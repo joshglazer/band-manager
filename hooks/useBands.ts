@@ -24,7 +24,7 @@ export default function useBands(): UseBandsResult {
     [supabase]
   );
 
-  const { data, isLoading, error } = useQuery(query, {
+  const { data, isLoading, error } = useQuery<Tables<'bands'>[]>(query, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
