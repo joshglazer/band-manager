@@ -1,3 +1,4 @@
+import Bands from '@/components/Bands';
 import useAuthUser from '@/hooks/useAuthUser';
 
 export default async function Index() {
@@ -10,7 +11,7 @@ export default async function Index() {
           Welcome to your one-stop band management shop!
         </h2>
         {user ? (
-          <div>[List out bands]</div>
+          <Bands />
         ) : (
           <>
             <p className="my-2">
