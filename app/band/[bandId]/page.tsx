@@ -1,8 +1,9 @@
 'use client';
 
 import useBand from '@/hooks/useBand';
+import { BandRouteProps } from './types';
 
-export default function Index({ params }: { params: { bandId: number } }) {
+export default function Index({ params }: BandRouteProps) {
   const { bandId } = params;
   const { data: band, isLoading } = useBand({ bandId: +bandId });
 
