@@ -23,7 +23,11 @@ export default function Bands() {
     return (
       <>
         {data.map(({ id, name }) => {
-          return <div key={id}>{name}</div>;
+          return (
+            <div key={id}>
+              <Link href={`/band/${id}`}>{name}</Link>
+            </div>
+          );
         })}
         <hr />
         <div>
