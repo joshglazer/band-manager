@@ -8,25 +8,25 @@ import {
 } from '@supabase-cache-helpers/postgrest-swr';
 import { useMemo } from 'react';
 
-interface UseBandsResult {
-  data?: Tables<'bands'>[] | null;
+interface UseSongsProps {
+  bandId: number;
+}
+
+interface UseSongsResult {
+  data?: Tables<'songs'>[] | null;
   isLoading: boolean;
   error?: PostgrestError;
 }
 
-export default function useBands(): UseBandsResult {
+export default function useSongs({ bandId }: UseSongsProps): UseSongsResult {
   const supabase = createClient();
 
   const query = useMemo(
-    () =>
-      supabase
-        .from('bands')
-        .select('id, name, created_at')
-        .order('name', { ascending: true }),
-    [supabase]
+    () => supabase.from('songs').select().eq('band_id', bandId),
+    [bandId, supabase]
   );
 
-  const { data, isLoading, error } = useQuery<Tables<'bands'>[]>(query, {
+  const { data, isLoading, error } = useQuery<Tables<'songs'>[]>(query, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });

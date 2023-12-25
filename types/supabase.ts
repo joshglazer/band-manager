@@ -63,6 +63,41 @@ export interface Database {
         }
         Relationships: []
       }
+      songs: {
+        Row: {
+          artist: string | null
+          band_id: number | null
+          created_at: string
+          duration: number | null
+          id: number
+          name: string | null
+        }
+        Insert: {
+          artist?: string | null
+          band_id?: number | null
+          created_at?: string
+          duration?: number | null
+          id?: number
+          name?: string | null
+        }
+        Update: {
+          artist?: string | null
+          band_id?: number | null
+          created_at?: string
+          duration?: number | null
+          id?: number
+          name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "songs_band_id_fkey"
+            columns: ["band_id"]
+            isOneToOne: false
+            referencedRelation: "bands"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

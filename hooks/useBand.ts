@@ -1,3 +1,5 @@
+'use client';
+
 import { Tables } from '@/types/supabase';
 import { createClient } from '@/utils/supabase/client';
 import {
@@ -10,13 +12,13 @@ interface UseBandProps {
   bandId: number;
 }
 
-interface UseBandsResult {
+interface UseBandResult {
   data?: Tables<'bands'> | null;
   isLoading: boolean;
   error?: PostgrestError;
 }
 
-export default function useBands({ bandId }: UseBandProps): UseBandsResult {
+export default function useBands({ bandId }: UseBandProps): UseBandResult {
   const supabase = createClient();
 
   const query = useMemo(

@@ -1,19 +1,29 @@
-'use client';
-
-import useBand from '@/hooks/useBand';
+import Link from 'next/link';
+import { useMemo } from 'react';
 import { BandRouteProps } from './types';
 
 export default function Index({ params }: BandRouteProps) {
   const { bandId } = params;
-  const { data: band, isLoading } = useBand({ bandId: +bandId });
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const actions = useMemo(
+    () => [
+      {
+        title: 'Manage Songs',
+        description: 'What songs do you play?',
+        link: `/band/${bandId}/songs`,
+      },
+    ],
+    [bandId]
+  );
 
-  if (band) {
-    return <h2>{band.name}</h2>;
-  }
-
-  return <h2>Whoops!</h2>;
+  return (
+    <>
+      {actions.map(({ title, description, link }) => (
+        <Link href={link} key={link}>
+          <h3>{title}</h3>
+          <div>{description}</div>
+        </Link>
+      ))}
+    </>
+  );
 }

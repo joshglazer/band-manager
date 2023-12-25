@@ -1,7 +1,8 @@
+import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
 import { GeistSans } from 'geist/font/sans';
+import { ReactNode } from 'react';
 import './globals.css';
-import Footer from '@/components/layout/Footer';
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -14,11 +15,11 @@ export const metadata = {
     'Let us handle the boring parts of being in a band, so you can focus on the fun stuff!',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" className={GeistSans.className}>
       <body className="bg-background text-foreground">
