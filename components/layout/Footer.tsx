@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="w-full flex justify-center border-t border-t-foreground/10 h-16">
-      <div className="w-full max-w-4xl flex justify-between items-center py-3 text-xs">
+      <div className="w-full max-w-4xl flex justify-between items-center p-3 text-xs">
         <div>
           A{' '}
           <a

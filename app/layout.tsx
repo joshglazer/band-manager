@@ -25,8 +25,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body className="bg-background text-foreground">
         <div className="min-h-screen flex-1 w-full flex flex-col items-center">
           <Header />
-          <main className="flex flex-col items-center grow py-3 w-full">
-            <div className="w-full max-w-4xl">{children}</div>
+          <main className="flex flex-col items-center grow w-full">
+            <div className="w-full max-w-4xl p-3 ">{children}</div>
           </main>
           <Footer />
         </div>
