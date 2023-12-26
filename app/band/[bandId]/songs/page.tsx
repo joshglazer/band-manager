@@ -2,6 +2,7 @@
 
 import useSongs from '@/hooks/useSongs';
 import { BandRouteProps } from '../types';
+import SpotifyPlaylistImport from '@/components/SpotifyPlaylistImport';
 
 export default function Index({ params }: BandRouteProps) {
   const { bandId } = params;
@@ -12,8 +13,10 @@ export default function Index({ params }: BandRouteProps) {
     return <div>Loading...</div>;
   }
 
+  let pageContent: JSX.Element;
+
   if (songs && songs.length) {
-    return (
+    pageContent = (
       <>
         {songs.map(({ name, artist }) => (
           <>
@@ -23,7 +26,15 @@ export default function Index({ params }: BandRouteProps) {
         ))}
       </>
     );
+  } else {
+    pageContent = <>You haven&apos;t added any songs</>;
   }
 
-  return <>You haven&apos;t added any songs</>;
+  return (
+    <>
+      {pageContent}
+      <hr />
+      <SpotifyPlaylistImport />
+    </>
+  );
 }

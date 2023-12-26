@@ -23,15 +23,15 @@ export default function BandForm({ bandId }: BandFormProps) {
   const router = useRouter();
 
   async function onSubmit(data: FieldValues) {
-    console.log(bandId);
-    console.log(data);
-    const { error: submitError } = await supabase
-      .from('bands')
-      .insert({ name: data.name });
-    if (submitError) {
-      setError(submitError);
-    } else {
-      router.push('/');
+    if (!bandId) {
+      const { error: submitError } = await supabase
+        .from('bands')
+        .insert({ name: data.name });
+      if (submitError) {
+        setError(submitError);
+      } else {
+        router.push('/');
+      }
     }
   }
 
