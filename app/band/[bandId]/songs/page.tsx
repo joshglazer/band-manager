@@ -1,8 +1,8 @@
 'use client';
 
 import useSongs from '@/hooks/useSongs';
+import Link from 'next/link';
 import { BandRouteProps } from '../types';
-import SpotifyPlaylistImport from '@/components/SpotifyPlaylistImport';
 
 export default function Index({ params }: BandRouteProps) {
   const { bandId } = params;
@@ -34,7 +34,9 @@ export default function Index({ params }: BandRouteProps) {
     <>
       {pageContent}
       <hr />
-      <SpotifyPlaylistImport />
+      <Link href={`/band/${bandId}/songs/spotify-import`}>
+        Import Songs From Spotify
+      </Link>
     </>
   );
 }
