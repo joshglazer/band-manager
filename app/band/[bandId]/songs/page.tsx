@@ -1,10 +1,19 @@
 'use client';
 
 import useSongs from '@/hooks/useSongs';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 import Link from 'next/link';
+import prettyMilliseconds from 'pretty-ms';
 import { BandRouteProps } from '../types';
 
-export default function Index({ params }: BandRouteProps) {
+export default function BandSongsPage({ params }: BandRouteProps) {
   const { bandId } = params;
 
   const { data: songs, isLoading } = useSongs({ bandId });
@@ -17,14 +26,32 @@ export default function Index({ params }: BandRouteProps) {
 
   if (songs && songs.length) {
     pageContent = (
-      <>
-        {songs.map(({ name, artist }) => (
-          <>
-            <div>{name}</div>
-            <div>{artist}</div>
-          </>
-        ))}
-      </>
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 650 }} aria-label="Table of Songs">
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Artist</TableCell>
+              <TableCell>Length</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {songs.map(({ id, name, artist, duration }) => (
+              <TableRow key={id}>
+                <TableCell component="th" scope="row">
+                  {name}
+                </TableCell>
+                <TableCell>{artist}</TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {duration
+                    ? prettyMilliseconds(duration, { secondsDecimalDigits: 0 })
+                    : '--'}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     );
   } else {
     pageContent = <>You haven&apos;t added any songs</>;
@@ -35,7 +62,7 @@ export default function Index({ params }: BandRouteProps) {
       {pageContent}
       <hr />
       <Link href={`/band/${bandId}/songs/spotify-import`}>
-        Import Songs From Spotify
+        <Button variant="contained">Import Songs From Spotify</Button>
       </Link>
     </>
   );

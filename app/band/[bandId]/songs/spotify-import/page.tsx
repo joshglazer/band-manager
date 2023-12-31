@@ -17,7 +17,7 @@ const clientId = process.env.NEXT_PUBLIC_SPOTIFY_API_KEY || '';
 const redirectUrl = `${location.origin}/spotifyConnect`;
 const activeScopes = ['playlist-read-private'];
 
-export default function SpotifyImport({ params }: BandRouteProps) {
+export default function SpotifyImportSongsPage({ params }: BandRouteProps) {
   const [playlists, setPlaylists] = useState<Page<SimplifiedPlaylist>>();
   const [tracks, setTracks] = useState<Page<PlaylistedTrack>>();
   const [selectedPlaylist, setSelectedPlaylist] =

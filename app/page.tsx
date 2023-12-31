@@ -1,7 +1,7 @@
 import Bands from '@/components/Bands';
 import useAuthUser from '@/hooks/useAuthUser';
 
-export default async function Index() {
+export default async function IndexPage() {
   const user = await useAuthUser();
 
   return (

@@ -8,8 +8,17 @@ import {
 } from '@supabase-cache-helpers/postgrest-swr';
 import { useMemo } from 'react';
 
+export interface BandsComposite extends Tables<'bands'> {
+  songs: {
+    count: number;
+  }[];
+  band_members: {
+    count: number;
+  }[];
+}
+
 interface UseBandsResult {
-  data?: Tables<'bands'>[] | null;
+  data?: BandsComposite[] | null;
   isLoading: boolean;
   error?: PostgrestError;
 }
@@ -21,15 +30,17 @@ export default function useBands(): UseBandsResult {
     () =>
       supabase
         .from('bands')
-        .select('id, name, created_at')
+        .select('id, name, created_at, songs(count), band_members(count)')
         .order('name', { ascending: true }),
     [supabase]
   );
 
-  const { data, isLoading, error } = useQuery<Tables<'bands'>[]>(query, {
+  const { data, isLoading, error } = useQuery<BandsComposite[]>(query, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
+
+  console.log(data);
 
   return { data, isLoading, error };
 }
