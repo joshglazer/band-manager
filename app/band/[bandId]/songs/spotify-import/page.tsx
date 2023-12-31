@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from 'react';
 import { BandRouteProps } from '../../types';
 import { useRouter } from 'next/navigation';
+import Button from '@mui/material/Button';
 
 const clientId = process.env.NEXT_PUBLIC_SPOTIFY_API_KEY || '';
 const redirectUrl = `${location.origin}/spotifyConnect`;
@@ -48,14 +49,13 @@ export default function SpotifyImportSongsPage({ params }: BandRouteProps) {
   // TODO: handle errors or move to server
   async function importAllTracks() {
     if (tracks?.items) {
-      for (const playlistTrack of tracks?.items) {
+      for (const playlistTrack of tracks.items) {
         const track = playlistTrack.track as Track;
         const { name, duration_ms: duration } = track;
 
         const artist = track.album.artists
           .map((artist) => artist.name)
           .join(', ');
-        Promise.allSettled;
 
         await supabase
           .from('songs')
@@ -83,7 +83,9 @@ export default function SpotifyImportSongsPage({ params }: BandRouteProps) {
                 <div key={track.track.id}>{track.track.name}</div>
               ))}
             </div>
-            <button onClick={importAllTracks}>Import All Songs</button>
+            <Button onClick={importAllTracks} variant="contained">
+              Import All Songs
+            </Button>
           </>
         )}
       </>
@@ -93,9 +95,13 @@ export default function SpotifyImportSongsPage({ params }: BandRouteProps) {
   return (
     <>
       {playlists?.items.map((playlist) => (
-        <div key={playlist.id} onClick={() => handlePlaylistClick(playlist)}>
+        <Button
+          key={playlist.id}
+          variant="text"
+          onClick={() => handlePlaylistClick(playlist)}
+        >
           {playlist.name}
-        </div>
+        </Button>
       ))}
     </>
   );
