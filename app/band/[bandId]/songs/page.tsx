@@ -13,7 +13,7 @@ import Link from 'next/link';
 import prettyMilliseconds from 'pretty-ms';
 import { BandRouteProps } from '../types';
 
-export default function BandSongsPage({ params }: BandRouteProps) {
+export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
   const { bandId } = params;
 
   const { data: songs, isLoading } = useSongs({ bandId });
@@ -24,7 +24,7 @@ export default function BandSongsPage({ params }: BandRouteProps) {
 
   let pageContent: JSX.Element;
 
-  if (songs && songs.length) {
+  if (songs?.length) {
     pageContent = (
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="Table of Songs">

@@ -7,7 +7,9 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 import { BandRouteProps } from './types';
 
-export default function BandDashboardPage({ params }: BandRouteProps) {
+export default function BandDashboardPage({
+  params,
+}: Readonly<BandRouteProps>) {
   const { bandId } = params;
 
   const actions = useMemo(

@@ -10,7 +10,7 @@ interface BandFormProps {
   bandId?: number;
 }
 
-export default function BandForm({ bandId }: BandFormProps) {
+export default function BandForm({ bandId }: Readonly<BandFormProps>) {
   const [error, setError] = useState<PostgrestError>();
   const supabase = createClient();
 

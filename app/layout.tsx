@@ -20,7 +20,7 @@ interface RootLayoutProps {
   children: ReactNode;
 }
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
     <AppRouterCacheProvider options={{ enableCssLayer: true }}>
       <html lang="en" className={GeistSans.className}>

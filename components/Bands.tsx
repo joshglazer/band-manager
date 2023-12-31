@@ -18,7 +18,7 @@ export default function Bands() {
     return <div>Loading...</div>;
   }
 
-  if (!data || !data.length) {
+  if (!data?.length) {
     return (
       <div>
         It looks like you haven&apos;t made any bands yet.{' '}
