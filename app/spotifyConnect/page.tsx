@@ -4,7 +4,7 @@ import { LocalStorageValues } from '@/utils/spotify/consts';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-export default function Index() {
+export default function SpotifyConnectPage() {
   const router = useRouter();
   useEffect(() => {
     const redirectUrl = window.localStorage.getItem(

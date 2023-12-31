@@ -1,3 +1,5 @@
+import GitHubIcon from '@mui/icons-material/GitHub';
+
 export default function Footer() {
   return (
     <footer className="w-full flex justify-center border-t border-t-foreground/10 h-16">
@@ -20,7 +22,7 @@ export default function Footer() {
           className="font-bold hover:underline"
           rel="noreferrer"
         >
-          Source Code On Github
+          <GitHubIcon /> Source Code On Github
         </a>
       </div>
     </footer>
