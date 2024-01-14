@@ -1,5 +1,6 @@
 'use client';
 
+import { Tables } from '@/types/supabase';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -9,10 +10,10 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
+import { getDragDropBackgroundColorClassName } from './helpers';
 import SetEditor from './SetEditor';
 import SongDragAndDrop from './SongDragAndDrop';
 import { Set, Setlist } from './types';
-import { Tables } from '@/types/supabase';
 interface SetlistEditorProps {
   initialSetlist: Setlist;
 }
@@ -46,25 +47,11 @@ export default function SetlistEditor({
             <Paper
               elevation={1}
               ref={provided.innerRef}
-              sx={{
-                p: 2,
-                backgroundColor: snapshot.isDraggingOver ? 'grey.300' : 'auto',
-              }}
+              className={`p-2 ${getDragDropBackgroundColorClassName(snapshot)}`}
               {...provided.droppableProps}
             >
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  p: 1,
-                }}
-              >
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontWeight: 'bold',
-                  }}
-                >
+              <Box className="flex justify-between p-1">
+                <Typography variant="body1" className="font-bold">
                   Unused Songs
                 </Typography>
               </Box>
@@ -134,7 +121,7 @@ export default function SetlistEditor({
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', pb: 3 }}>
+      <Box className="flex justify-between pb-3">
         <Typography variant="h6">{setlist.title}</Typography>
       </Box>
       <DragDropContext onDragEnd={onDragEnd}>
@@ -147,7 +134,7 @@ export default function SetlistEditor({
           </Grid>
           <Grid item xs={12} sm={6}>
             <Hidden smUp>
-              <Divider sx={{ my: 2 }} />
+              <Divider className="my-4" />
             </Hidden>
             {renderUnusedSongs()}
           </Grid>

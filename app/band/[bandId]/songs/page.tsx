@@ -27,7 +27,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
   if (songs?.length) {
     pageContent = (
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="Table of Songs">
+        <Table aria-label="Table of Songs">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>

@@ -28,13 +28,13 @@ export default function SongDragAndDrop({ song, index }: SongProps) {
           {...provided.dragHandleProps}
         >
           <Card variant="outlined">
-            <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
+            <CardContent className="flex items-center">
               <DragIndicatorOutlinedIcon />
-              <Box sx={{ px: 2 }}>
-                <div>{name}</div>
+              <Box className="px-2">
+                <div className="font-medium">{name}</div>
                 <div>{artist}</div>
               </Box>
-              <Box sx={{ ml: 'auto' }}>
+              <Box className="ml-auto whitespace-nowrap">
                 {prettyMilliseconds(duration ?? 0, { secondsDecimalDigits: 0 })}
               </Box>
             </CardContent>

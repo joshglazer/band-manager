@@ -6,6 +6,7 @@ import prettyMilliseconds from 'pretty-ms';
 import { useCallback } from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 import SongDragAndDrop from './SongDragAndDrop';
+import { getDragDropBackgroundColorClassName } from './helpers';
 import { Set } from './types';
 
 interface SetEditorProps {
@@ -27,35 +28,16 @@ export default function SetEditor({ index, set }: SetEditorProps): JSX.Element {
       {(provided, snapshot) => (
         <Paper
           ref={provided.innerRef}
-          sx={{
-            marginBottom: '2em',
-            backgroundColor: snapshot.isDraggingOver ? 'grey.300' : 'auto',
-          }}
+          className={`mb-8 ${getDragDropBackgroundColorClassName(snapshot)}`}
           elevation={1}
           {...provided.droppableProps}
         >
-          <Container sx={{ p: 2 }}>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                p: 1,
-              }}
-            >
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 'bold',
-                }}
-              >
+          <Container className="p-2">
+            <Box className="flex justify-between p-1">
+              <Typography variant="body1" className="font-bold">
                 Set #{index + 1}
               </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 'bold',
-                }}
-              >
+              <Typography variant="body1" className="font-bold">
                 {prettyMilliseconds(getSetDuration(), {
                   secondsDecimalDigits: 0,
                 })}
