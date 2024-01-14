@@ -12,12 +12,8 @@ interface SongProps {
   index: number;
 }
 
-export default function SongDragAndDrop({ song, index }: SongProps) {
+export default function SongDragAndDrop({ song, index }: Readonly<SongProps>) {
   const { id, name, artist, duration } = song;
-  const item = {
-    id: 'yes',
-    index: 1,
-  };
 
   return (
     <Draggable key={`${id}`} draggableId={`${id}`} index={index}>

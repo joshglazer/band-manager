@@ -14,7 +14,10 @@ interface SetEditorProps {
   set: Set;
 }
 
-export default function SetEditor({ index, set }: SetEditorProps): JSX.Element {
+export default function SetEditor({
+  index,
+  set,
+}: Readonly<SetEditorProps>): JSX.Element {
   const getSetDuration = useCallback(() => {
     const initialValue = 0;
     return set.songs.reduce(

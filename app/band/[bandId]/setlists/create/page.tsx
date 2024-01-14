@@ -18,7 +18,7 @@ export default function SetlistCreate({ params }: Readonly<BandRouteProps>) {
           songs: [],
         },
       ],
-      unusedSongs: songs || [],
+      unusedSongs: songs ?? [],
     }),
     [songs]
   );

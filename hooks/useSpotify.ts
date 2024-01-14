@@ -34,11 +34,9 @@ export function useSpotify(
         if (authenticated) {
           setSdk(() => internalSdk);
         }
-      } catch (e: Error | unknown) {
-        const error = e as Error;
+      } catch (error: unknown) {
         if (
-          error &&
-          error.message &&
+          error instanceof Error &&
           error.message.includes('No verifier found in cache')
         ) {
           console.error(
@@ -46,7 +44,7 @@ export function useSpotify(
             error
           );
         } else {
-          console.error(e);
+          console.error(error);
         }
       }
     })();

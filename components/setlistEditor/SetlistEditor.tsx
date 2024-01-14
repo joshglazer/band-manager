@@ -26,7 +26,7 @@ interface SetlistEditorProps {
 export default function SetlistEditor({
   initialSetlist,
   bandId,
-}: SetlistEditorProps): JSX.Element {
+}: Readonly<SetlistEditorProps>): JSX.Element {
   const [setlist, setSetlist] = useState<Setlist>(initialSetlist);
 
   const router = useRouter();
