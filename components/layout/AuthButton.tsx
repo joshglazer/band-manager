@@ -27,6 +27,7 @@ export default async function AuthButton() {
       <form action={signOut}>
         <Button
           variant="outlined"
+          type="submit"
           className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
         >
           Logout
