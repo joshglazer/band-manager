@@ -12,6 +12,7 @@ export default function SetlistCreate({ params }: Readonly<BandRouteProps>) {
 
   const initialSetlist: Setlist = useMemo(
     () => ({
+      bandId,
       name: 'New Setlist',
       sets: [
         {
@@ -20,7 +21,7 @@ export default function SetlistCreate({ params }: Readonly<BandRouteProps>) {
       ],
       unusedSongs: songs ?? [],
     }),
-    [songs]
+    [bandId, songs]
   );
 
   if (isLoading) {
@@ -31,5 +32,5 @@ export default function SetlistCreate({ params }: Readonly<BandRouteProps>) {
     return <div>You have not added any songs yet.</div>;
   }
 
-  return <SetlistEditor initialSetlist={initialSetlist} bandId={bandId} />;
+  return <SetlistEditor initialSetlist={initialSetlist} />;
 }
