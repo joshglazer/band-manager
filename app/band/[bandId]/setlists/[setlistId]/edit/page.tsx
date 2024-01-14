@@ -25,35 +25,35 @@ export default function BandSetlistsPage({
 
       const usedSongIds: number[] = [];
 
-      setlist_songs
-        .sort((a, b) => {
-          if (a.set !== b.set) {
-            return a.set - b.set;
-          }
-          return a.set_weight - b.set_weight;
-        })
-        .forEach(({ set, song_id }) => {
-          let song = songs.find(({ id }) => id === song_id);
-          if (!song) {
-            song = {
-              band_id: bandId,
-              duration: 0,
-              id: -1,
-              name: 'Not Found',
-              artist: 'Not Found',
-              created_at: 'Not Found',
-            };
-          } else {
-            usedSongIds.push(song.id);
-          }
-          if (set === sets.length) {
-            sets.push({
-              songs: [song],
-            });
-          } else {
-            sets[sets.length - 1].songs.push(song);
-          }
-        });
+      setlist_songs.sort((a, b) => {
+        if (a.set !== b.set) {
+          return a.set - b.set;
+        }
+        return a.set_weight - b.set_weight;
+      });
+
+      setlist_songs.forEach(({ set, song_id }) => {
+        let song = songs.find(({ id }) => id === song_id);
+        if (!song) {
+          song = {
+            band_id: bandId,
+            duration: 0,
+            id: -1,
+            name: 'Not Found',
+            artist: 'Not Found',
+            created_at: 'Not Found',
+          };
+        } else {
+          usedSongIds.push(song.id);
+        }
+        if (set === sets.length) {
+          sets.push({
+            songs: [song],
+          });
+        } else {
+          sets[sets.length - 1].songs.push(song);
+        }
+      });
 
       const unusedSongs = songs.filter(({ id }) => !usedSongIds.includes(id));
 
@@ -62,7 +62,7 @@ export default function BandSetlistsPage({
         bandId: bandId,
         name: name ?? '',
         sets,
-        unusedSongs,
+        unusedSongs: unusedSongs,
       };
     }
     return undefined;
