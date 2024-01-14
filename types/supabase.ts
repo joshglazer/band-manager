@@ -11,22 +11,22 @@ export interface Database {
     Tables: {
       band_members: {
         Row: {
-          band_id: number | null
+          band_id: number
           created_at: string
           id: number
-          user_id: string | null
+          user_id: string
         }
         Insert: {
-          band_id?: number | null
+          band_id: number
           created_at?: string
           id?: number
-          user_id?: string | null
+          user_id: string
         }
         Update: {
-          band_id?: number | null
+          band_id?: number
           created_at?: string
           id?: number
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -49,17 +49,17 @@ export interface Database {
         Row: {
           created_at: string
           id: number
-          name: string | null
+          name: string
         }
         Insert: {
           created_at?: string
           id?: number
-          name?: string | null
+          name: string
         }
         Update: {
           created_at?: string
           id?: number
-          name?: string | null
+          name?: string
         }
         Relationships: []
       }
@@ -137,7 +137,7 @@ export interface Database {
       songs: {
         Row: {
           artist: string | null
-          band_id: number | null
+          band_id: number
           created_at: string
           duration: number | null
           id: number
@@ -145,7 +145,7 @@ export interface Database {
         }
         Insert: {
           artist?: string | null
-          band_id?: number | null
+          band_id: number
           created_at?: string
           duration?: number | null
           id?: number
@@ -153,7 +153,7 @@ export interface Database {
         }
         Update: {
           artist?: string | null
-          band_id?: number | null
+          band_id?: number
           created_at?: string
           duration?: number | null
           id?: number
