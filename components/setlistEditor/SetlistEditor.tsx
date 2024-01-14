@@ -8,20 +8,29 @@ import Grid from '@mui/material/Grid';
 import Hidden from '@mui/material/Hidden';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { getDragDropBackgroundColorClassName } from './helpers';
 import SetEditor from './SetEditor';
 import SongDragAndDrop from './SongDragAndDrop';
 import { Set, Setlist } from './types';
+import TextField from '@mui/material/TextField';
+import { createClient } from '@/utils/supabase/client';
+
 interface SetlistEditorProps {
   initialSetlist: Setlist;
+  bandId: number;
 }
 
 export default function SetlistEditor({
   initialSetlist,
+  bandId,
 }: SetlistEditorProps): JSX.Element {
   const [setlist, setSetlist] = useState<Setlist>(initialSetlist);
+
+  const router = useRouter();
+  const supabase = createClient();
 
   function renderSet(set: Set, index: number): JSX.Element {
     return <SetEditor key={index} index={index} set={set} />;
@@ -37,6 +46,13 @@ export default function SetlistEditor({
       ...newSetlist,
       sets: [...newSetlist.sets, { songs: [] }],
     });
+  }
+
+  async function saveSetlist() {
+    await supabase
+      .from('setlists')
+      .insert({ name: setlist.name, band_id: bandId });
+    router.push(`/band/${bandId}/setlists`);
   }
 
   function renderUnusedSongs() {
@@ -119,18 +135,40 @@ export default function SetlistEditor({
     }
   }
 
+  function handleTitleChange(
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    setSetlist((value) => ({
+      ...value,
+      title: event.target.value,
+    }));
+  }
+
   return (
     <>
       <Box className="flex justify-between pb-3">
-        <Typography variant="h6">{setlist.title}</Typography>
+        <TextField
+          id="title"
+          label="Title"
+          variant="outlined"
+          value={setlist.name}
+          onChange={handleTitleChange}
+          placeholder="My Setlist"
+        />
+        {/* <Typography variant="h6">{setlist.title}</Typography> */}
       </Box>
       <DragDropContext onDragEnd={onDragEnd}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             {renderSetlists()}
-            <Button variant="contained" onClick={addSetlist}>
-              Add Set
-            </Button>
+            <Box className="flex justify-between">
+              <Button variant="contained" onClick={addSetlist}>
+                Add Set
+              </Button>
+              <Button variant="contained" onClick={saveSetlist}>
+                Save Setlist
+              </Button>
+            </Box>
           </Grid>
           <Grid item xs={12} sm={6}>
             <Hidden smUp>

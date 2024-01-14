@@ -63,6 +63,35 @@ export interface Database {
         }
         Relationships: []
       }
+      setlists: {
+        Row: {
+          band_id: number | null
+          created_at: string
+          id: number
+          name: string | null
+        }
+        Insert: {
+          band_id?: number | null
+          created_at?: string
+          id?: number
+          name?: string | null
+        }
+        Update: {
+          band_id?: number | null
+          created_at?: string
+          id?: number
+          name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setlists_band_id_fkey"
+            columns: ["band_id"]
+            isOneToOne: false
+            referencedRelation: "bands"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       songs: {
         Row: {
           artist: string | null
