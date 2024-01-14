@@ -12,8 +12,12 @@ interface UseSetlistProps {
   setlistId: number;
 }
 
+export interface SetlistComposite extends Tables<'setlists'> {
+  setlist_songs: Tables<'setlist_songs'>[];
+}
+
 interface UseSetlistResult {
-  data?: Tables<'setlists'> | null;
+  data?: SetlistComposite | null;
   isLoading: boolean;
   error?: PostgrestError;
 }
@@ -24,11 +28,16 @@ export default function useSetlist({
   const supabase = createClient();
 
   const query = useMemo(
-    () => supabase.from('setlists').select().eq('id', setlistId).maybeSingle(),
+    () =>
+      supabase
+        .from('setlists')
+        .select('*, setlist_songs(*)')
+        .eq('id', setlistId)
+        .maybeSingle(),
     [setlistId, supabase]
   );
 
-  const { data, isLoading, error } = useQuery<Tables<'setlists'>>(query, {
+  const { data, isLoading, error } = useQuery<SetlistComposite>(query, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });

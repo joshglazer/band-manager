@@ -1,6 +1,6 @@
 'use client';
 
-import { Tables } from '@/types/supabase';
+import { Tables, TablesInsert } from '@/types/supabase';
 import { createClient } from '@/utils/supabase/client';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -48,16 +48,42 @@ export default function SetlistEditor({
 
   async function saveSetlist() {
     const { id, name, bandId } = setlist;
-    const upsertData = { name, band_id: bandId };
+    const upsertData: TablesInsert<'setlists'> = { name, band_id: bandId };
+    let setlistIdForSongs: number | undefined;
     if (id) {
-      const response = await supabase
-        .from('setlists')
-        .update(upsertData)
-        .eq('id', id);
-      console.log('SAVED', upsertData, response);
+      setlistIdForSongs = id;
+      await supabase.from('setlist_songs').delete().eq('setlist_id', id);
+      await supabase.from('setlists').update(upsertData).eq('id', id);
     } else {
-      await supabase.from('setlists').insert(upsertData);
+      const { data: insertedData } = await supabase
+        .from('setlists')
+        .insert(upsertData)
+        .select();
+      if (insertedData) {
+        setlistIdForSongs = insertedData[0].id;
+      }
     }
+
+    if (setlistIdForSongs) {
+      await Promise.all(
+        setlist.sets.map(async (set, setIndex) => {
+          await Promise.all(
+            set.songs.map(async (song, songIndex) => {
+              const setlistSongInsertData: TablesInsert<'setlist_songs'> = {
+                setlist_id: setlistIdForSongs as number,
+                set: setIndex,
+                set_weight: songIndex,
+                song_id: song.id,
+              };
+              await supabase
+                .from('setlist_songs')
+                .insert(setlistSongInsertData);
+            })
+          );
+        })
+      );
+    }
+
     router.push(`/band/${bandId}/setlists`);
   }
 

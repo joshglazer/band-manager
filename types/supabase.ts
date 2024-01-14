@@ -63,21 +63,63 @@ export interface Database {
         }
         Relationships: []
       }
+      setlist_songs: {
+        Row: {
+          created_at: string
+          id: number
+          set: number
+          set_weight: number
+          setlist_id: number
+          song_id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          set: number
+          set_weight: number
+          setlist_id: number
+          song_id: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          set?: number
+          set_weight?: number
+          setlist_id?: number
+          song_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setlist_songs_setlist_id_fkey"
+            columns: ["setlist_id"]
+            isOneToOne: false
+            referencedRelation: "setlists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "setlist_songs_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       setlists: {
         Row: {
-          band_id: number | null
+          band_id: number
           created_at: string
           id: number
           name: string | null
         }
         Insert: {
-          band_id?: number | null
+          band_id: number
           created_at?: string
           id?: number
           name?: string | null
         }
         Update: {
-          band_id?: number | null
+          band_id?: number
           created_at?: string
           id?: number
           name?: string | null
