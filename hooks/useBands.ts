@@ -40,7 +40,5 @@ export default function useBands(): UseBandsResult {
     revalidateOnReconnect: false,
   });
 
-  console.log(data);
-
   return { data, isLoading, error };
 }

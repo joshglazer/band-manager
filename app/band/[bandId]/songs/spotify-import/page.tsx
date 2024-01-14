@@ -68,8 +68,6 @@ export default function SpotifyImportSongsPage({
     router.push(`/band/${bandId}/songs`);
   }
 
-  console.log('tracks', tracks);
-
   if (!spotifySdk) {
     return <div>Loading...</div>;
   }
