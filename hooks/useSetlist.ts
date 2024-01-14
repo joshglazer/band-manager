@@ -8,25 +8,27 @@ import {
 } from '@supabase-cache-helpers/postgrest-swr';
 import { useMemo } from 'react';
 
-interface UseBandProps {
-  bandId: number;
+interface UseSetlistProps {
+  setlistId: number;
 }
 
-interface UseBandResult {
-  data?: Tables<'bands'> | null;
+interface UseSetlistResult {
+  data?: Tables<'setlists'> | null;
   isLoading: boolean;
   error?: PostgrestError;
 }
 
-export default function useBand({ bandId }: UseBandProps): UseBandResult {
+export default function useSetlist({
+  setlistId,
+}: UseSetlistProps): UseSetlistResult {
   const supabase = createClient();
 
   const query = useMemo(
-    () => supabase.from('bands').select().eq('id', bandId).maybeSingle(),
-    [bandId, supabase]
+    () => supabase.from('setlists').select().eq('id', setlistId).maybeSingle(),
+    [setlistId, supabase]
   );
 
-  const { data, isLoading, error } = useQuery<Tables<'bands'>>(query, {
+  const { data, isLoading, error } = useQuery<Tables<'setlists'>>(query, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });

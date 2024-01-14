@@ -19,6 +19,11 @@ export default function BandDashboardPage({
         description: 'What songs do you play?',
         link: `/band/${bandId}/songs`,
       },
+      {
+        title: 'Manage Setlists',
+        description: 'What are you playing at your gigs?',
+        link: `/band/${bandId}/setlists`,
+      },
     ],
     [bandId]
   );

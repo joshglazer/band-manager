@@ -1,6 +1,8 @@
 import { Tables } from '@/types/supabase';
 
 interface Setlist {
+  id?: number;
+  bandId: number;
   name: string;
   date?: Date;
   sets: Set[];

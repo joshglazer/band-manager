@@ -1,12 +1,14 @@
 'use client';
 
 import { Tables } from '@/types/supabase';
+import { createClient } from '@/utils/supabase/client';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import Hidden from '@mui/material/Hidden';
 import Paper from '@mui/material/Paper';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -15,17 +17,13 @@ import { getDragDropBackgroundColorClassName } from './helpers';
 import SetEditor from './SetEditor';
 import SongDragAndDrop from './SongDragAndDrop';
 import { Set, Setlist } from './types';
-import TextField from '@mui/material/TextField';
-import { createClient } from '@/utils/supabase/client';
 
 interface SetlistEditorProps {
   initialSetlist: Setlist;
-  bandId: number;
 }
 
 export default function SetlistEditor({
   initialSetlist,
-  bandId,
 }: Readonly<SetlistEditorProps>): JSX.Element {
   const [setlist, setSetlist] = useState<Setlist>(initialSetlist);
 
@@ -49,9 +47,17 @@ export default function SetlistEditor({
   }
 
   async function saveSetlist() {
-    await supabase
-      .from('setlists')
-      .insert({ name: setlist.name, band_id: bandId });
+    const { id, name, bandId } = setlist;
+    const upsertData = { name, band_id: bandId };
+    if (id) {
+      const response = await supabase
+        .from('setlists')
+        .update(upsertData)
+        .eq('id', id);
+      console.log('SAVED', upsertData, response);
+    } else {
+      await supabase.from('setlists').insert(upsertData);
+    }
     router.push(`/band/${bandId}/setlists`);
   }
 
@@ -140,7 +146,7 @@ export default function SetlistEditor({
   ) {
     setSetlist((value) => ({
       ...value,
-      title: event.target.value,
+      name: event.target.value,
     }));
   }
 
