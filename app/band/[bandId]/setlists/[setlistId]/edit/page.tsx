@@ -23,6 +23,8 @@ export default function BandSetlistsPage({
 
       const sets: Set[] = [];
 
+      const usedSongIds: number[] = [];
+
       setlist_songs
         .sort((a, b) => {
           if (a.set !== b.set) {
@@ -41,6 +43,8 @@ export default function BandSetlistsPage({
               artist: 'Not Found',
               created_at: 'Not Found',
             };
+          } else {
+            usedSongIds.push(song.id);
           }
           if (set === sets.length) {
             sets.push({
@@ -51,14 +55,14 @@ export default function BandSetlistsPage({
           }
         });
 
-      console.log(setlist_songs);
+      const unusedSongs = songs.filter(({ id }) => !usedSongIds.includes(id));
 
       return {
         id,
         bandId: bandId,
         name: name ?? '',
         sets,
-        unusedSongs: songs,
+        unusedSongs,
       };
     }
     return undefined;
