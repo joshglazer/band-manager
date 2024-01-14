@@ -17,7 +17,7 @@ export default function SetEditor({ index, set }: SetEditorProps): JSX.Element {
   const getSetDuration = useCallback(() => {
     const initialValue = 0;
     return set.songs.reduce(
-      (accumulator, currentValue) => accumulator + currentValue.duration,
+      (accumulator, currentValue) => accumulator + (currentValue.duration ?? 0),
       initialValue
     );
   }, [set]);
@@ -65,11 +65,7 @@ export default function SetEditor({ index, set }: SetEditorProps): JSX.Element {
             <Box>
               {set.songs.length ? (
                 set.songs.map((song, index) => (
-                  <SongDragAndDrop
-                    key={song.spotifyTrackId}
-                    song={song}
-                    index={index}
-                  />
+                  <SongDragAndDrop key={song.id} song={song} index={index} />
                 ))
               ) : (
                 <div>Drag and drop songs here</div>

@@ -11,7 +11,8 @@ import { useState } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import SetEditor from './SetEditor';
 import SongDragAndDrop from './SongDragAndDrop';
-import { Set, Setlist, Song } from './types';
+import { Set, Setlist } from './types';
+import { Tables } from '@/types/supabase';
 interface SetlistEditorProps {
   initialSetlist: Setlist;
 }
@@ -70,7 +71,7 @@ export default function SetlistEditor({
               <Box>
                 {setlist.unusedSongs.map((unusedSong, index) => (
                   <SongDragAndDrop
-                    key={unusedSong.spotifyTrackId}
+                    key={unusedSong.id}
                     song={unusedSong}
                     index={index}
                   />
@@ -94,7 +95,7 @@ export default function SetlistEditor({
     destinationId: string,
     destinationIndex: number
   ): void {
-    let song: Song | null = null;
+    let song: Tables<'songs'> | null = null;
     const newSetlist = structuredClone(setlist);
 
     if (sourceId === 'unused') {
