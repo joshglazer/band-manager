@@ -20,7 +20,7 @@ interface TableProps {
   rows: { [key: string]: TablePropsDataType }[];
 }
 
-export default function Table({ columns, rows }: TableProps) {
+export default function Table({ columns, rows }: Readonly<TableProps>) {
   return (
     <TableContainer component={Paper}>
       <MUITable aria-label="Table of Songs">
