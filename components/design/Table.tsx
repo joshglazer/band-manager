@@ -1,3 +1,4 @@
+import Alert from '@mui/material/Alert';
 import Paper from '@mui/material/Paper';
 import MUITable from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -26,6 +27,20 @@ export default function Table({
   columns,
   rows,
 }: Readonly<TableProps>) {
+  const headerColumns = columns.filter(
+    (column) => column.isHeader && column.headerDataKey
+  );
+
+  if (headerColumns.length !== 1) {
+    return (
+      <Alert severity="error">
+        Header columns have not been configured correctly for this table.
+      </Alert>
+    );
+  }
+
+  const headerColumn = headerColumns[0];
+
   return (
     <TableContainer component={Paper} aria-label={ariaLabel}>
       <MUITable aria-label="Table of Songs">
@@ -37,44 +52,46 @@ export default function Table({
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, index) => (
-            <TableRow key={index}>
-              {columns.map(
-                ({
-                  name,
-                  dataKey,
-                  dataFormatter,
-                  isHeader,
-                  headerDataKey,
-                  className,
-                }) => {
-                  let component: TableCellProps['component'] = 'td';
-                  let scope: TableCellProps['scope'];
-                  let value: TablePropsDataType | JSX.Element = row[dataKey];
+          {rows.map((row) => {
+            return (
+              <TableRow key={row[headerColumn.headerDataKey || '']}>
+                {columns.map(
+                  ({
+                    name,
+                    dataKey,
+                    dataFormatter,
+                    isHeader,
+                    headerDataKey,
+                    className,
+                  }) => {
+                    let component: TableCellProps['component'] = 'td';
+                    let scope: TableCellProps['scope'];
+                    let value: TablePropsDataType | JSX.Element = row[dataKey];
 
-                  if (dataFormatter) {
-                    value = dataFormatter(value);
+                    if (dataFormatter) {
+                      value = dataFormatter(value);
+                    }
+
+                    if (isHeader && headerDataKey) {
+                      component = 'th';
+                      scope = 'row';
+                    }
+
+                    return (
+                      <TableCell
+                        component={component}
+                        scope={scope}
+                        key={name}
+                        className={className}
+                      >
+                        {value}
+                      </TableCell>
+                    );
                   }
-
-                  if (isHeader && headerDataKey) {
-                    component = 'th';
-                    scope = 'row';
-                  }
-
-                  return (
-                    <TableCell
-                      component={component}
-                      scope={scope}
-                      key={name}
-                      className={className}
-                    >
-                      {value}
-                    </TableCell>
-                  );
-                }
-              )}
-            </TableRow>
-          ))}
+                )}
+              </TableRow>
+            );
+          })}
         </TableBody>
       </MUITable>
     </TableContainer>
