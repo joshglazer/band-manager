@@ -5,6 +5,7 @@ import { Setlist } from '@/components/setlistEditor/types';
 import { BandRouteProps } from '../../types';
 import useSongs from '@/hooks/useSongs';
 import { useMemo } from 'react';
+import Loading from '@/components/design/Loading';
 
 export default function SetlistCreate({ params }: Readonly<BandRouteProps>) {
   const { bandId } = params;
@@ -25,7 +26,7 @@ export default function SetlistCreate({ params }: Readonly<BandRouteProps>) {
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (!songs) {

@@ -1,17 +1,18 @@
 'use client';
 
+import Loading from '@/components/design/Loading';
 import { useSpotify } from '@/hooks/useSpotify';
 import { createClient } from '@/utils/supabase/client';
+import Button from '@mui/material/Button';
 import {
   Page,
   PlaylistedTrack,
   SimplifiedPlaylist,
   Track,
 } from '@spotify/web-api-ts-sdk';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BandRouteProps } from '../../types';
-import { useRouter } from 'next/navigation';
-import Button from '@mui/material/Button';
 
 const clientId = process.env.NEXT_PUBLIC_SPOTIFY_API_KEY || '';
 const redirectUrl = `${location.origin}/spotifyConnect`;
@@ -69,7 +70,7 @@ export default function SpotifyImportSongsPage({
   }
 
   if (!spotifySdk) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (selectedPlaylist) {

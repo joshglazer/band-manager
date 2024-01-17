@@ -10,12 +10,13 @@ import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
+import Loading from './design/Loading';
 
 export default function Bands() {
   const { data, isLoading } = useBands();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (!data?.length) {

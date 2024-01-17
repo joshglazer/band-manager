@@ -7,6 +7,7 @@ import { Setlist, Set } from '@/components/setlistEditor/types';
 import { useMemo } from 'react';
 import { BandRouteProps } from '../../../types';
 import useSongs from '@/hooks/useSongs';
+import Loading from '@/components/design/Loading';
 
 export default function BandSetlistsPage({
   params,
@@ -74,7 +75,7 @@ export default function BandSetlistsPage({
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (setlistAdapted) {

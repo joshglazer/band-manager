@@ -1,8 +1,9 @@
 'use client';
 
+import Loading from '@/components/design/Loading';
 import useBand from '@/hooks/useBand';
-import { BandRouteProps } from './types';
 import { ReactNode } from 'react';
+import { BandRouteProps } from './types';
 
 interface ConsumerProps {
   children: ReactNode;
@@ -15,7 +16,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
   const { data: band, isLoading } = useBand({ bandId });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (band) {

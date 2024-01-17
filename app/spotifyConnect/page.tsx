@@ -1,5 +1,6 @@
 'use client';
 
+import Loading from '@/components/design/Loading';
 import { LocalStorageValues } from '@/utils/spotify/consts';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -14,5 +15,5 @@ export default function SpotifyConnectPage() {
       router.push(`${redirectUrl}${window.location.search}`);
     }
   }, [router]);
-  return <div>Loading...</div>;
+  return <Loading />;
 }
