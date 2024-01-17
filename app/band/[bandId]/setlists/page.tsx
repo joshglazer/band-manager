@@ -1,18 +1,16 @@
 'use client';
 
 import Loading from '@/components/design/Loading';
+import Table, {
+  TableProps,
+  TablePropsDataType,
+} from '@/components/design/Table';
 import useSetlists from '@/hooks/useSetlists';
 import Button from '@mui/material/Button';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BandRouteProps } from '../types';
+import { useCallback } from 'react';
 
 export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
   const { bandId } = params;
@@ -20,46 +18,39 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
 
   const { data: setlists, isLoading } = useSetlists({ bandId });
 
+  const formatEditButton = useCallback(
+    (setlistId: TablePropsDataType) => {
+      return (
+        <Button
+          variant="outlined"
+          onClick={() =>
+            router.push(`/band/${bandId}/setlists/${setlistId}/edit`)
+          }
+        >
+          Edit
+        </Button>
+      );
+    },
+    [bandId, router]
+  );
+
   if (isLoading) {
     return <Loading />;
-  }
-
-  function handleSetlistEditClick(id: number) {
-    router.push(`/band/${bandId}/setlists/${id}/edit`);
   }
 
   let pageContent: JSX.Element;
 
   if (setlists?.length) {
-    pageContent = (
-      <TableContainer component={Paper}>
-        <Table aria-label="Table of Songs">
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {setlists.map(({ id, name }) => (
-              <TableRow key={id}>
-                <TableCell component="th" scope="row">
-                  {name}
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleSetlistEditClick(id)}
-                  >
-                    Edit
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    );
+    const setlistTableData: TableProps = {
+      ariaLabel: 'Table of Setlists',
+      columns: [
+        { name: 'Name', dataKey: 'name', isHeader: true, headerDataKey: 'id' },
+        { name: 'Actions', dataKey: 'id', dataFormatter: formatEditButton },
+      ],
+      rows: setlists,
+    };
+
+    pageContent = <Table {...setlistTableData} />;
   } else {
     pageContent = <>You haven&apos;t added any setlists</>;
   }

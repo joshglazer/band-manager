@@ -30,6 +30,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
 
   if (songs?.length) {
     const songsTableData: TableProps = {
+      ariaLabel: 'Table of Songs',
       columns: [
         {
           name: 'Name',

@@ -9,10 +9,11 @@ import TableRow from '@mui/material/TableRow';
 type TablePropsDataType = string | number | null | undefined;
 
 interface TableProps {
+  ariaLabel: string;
   columns: {
     name: string;
     dataKey: string;
-    dataFormatter?: (value: TablePropsDataType) => string;
+    dataFormatter?: (value: TablePropsDataType) => string | JSX.Element;
     isHeader?: boolean;
     headerDataKey?: TablePropsDataType;
     className?: string;
@@ -20,9 +21,13 @@ interface TableProps {
   rows: { [key: string]: TablePropsDataType }[];
 }
 
-export default function Table({ columns, rows }: Readonly<TableProps>) {
+export default function Table({
+  ariaLabel,
+  columns,
+  rows,
+}: Readonly<TableProps>) {
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} aria-label={ariaLabel}>
       <MUITable aria-label="Table of Songs">
         <TableHead>
           <TableRow>
@@ -45,7 +50,7 @@ export default function Table({ columns, rows }: Readonly<TableProps>) {
                 }) => {
                   let component: TableCellProps['component'] = 'td';
                   let scope: TableCellProps['scope'];
-                  let value = row[dataKey];
+                  let value: TablePropsDataType | JSX.Element = row[dataKey];
 
                   if (dataFormatter) {
                     value = dataFormatter(value);
