@@ -54,7 +54,7 @@ export default function Table({
         <TableBody>
           {rows.map((row) => {
             return (
-              <TableRow key={row[headerColumn.headerDataKey || '']}>
+              <TableRow key={row[headerColumn.headerDataKey ?? '']}>
                 {columns.map(
                   ({
                     name,
