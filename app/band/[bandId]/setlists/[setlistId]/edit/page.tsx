@@ -1,13 +1,14 @@
 'use client';
 
-import useSetlist from '@/hooks/useSetlist';
-import { SetlistRouteProps } from '../types';
+import Loading from '@/components/design/Loading';
 import SetlistEditor from '@/components/setlistEditor/SetlistEditor';
-import { Setlist, Set } from '@/components/setlistEditor/types';
+import { adaptSetlist } from '@/components/setlistEditor/helpers';
+import { Setlist } from '@/components/setlistEditor/types';
+import useSetlist from '@/hooks/useSetlist';
+import useSongs from '@/hooks/useSongs';
 import { useMemo } from 'react';
 import { BandRouteProps } from '../../../types';
-import useSongs from '@/hooks/useSongs';
-import Loading from '@/components/design/Loading';
+import { SetlistRouteProps } from '../types';
 
 export default function BandSetlistsPage({
   params,
@@ -20,54 +21,10 @@ export default function BandSetlistsPage({
 
   const setlistAdapted: Setlist | undefined = useMemo(() => {
     if (setlist && songs) {
-      const { id, name, setlist_songs } = setlist;
-
-      const sets: Set[] = [];
-
-      const usedSongIds: number[] = [];
-
-      setlist_songs.sort((a, b) => {
-        if (a.set !== b.set) {
-          return a.set - b.set;
-        }
-        return a.set_weight - b.set_weight;
-      });
-
-      setlist_songs.forEach(({ set, song_id }) => {
-        let song = songs.find(({ id }) => id === song_id);
-        if (!song) {
-          song = {
-            band_id: bandId,
-            duration: 0,
-            id: -1,
-            name: 'Not Found',
-            artist: 'Not Found',
-            created_at: 'Not Found',
-          };
-        } else {
-          usedSongIds.push(song.id);
-        }
-        if (set === sets.length) {
-          sets.push({
-            songs: [song],
-          });
-        } else {
-          sets[sets.length - 1].songs.push(song);
-        }
-      });
-
-      const unusedSongs = songs.filter(({ id }) => !usedSongIds.includes(id));
-
-      return {
-        id,
-        bandId: bandId,
-        name: name ?? '',
-        sets,
-        unusedSongs: unusedSongs,
-      };
+      return adaptSetlist(setlist, songs);
     }
     return undefined;
-  }, [bandId, setlist, songs]);
+  }, [setlist, songs]);
 
   const isLoading = useMemo(
     () => isLoadingSetlist || isLoadingSongs,

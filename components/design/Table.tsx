@@ -22,14 +22,8 @@ interface TableProps {
   rows: { [key: string]: TablePropsDataType }[];
 }
 
-export default function Table({
-  ariaLabel,
-  columns,
-  rows,
-}: Readonly<TableProps>) {
-  const headerColumns = columns.filter(
-    (column) => column.isHeader && column.headerDataKey
-  );
+export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>) {
+  const headerColumns = columns.filter((column) => column.isHeader && column.headerDataKey);
 
   if (headerColumns.length !== 1) {
     return (
@@ -56,14 +50,7 @@ export default function Table({
             return (
               <TableRow key={row[headerColumn.headerDataKey ?? '']}>
                 {columns.map(
-                  ({
-                    name,
-                    dataKey,
-                    dataFormatter,
-                    isHeader,
-                    headerDataKey,
-                    className,
-                  }) => {
+                  ({ name, dataKey, dataFormatter, isHeader, headerDataKey, className }) => {
                     let component: TableCellProps['component'] = 'td';
                     let scope: TableCellProps['scope'];
                     let value: TablePropsDataType | JSX.Element = row[dataKey];
