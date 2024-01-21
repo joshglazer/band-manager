@@ -169,12 +169,52 @@ export interface Database {
           }
         ]
       }
+      user_profiles: {
+        Row: {
+          bio: string | null
+          created_at: string
+          first_name: string | null
+          id: number
+          last_name: string | null
+          user_id: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          first_name?: string | null
+          id?: number
+          last_name?: string | null
+          user_id: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          first_name?: string | null
+          id?: number
+          last_name?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_band_member: {
+        Args: {
+          band_id_arg: number
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
