@@ -35,7 +35,7 @@ export default function UserMenu({ user, signOut }: Readonly<UserMenuProps>): JS
     const initials: string[] = [];
     if (userProfile) {
       [userProfile.first_name, userProfile.last_name].forEach((namePart) => {
-        if (!!namePart) {
+        if (namePart) {
           initials.push(namePart);
         }
       });

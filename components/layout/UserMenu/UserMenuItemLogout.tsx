@@ -5,7 +5,7 @@ interface UserMenuItemProps {
   signOut: () => Promise<void>;
 }
 
-export default function UserMenuItem({ handleClose, signOut }: Readonly<UserMenuItemProps>) {
+export default function UserMenuItemLogout({ handleClose, signOut }: Readonly<UserMenuItemProps>) {
   function handleClick() {
     signOut();
     handleClose();

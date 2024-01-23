@@ -8,7 +8,7 @@ interface CardProps {
   description?: string | null;
 }
 
-export default function Card({ title, description }: CardProps): JSX.Element {
+export default function Card({ title, description }: Readonly<CardProps>): JSX.Element {
   return (
     <MUICard className="flex m-3 justify-center">
       <CardContent>

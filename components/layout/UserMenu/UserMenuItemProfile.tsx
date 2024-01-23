@@ -5,7 +5,7 @@ interface UserMenuItemProps {
   handleClose: () => void;
 }
 
-export default function UserMenuItem({ handleClose }: UserMenuItemProps) {
+export default function UserMenuItemProfile({ handleClose }: Readonly<UserMenuItemProps>) {
   const router = useRouter();
 
   function handleClick() {
