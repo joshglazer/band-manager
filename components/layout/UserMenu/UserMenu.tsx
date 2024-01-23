@@ -29,7 +29,7 @@ export default function UserMenu({ user, signOut }: Readonly<UserMenuProps>): JS
     setAnchorEl(null);
   };
 
-  const { data: userProfile } = useUserProfile({ userId: user.id });
+  const { data: userProfile, isLoading } = useUserProfile({ userId: user.id });
 
   const avatarInitials: string = useMemo(() => {
     const initials: string[] = [];
@@ -48,7 +48,7 @@ export default function UserMenu({ user, signOut }: Readonly<UserMenuProps>): JS
     return initials.map((initial) => initial[0].toUpperCase()).join('');
   }, [user.email, userProfile]);
 
-  if (!avatarInitials) {
+  if (isLoading) {
     return <Loading />;
   }
 
