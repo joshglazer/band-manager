@@ -1,34 +1,39 @@
 'use client';
 
 import { createClient } from '@/utils/supabase/client';
-import { PostgrestError } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { FieldValues, useForm } from 'react-hook-form';
+import { useMemo, useState } from 'react';
+import { FieldValues } from 'react-hook-form';
+import Form, { FormField } from '../design/Form';
 
 interface BandFormProps {
   bandId?: number;
 }
 
 export default function BandForm({ bandId }: Readonly<BandFormProps>) {
-  const [error, setError] = useState<PostgrestError>();
+  const [errorMessage, setErrorMessage] = useState<string>();
+
   const supabase = createClient();
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
   const router = useRouter();
 
-  async function onSubmit(data: FieldValues) {
+  const formFields: FormField[] = useMemo(
+    () => [
+      {
+        fieldType: 'text' as FormField['fieldType'],
+        name: 'name',
+        label: 'Name',
+        fullWidth: true,
+        required: true,
+      },
+    ],
+    []
+  );
+
+  async function onSuccess(data: FieldValues) {
     if (!bandId) {
-      const { error: submitError } = await supabase
-        .from('bands')
-        .insert({ name: data.name });
+      const { error: submitError } = await supabase.from('bands').insert({ name: data.name });
       if (submitError) {
-        setError(submitError);
+        setErrorMessage(submitError.message);
       } else {
         router.push('/');
       }
@@ -36,18 +41,11 @@ export default function BandForm({ bandId }: Readonly<BandFormProps>) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <label htmlFor="name">Name: </label>
-      <input
-        id="name"
-        placeholder="Smash Mouth"
-        {...register('name', { required: true })}
-      />
-
-      {errors.name && <span>This field is required</span>}
-      {error && <span>{error.message}</span>}
-
-      <input type="submit" />
-    </form>
+    <Form
+      // defaultValues={defaultValues}
+      onSuccess={onSuccess}
+      formFields={formFields}
+      errorMessage={errorMessage}
+    ></Form>
   );
 }
