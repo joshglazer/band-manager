@@ -2,16 +2,15 @@
 
 import useUserProfile from '@/hooks/useUserProfile';
 import { createClient } from '@/utils/supabase/client';
-import SaveIcon from '@mui/icons-material/Save';
-import LoadingButton from '@mui/lab/LoadingButton';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
 import { PostgrestError, User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Controller, FieldValues, useForm } from 'react-hook-form';
+import { useMemo, useState } from 'react';
+import { FieldValues } from 'react-hook-form';
+import { FormContainer, TextFieldElement } from 'react-hook-form-mui';
 import Loading from '../design/Loading';
+import LoadingButton from '@mui/lab/LoadingButton';
 
+import SaveIcon from '@mui/icons-material/Save';
 interface UserProfileFormProps {
   user: User;
 }
@@ -25,16 +24,13 @@ export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>
   const { data: userProfile, isLoading } = useUserProfile({ userId: user.id });
   const supabase = createClient();
 
-  const {
-    handleSubmit,
-    reset,
-    control,
-    formState: { errors },
-  } = useForm();
-
-  useEffect(() => {
-    reset({ firstName: userProfile?.first_name, lastName: userProfile?.last_name });
-  }, [reset, userProfile?.first_name, userProfile?.last_name]);
+  const defaultValues = useMemo(
+    () => ({
+      firstName: userProfile?.first_name,
+      lastName: userProfile?.last_name,
+    }),
+    [userProfile?.first_name, userProfile?.last_name]
+  );
 
   if (isLoading) {
     return <Loading />;
@@ -58,55 +54,10 @@ export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>
   }
 
   return (
-    <Box
-      component="form"
-      sx={{
-        width: 500,
-        maxWidth: '100%',
-        '& > :not(style)': { m: 1 },
-      }}
-      noValidate
-      autoComplete="off"
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <Controller
-        name="firstName"
-        control={control}
-        render={({ field: { onChange, value }, fieldState: { error } }) => (
-          <TextField
-            helperText={error ? error.message : null}
-            size="small"
-            error={!!error}
-            onChange={onChange}
-            value={value}
-            fullWidth
-            label="First Name"
-            variant="outlined"
-            required
-          />
-        )}
-      />
-      <Controller
-        name="lastName"
-        control={control}
-        render={({ field: { onChange, value }, fieldState: { error } }) => (
-          <TextField
-            helperText={error ? error.message : null}
-            size="small"
-            error={!!error}
-            onChange={onChange}
-            value={value}
-            fullWidth
-            label="Last Name"
-            variant="outlined"
-            required
-          />
-        )}
-      />
-
-      {!!Object.keys(errors).length && <span>A required field is missing</span>}
+    <FormContainer defaultValues={defaultValues} onSuccess={onSubmit}>
+      <TextFieldElement name="firstName" label="First Name" fullWidth required className="mb-4" />
+      <TextFieldElement name="lastName" label="Last Name" fullWidth required className="mb-4" />
       {error && <span>{error.message}</span>}
-
       <LoadingButton
         variant="contained"
         type="submit"
@@ -115,6 +66,6 @@ export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>
       >
         Save
       </LoadingButton>
-    </Box>
+    </FormContainer>
   );
 }
