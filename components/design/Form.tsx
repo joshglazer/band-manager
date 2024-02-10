@@ -12,7 +12,7 @@ import {
 } from 'react-hook-form-mui';
 
 type FormField = {
-  fieldType: 'text';
+  fieldType: 'text' | 'textarea';
 } & TextFieldElementProps;
 
 interface FormProps {
@@ -35,9 +35,23 @@ export default function Form({ formFields, defaultValues, onSuccess, errorMessag
   return (
     <FormContainer defaultValues={defaultValues} onSuccess={handleSuccess}>
       {formFields.map(({ fieldType, ...fieldProps }) => {
-        if (fieldType === 'text') {
-          return <TextFieldElement key={fieldProps.name} {...fieldProps} className="mb-4" />;
+        let field: JSX.Element;
+        switch (fieldType) {
+          case 'text':
+            field = <TextFieldElement key={fieldProps.name} {...fieldProps} className="mb-4" />;
+            break;
+          case 'textarea':
+            field = (
+              <TextFieldElement key={fieldProps.name} {...fieldProps} multiline className="mb-4" />
+            );
+            break;
+          default:
+            return (
+              <Alert severity="error">Error: Field Type of {fieldType} is not supported</Alert>
+            );
         }
+
+        return field;
       })}
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       <LoadingButton

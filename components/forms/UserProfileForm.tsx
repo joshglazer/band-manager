@@ -37,6 +37,13 @@ export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>
         fullWidth: true,
         required: true,
       },
+      {
+        fieldType: 'textarea' as FormField['fieldType'],
+        name: 'bio',
+        label: 'Bio',
+        fullWidth: true,
+        required: true,
+      },
     ],
     []
   );
@@ -45,8 +52,9 @@ export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>
     () => ({
       firstName: userProfile?.first_name,
       lastName: userProfile?.last_name,
+      bio: userProfile?.bio,
     }),
-    [userProfile?.first_name, userProfile?.last_name]
+    [userProfile]
   );
 
   if (isLoading) {
@@ -55,9 +63,10 @@ export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>
 
   async function onSuccess(data: FieldValues) {
     if (userProfile) {
+      const { firstName, lastName, bio } = data;
       const { error: submitError } = await supabase
         .from('user_profiles')
-        .update({ first_name: data.firstName, last_name: data.lastName })
+        .update({ first_name: firstName, last_name: lastName, bio })
         .eq('id', userProfile.id);
 
       if (submitError) {
