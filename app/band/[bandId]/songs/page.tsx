@@ -1,10 +1,7 @@
 'use client';
 
 import Loading from '@/components/design/Loading';
-import Table, {
-  TableProps,
-  TablePropsDataType,
-} from '@/components/design/Table';
+import Table, { TableProps, TablePropsDataType } from '@/components/design/Table';
 import useSongs from '@/hooks/useSongs';
 import Button from '@mui/material/Button';
 import Link from 'next/link';
@@ -29,6 +26,14 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
   let pageContent: JSX.Element;
 
   if (songs?.length) {
+    const songsForTable = songs.map((song) => ({
+      id: song.id,
+      name: song.name,
+      artist: song.artist,
+      duration: song.duration,
+      commentsCount: song.song_comments[0].count,
+    }));
+
     const songsTableData: TableProps = {
       ariaLabel: 'Table of Songs',
       columns: [
@@ -48,8 +53,13 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
           dataFormatter: formatDuration,
           className: 'whitespace-nowrap',
         },
+        {
+          name: 'Comments',
+          dataKey: 'commentsCount',
+          className: 'whitespace-nowrap',
+        },
       ],
-      rows: songs,
+      rows: songsForTable,
     };
     pageContent = <Table {...songsTableData} />;
   } else {

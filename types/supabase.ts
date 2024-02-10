@@ -137,6 +137,35 @@ export type Database = {
           }
         ]
       }
+      song_comments: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: number
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: number
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "song_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       songs: {
         Row: {
           artist: string | null
