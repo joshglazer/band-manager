@@ -2,20 +2,30 @@ import Box from '@mui/material/Box';
 import MUICard from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import Link from 'next/link';
 
 interface CardProps {
+  icon?: JSX.Element;
   title?: string | null;
-  description?: string | null;
+  description?: string | JSX.Element | null;
+  link?: string;
+  className?: string;
 }
 
-export default function Card({ title, description }: Readonly<CardProps>): JSX.Element {
-  return (
+export default function Card({
+  title,
+  description,
+  icon,
+  link,
+  className,
+}: Readonly<CardProps>): JSX.Element {
+  let cardElement = (
     <MUICard className="flex m-3 justify-center">
       <CardContent>
         <Box className="flex flex-col">
-          {!!title && (
+          {(!!title || !!icon) && (
             <Typography component="div" variant="h5">
-              <div>{title}</div>
+              {!!icon && icon} {!!title && title}
             </Typography>
           )}
           {!!description && (
@@ -32,4 +42,20 @@ export default function Card({ title, description }: Readonly<CardProps>): JSX.E
       </CardContent>
     </MUICard>
   );
+
+  if (link) {
+    cardElement = (
+      <Link href={link} key={link} className="no-underline">
+        {cardElement}
+      </Link>
+    );
+  }
+
+  if (className) {
+    cardElement = <Box className={className}>{cardElement}</Box>;
+  }
+
+  return cardElement;
 }
+
+export type { CardProps };

@@ -5,12 +5,10 @@ import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
 import PeopleIcon from '@mui/icons-material/People';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import Loading from './design/Loading';
+import Card from './design/Card';
 
 export default function Bands() {
   const { data, isLoading } = useBands();
@@ -31,44 +29,31 @@ export default function Bands() {
   if (data.length) {
     return (
       <>
-        <Grid
-          container
-          spacing={2}
-          justifyContent="flex-start"
-          alignItems="center"
-        >
+        <Grid container spacing={2} justifyContent="flex-start" alignItems="center">
           {data.map(({ id, name, songs, band_members }) => {
+            const bandCardDescription = (
+              <>
+                <Box>
+                  <PeopleIcon titleAccess="Count of Members" />: {band_members[0]['count']}
+                </Box>
+                <Box>
+                  <LibraryMusicIcon titleAccess="Count of Songs" />: {songs[0]['count']}
+                </Box>
+              </>
+            );
+
+            const bandCardLink = `/band/${id}`;
+
+            const bandCardClassName = 'md:basis-1/3 sm:basis-1/2 basis-full';
+
             return (
-              <Link
-                href={`/band/${id}`}
+              <Card
                 key={id}
-                className="no-underline md:basis-1/3 sm:basis-1/2 basis-full"
-              >
-                <Card className="flex m-3 justify-center">
-                  <Box className="flex flex-col">
-                    <CardContent>
-                      <Typography component="div" variant="h5">
-                        <div>{name}</div>
-                      </Typography>
-                      <Typography
-                        variant="subtitle1"
-                        color="text.secondary"
-                        component="div"
-                        className="flex justify-between pt-1"
-                      >
-                        <Box>
-                          <PeopleIcon titleAccess="Count of Members" />:{' '}
-                          {band_members[0]['count']}
-                        </Box>
-                        <Box>
-                          <LibraryMusicIcon titleAccess="Count of Songs" />:{' '}
-                          {songs[0]['count']}
-                        </Box>
-                      </Typography>
-                    </CardContent>
-                  </Box>
-                </Card>
-              </Link>
+                title={name}
+                description={bandCardDescription}
+                link={bandCardLink}
+                className={bandCardClassName}
+              />
             );
           })}
         </Grid>
