@@ -36,7 +36,7 @@ export default function Form({
   saveButtonLabel = 'Save',
   saveButtonDisplay = true,
   saveButtonIcon = <SaveIcon />,
-}: FormProps) {
+}: Readonly<FormProps>) {
   const [isFormProcessing, setIsFormProcessing] = useState(false);
 
   function handleSuccess(data: FieldValues) {
@@ -58,7 +58,7 @@ export default function Form({
         let field: JSX.Element;
         switch (fieldType) {
           case 'text':
-          case 'textarea':
+          case 'textarea': {
             const extraProps: Partial<TextFieldElementProps> = {};
             if (fieldType === 'textarea') {
               extraProps.multiline = true;
@@ -72,13 +72,16 @@ export default function Form({
               />
             );
             break;
-          case 'password':
+          }
+          case 'password': {
             field = <PasswordElement key={fieldProps.name} {...fieldProps} {...sharedFieldProps} />;
             break;
-          default:
+          }
+          default: {
             return (
               <Alert severity="error">Error: Field Type of {fieldType} is not supported</Alert>
             );
+          }
         }
 
         return field;

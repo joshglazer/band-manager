@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import LoginIcon from '@mui/icons-material/Login';
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { useMemo } from 'react';
 import { FieldValues } from 'react-hook-form';
@@ -10,7 +10,7 @@ interface LoginFormProps {
   errorMessage?: string;
 }
 
-export default function LoginForm({ errorMessage }: LoginFormProps) {
+export default function LoginForm({ errorMessage }: Readonly<LoginFormProps>) {
   const formFields: FormField[] = useMemo(
     () => [
       {
@@ -36,23 +36,19 @@ export default function LoginForm({ errorMessage }: LoginFormProps) {
 
     const { email, password } = data;
 
-    const origin = headers().get('origin');
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
 
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: {
-        emailRedirectTo: `${origin}/auth/callback`,
-      },
     });
 
     if (error) {
       return redirect('/login?message=Could not authenticate user');
     }
 
-    return redirect('/login?message=Check email to continue sign in process');
+    return redirect('/');
   }
 
   return (
