@@ -9,17 +9,21 @@ import TableRow from '@mui/material/TableRow';
 
 type TablePropsDataType = string | number | null | undefined;
 
+interface TableRow {
+  [key: string]: TablePropsDataType;
+}
+
 interface TableProps {
   ariaLabel: string;
   columns: {
     name: string;
     dataKey: string;
-    dataFormatter?: (value: TablePropsDataType) => string | JSX.Element;
+    dataFormatter?: (value: TablePropsDataType, row: TableRow) => string | JSX.Element;
     isHeader?: boolean;
     headerDataKey?: TablePropsDataType;
     className?: string;
   }[];
-  rows: { [key: string]: TablePropsDataType }[];
+  rows: TableRow[];
 }
 
 export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>) {
@@ -56,7 +60,7 @@ export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>
                     let value: TablePropsDataType | JSX.Element = row[dataKey];
 
                     if (dataFormatter) {
-                      value = dataFormatter(value);
+                      value = dataFormatter(value, row);
                     }
 
                     if (isHeader && headerDataKey) {
@@ -85,4 +89,4 @@ export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>
   );
 }
 
-export type { TableProps, TablePropsDataType };
+export type { TableProps, TablePropsDataType, TableRow };

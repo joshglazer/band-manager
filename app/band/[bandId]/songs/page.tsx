@@ -1,8 +1,9 @@
 'use client';
 
 import Loading from '@/components/design/Loading';
-import Table, { TableProps, TablePropsDataType } from '@/components/design/Table';
-import useSongs from '@/hooks/useSongs';
+import Table, { TableProps, TablePropsDataType, TableRow } from '@/components/design/Table';
+import SongCommentsModal from '@/components/modals/SongCommentsModal';
+import useSongs, { SongsComposite } from '@/hooks/useSongs';
 import Button from '@mui/material/Button';
 import Link from 'next/link';
 import prettyMilliseconds from 'pretty-ms';
@@ -12,6 +13,14 @@ function formatDuration(value?: TablePropsDataType | null) {
   return value && typeof value === 'number'
     ? prettyMilliseconds(value, { secondsDecimalDigits: 0 })
     : '--';
+}
+
+function formatComments(value: TablePropsDataType | null, row: TableRow) {
+  return value !== null && value !== undefined ? (
+    <SongCommentsModal commentsCount={+value} song={row as unknown as SongsComposite} />
+  ) : (
+    '--'
+  );
 }
 
 export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
@@ -57,6 +66,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
           name: 'Comments',
           dataKey: 'commentsCount',
           className: 'whitespace-nowrap',
+          dataFormatter: formatComments,
         },
       ],
       rows: songsForTable,
