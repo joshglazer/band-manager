@@ -16,10 +16,8 @@ function formatDuration(value?: TablePropsDataType | null) {
 }
 
 function formatComments(value: TablePropsDataType | null, row: TableRow) {
-  return value !== null && value !== undefined ? (
-    <SongCommentsModal commentsCount={+value} song={row as unknown as SongsComposite} />
-  ) : (
-    '--'
+  return (
+    <SongCommentsModal commentsCount={+(value ?? 0)} song={row as unknown as SongsComposite} />
   );
 }
 

@@ -35,8 +35,8 @@ export default function ModalWithTrigger({
       </Button>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{modalTitle}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{modalContent}</DialogContentText>
+        <DialogContent className="pt-3">
+          <DialogContentText component={'div'}>{modalContent}</DialogContentText>
         </DialogContent>
       </Dialog>
     </>

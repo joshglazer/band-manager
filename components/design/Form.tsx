@@ -12,11 +12,17 @@ import {
   TextFieldElement,
   TextFieldElementProps,
   UseFormProps,
+  SelectElement,
+  SelectElementProps,
 } from 'react-hook-form-mui';
 
-type FormField = {
-  fieldType: 'text' | 'textarea' | 'password';
-} & TextFieldElementProps;
+type FormField =
+  | ({
+      fieldType: 'text' | 'textarea' | 'password' | 'select';
+    } & TextFieldElementProps)
+  | ({
+      fieldType: 'select';
+    } & SelectElementProps);
 
 interface FormProps {
   formFields: FormField[];
@@ -47,7 +53,7 @@ export default function Form({
     setIsFormProcessing(false);
   }
 
-  const sharedFieldProps: Partial<TextFieldElementProps> = useMemo(
+  const sharedFieldProps: Partial<TextFieldElementProps & SelectElementProps> = useMemo(
     () => ({ className: 'mb-4' }),
     []
   );
@@ -66,7 +72,7 @@ export default function Form({
             field = (
               <TextFieldElement
                 key={fieldProps.name}
-                {...fieldProps}
+                {...(fieldProps as TextFieldElementProps)}
                 {...extraProps}
                 {...sharedFieldProps}
               />
@@ -74,7 +80,19 @@ export default function Form({
             break;
           }
           case 'password': {
-            field = <PasswordElement key={fieldProps.name} {...fieldProps} {...sharedFieldProps} />;
+            field = (
+              <PasswordElement
+                key={fieldProps.name}
+                {...(fieldProps as TextFieldElementProps)}
+                {...sharedFieldProps}
+              />
+            );
+            break;
+          }
+          case 'select': {
+            console.log((fieldProps as SelectElementProps).options);
+            const { key, ...props } = fieldProps as SelectElementProps;
+            field = <SelectElement {...props} {...sharedFieldProps} key={fieldProps.name} />;
             break;
           }
           default: {
