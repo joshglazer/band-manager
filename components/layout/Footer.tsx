@@ -1,29 +1,28 @@
 import GitHubIcon from '@mui/icons-material/GitHub';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
 
 export default function Footer() {
   return (
-    <footer className="w-full flex justify-center border-t border-t-foreground/10 h-16">
-      <div className="w-full max-w-4xl flex justify-between items-center p-3 text-xs">
-        <div>
+    <footer className="w-full flex justify-center border-t h-16">
+      <div className="w-full max-w-4xl flex justify-between items-center p-3">
+        <Typography variant="caption" color="text.secondary">
           A{' '}
-          <a
-            href="https://joshglazer.com"
-            target="_blank"
-            className="font-bold hover:underline"
-            rel="noreferrer"
-          >
+          <Link href="https://joshglazer.com" target="_blank" rel="noreferrer" underline="hover" color="inherit" fontWeight={600}>
             Josh Glazer
-          </a>{' '}
+          </Link>{' '}
           Project
-        </div>
-        <a
+        </Typography>
+        <Link
           href="https://github.com/joshglazer/band-manager"
           target="_blank"
-          className="font-bold hover:underline"
           rel="noreferrer"
+          underline="hover"
+          color="text.secondary"
+          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.75rem', fontWeight: 600 }}
         >
-          <GitHubIcon /> Source Code On Github
-        </a>
+          <GitHubIcon sx={{ fontSize: 16 }} /> Source Code
+        </Link>
       </div>
     </footer>
   );

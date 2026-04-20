@@ -5,6 +5,7 @@ import Table, { TableProps, TablePropsDataType } from '@/components/design/Table
 import { adaptSetlist } from '@/components/setlistEditor/helpers';
 import useSetlists from '@/hooks/useSetlists';
 import useSongs from '@/hooks/useSongs';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -94,10 +95,15 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
   return (
     <>
       {pageContent}
-      <hr />
-      <Link href={`/band/${bandId}/setlists/create`}>
-        <Button variant="contained">Create a Setlist</Button>
-      </Link>
+      <Box sx={{ mt: 3 }}>
+        <Button
+          component={Link}
+          href={`/band/${bandId}/setlists/create`}
+          variant="contained"
+        >
+          Create a Setlist
+        </Button>
+      </Box>
     </>
   );
 }

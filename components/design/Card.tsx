@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box';
 import MUICard from '@mui/material/Card';
+import CardActionArea from '@mui/material/CardActionArea';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
@@ -19,37 +20,43 @@ export default function Card({
   link,
   className,
 }: Readonly<CardProps>): JSX.Element {
-  let cardElement = (
-    <MUICard className="flex m-3 justify-center">
-      <CardContent>
-        <Box className="flex flex-col">
-          {(!!title || !!icon) && (
-            <Typography component="div" variant="h5">
-              {!!icon && icon} {!!title && title}
-            </Typography>
-          )}
-          {!!description && (
-            <Typography
-              variant="subtitle1"
-              color="text.secondary"
-              component="div"
-              className="flex justify-between pt-1"
-            >
-              {description}
-            </Typography>
-          )}
-        </Box>
-      </CardContent>
-    </MUICard>
+  const content = (
+    <CardContent sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {(!!title || !!icon) && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            {!!icon && (
+              <Box sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', fontSize: 28 }}>
+                {icon}
+              </Box>
+            )}
+            {!!title && (
+              <Typography component="div" variant="h6" fontWeight={600}>
+                {title}
+              </Typography>
+            )}
+          </Box>
+        )}
+        {!!description && (
+          <Typography variant="body2" color="text.secondary" component="div">
+            {description}
+          </Typography>
+        )}
+      </Box>
+    </CardContent>
   );
 
-  if (link) {
-    cardElement = (
-      <Link href={link} key={link} className="no-underline">
-        {cardElement}
-      </Link>
-    );
-  }
+  let cardElement = (
+    <MUICard sx={{ m: 1.5 }}>
+      {link ? (
+        <CardActionArea component={Link} href={link}>
+          {content}
+        </CardActionArea>
+      ) : (
+        content
+      )}
+    </MUICard>
+  );
 
   if (className) {
     cardElement = <Box className={className}>{cardElement}</Box>;
