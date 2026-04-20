@@ -91,8 +91,13 @@ export default function Form({
           }
           case 'select': {
             console.log((fieldProps as SelectElementProps).options);
-            const { key, ...props } = fieldProps as SelectElementProps;
-            field = <SelectElement {...props} {...sharedFieldProps} key={fieldProps.name} />;
+            field = (
+              <SelectElement
+                {...(fieldProps as SelectElementProps)}
+                {...sharedFieldProps}
+                key={fieldProps.name}
+              />
+            );
             break;
           }
           default: {
