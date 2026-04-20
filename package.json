@@ -3,7 +3,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "db:migration:new": "npx supabase migration new",
+    "db:migration:list": "npx supabase migration list",
+    "db:types": "npx supabase gen types typescript --linked > types/supabase.ts"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
