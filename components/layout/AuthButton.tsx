@@ -1,8 +1,9 @@
 import { createClient } from '@/utils/supabase/server';
+import Button from '@mui/material/Button';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import UserMenu from './UserMenu/UserMenu';
 import { redirect } from 'next/navigation';
+import UserMenu from './UserMenu/UserMenu';
 
 export default async function AuthButton() {
   const cookieStore = cookies();
@@ -22,15 +23,16 @@ export default async function AuthButton() {
   };
 
   return user ? (
-    <div className="flex items-center gap-4 text-sm">
-      <UserMenu user={user} signOut={signOut} />
-    </div>
+    <UserMenu user={user} signOut={signOut} />
   ) : (
-    <Link
+    <Button
+      component={Link}
       href="/login"
-      className="py-2 px-3 flex rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
+      variant="outlined"
+      size="small"
+      sx={{ color: 'inherit', borderColor: 'rgba(255,255,255,0.5)', '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.08)' } }}
     >
       Login
-    </Link>
+    </Button>
   );
 }

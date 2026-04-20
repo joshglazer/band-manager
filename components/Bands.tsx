@@ -5,10 +5,13 @@ import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
 import PeopleIcon from '@mui/icons-material/People';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
+import MuiLink from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
 import Link from 'next/link';
-import Loading from './design/Loading';
 import Card from './design/Card';
+import Loading from './design/Loading';
 
 export default function Bands() {
   const { data, isLoading } = useBands();
@@ -19,51 +22,54 @@ export default function Bands() {
 
   if (!data?.length) {
     return (
-      <div>
-        It looks like you haven&apos;t made any bands yet.{' '}
-        <Link href="/band/create">Create one now!</Link>
-      </div>
+      <Box sx={{ py: 4 }}>
+        <Typography color="text.secondary">
+          You haven&apos;t created any bands yet.{' '}
+          <MuiLink component={Link} href="/band/create" underline="hover" color="primary" fontWeight={600}>
+            Create one now!
+          </MuiLink>
+        </Typography>
+      </Box>
     );
   }
 
-  if (data.length) {
-    return (
-      <>
-        <Grid container spacing={2} justifyContent="flex-start" alignItems="center">
-          {data.map(({ id, name, songs, band_members }) => {
-            const bandCardDescription = (
-              <>
-                <Box>
-                  <PeopleIcon titleAccess="Count of Members" />: {band_members[0]['count']}
-                </Box>
-                <Box>
-                  <LibraryMusicIcon titleAccess="Count of Songs" />: {songs[0]['count']}
-                </Box>
-              </>
-            );
-
-            const bandCardLink = `/band/${id}`;
-
-            const bandCardClassName = 'md:basis-1/3 sm:basis-1/2 basis-full';
-
-            return (
-              <Card
-                key={id}
-                title={name}
-                description={bandCardDescription}
-                link={bandCardLink}
-                className={bandCardClassName}
+  return (
+    <>
+      <Grid container spacing={2} justifyContent="flex-start" alignItems="stretch">
+        {data.map(({ id, name, songs, band_members }) => {
+          const bandCardDescription = (
+            <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+              <Chip
+                icon={<PeopleIcon />}
+                label={`${band_members[0]['count']} member${band_members[0]['count'] !== 1 ? 's' : ''}`}
+                size="small"
+                variant="outlined"
               />
-            );
-          })}
-        </Grid>
-        <hr />
-        <div>
-          <Link href="/band/create">
-            <Button variant="contained">Add another band</Button>
-          </Link>
-        </div>
-      </>
-    );
-  }
+              <Chip
+                icon={<LibraryMusicIcon />}
+                label={`${songs[0]['count']} song${songs[0]['count'] !== 1 ? 's' : ''}`}
+                size="small"
+                variant="outlined"
+              />
+            </Box>
+          );
+
+          return (
+            <Card
+              key={id}
+              title={name}
+              description={bandCardDescription}
+              link={`/band/${id}`}
+              className="md:basis-1/3 sm:basis-1/2 basis-full"
+            />
+          );
+        })}
+      </Grid>
+      <Box sx={{ mt: 3 }}>
+        <Button component={Link} href="/band/create" variant="outlined">
+          Add another band
+        </Button>
+      </Box>
+    </>
+  );
 }

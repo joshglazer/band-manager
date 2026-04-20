@@ -2,6 +2,9 @@
 
 import Loading from '@/components/design/Loading';
 import useBand from '@/hooks/useBand';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
 import { ReactNode } from 'react';
 import { BandRouteProps } from './types';
 
@@ -22,11 +25,16 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
   if (band) {
     return (
       <>
-        <h2>{band.name}</h2>
-        <div>{children}</div>
+        <Box sx={{ pt: 3, pb: 2 }}>
+          <Typography variant="h4" fontWeight={700} color="text.primary">
+            {band.name}
+          </Typography>
+          <Divider sx={{ mt: 2 }} />
+        </Box>
+        <Box>{children}</Box>
       </>
     );
   }
 
-  return <h2>Whoops!</h2>;
+  return <Typography variant="h5">Band not found.</Typography>;
 }

@@ -4,6 +4,7 @@ import Loading from '@/components/design/Loading';
 import Table, { TableProps, TablePropsDataType, TableRow } from '@/components/design/Table';
 import SongCommentsModal from '@/components/modals/SongCommentsModal';
 import useSongs, { SongsComposite } from '@/hooks/useSongs';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Link from 'next/link';
 import prettyMilliseconds from 'pretty-ms';
@@ -77,10 +78,15 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
   return (
     <>
       {pageContent}
-      <hr />
-      <Link href={`/band/${bandId}/songs/spotify-import`}>
-        <Button variant="contained">Import Songs From Spotify</Button>
-      </Link>
+      <Box sx={{ mt: 3 }}>
+        <Button
+          component={Link}
+          href={`/band/${bandId}/songs/spotify-import`}
+          variant="contained"
+        >
+          Import Songs From Spotify
+        </Button>
+      </Box>
     </>
   );
 }
