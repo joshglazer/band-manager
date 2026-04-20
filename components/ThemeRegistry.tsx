@@ -1,5 +1,6 @@
 'use client';
 
+import '@mui/lab/themeAugmentation';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
