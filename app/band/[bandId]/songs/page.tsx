@@ -2,6 +2,7 @@
 
 import Loading from '@/components/design/Loading';
 import Table, { TableProps, TablePropsDataType, TableRow } from '@/components/design/Table';
+import AddSongModal from '@/components/modals/AddSongModal';
 import SongCommentsModal from '@/components/modals/SongCommentsModal';
 import useSongs, { SongsComposite } from '@/hooks/useSongs';
 import Box from '@mui/material/Box';
@@ -25,7 +26,7 @@ function formatComments(value: TablePropsDataType | null, row: TableRow) {
 export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
   const { bandId } = params;
 
-  const { data: songs, isLoading } = useSongs({ bandId });
+  const { data: songs, isLoading, mutate } = useSongs({ bandId });
 
   if (isLoading) {
     return <Loading />;
@@ -78,7 +79,8 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
   return (
     <>
       {pageContent}
-      <Box sx={{ mt: 3 }}>
+      <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+        <AddSongModal bandId={+bandId} onSuccess={mutate} />
         <Button
           component={Link}
           href={`/band/${bandId}/songs/spotify-import`}
