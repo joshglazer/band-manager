@@ -9,6 +9,55 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      band_invitations: {
+        Row: {
+          band_id: number
+          created_at: string
+          id: number
+          invited_by: string
+          invitee_user_id: string
+          status: string
+        }
+        Insert: {
+          band_id: number
+          created_at?: string
+          id?: number
+          invited_by: string
+          invitee_user_id: string
+          status?: string
+        }
+        Update: {
+          band_id?: number
+          created_at?: string
+          id?: number
+          invited_by?: string
+          invitee_user_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "band_invitations_band_id_fkey"
+            columns: ["band_id"]
+            isOneToOne: false
+            referencedRelation: "bands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "band_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "band_invitations_invitee_user_id_fkey"
+            columns: ["invitee_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       band_members: {
         Row: {
           band_id: number
