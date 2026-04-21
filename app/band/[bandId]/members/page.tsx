@@ -2,11 +2,16 @@
 
 import Card from '@/components/design/Card';
 import Loading from '@/components/design/Loading';
-import useBandMembers from '@/hooks/useBandMembers';
-import { BandRouteProps } from '../types';
 import ResponsiveGrid from '@/components/design/ResponsiveGrid';
-import { useMemo } from 'react';
+import InviteMemberForm from '@/components/forms/InviteMemberForm';
+import useBandMembers from '@/hooks/useBandMembers';
 import useUserProfiles from '@/hooks/useUserProfiles';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import { useMemo } from 'react';
+import { BandRouteProps } from '../types';
 
 export default function BandMembersPage({ params }: Readonly<BandRouteProps>): JSX.Element {
   const { bandId } = params;
@@ -51,9 +56,27 @@ export default function BandMembersPage({ params }: Readonly<BandRouteProps>): J
     return <Loading />;
   }
 
-  if (responsiveGridItems) {
-    return <ResponsiveGrid items={responsiveGridItems} />;
-  } else {
-    return <>There are no band members</>;
-  }
+  return (
+    <>
+      {responsiveGridItems?.length ? (
+        <ResponsiveGrid items={responsiveGridItems} />
+      ) : (
+        <Typography color="text.secondary" sx={{ mb: 3 }}>
+          There are no band members yet.
+        </Typography>
+      )}
+
+      <Divider sx={{ my: 3 }} />
+
+      <Box sx={{ maxWidth: 480 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <PersonAddIcon color="primary" />
+          <Typography variant="h6" fontWeight={600}>
+            Invite a Member
+          </Typography>
+        </Box>
+        <InviteMemberForm bandId={bandId} />
+      </Box>
+    </>
+  );
 }

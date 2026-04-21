@@ -1,4 +1,5 @@
 import Bands from '@/components/Bands';
+import PendingInvitations from '@/components/PendingInvitations';
 import useAuthUser from '@/hooks/useAuthUser';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -12,6 +13,7 @@ export default async function IndexPage() {
     <Box className="animate-in">
       {user ? (
         <>
+          <PendingInvitations />
           <Typography variant="h5" fontWeight={700} mb={3}>
             Your Bands
           </Typography>
