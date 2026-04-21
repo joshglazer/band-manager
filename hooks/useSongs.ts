@@ -19,6 +19,7 @@ interface UseSongsResult {
   data?: SongsComposite[] | null;
   isLoading: boolean;
   error?: PostgrestError;
+  mutate: () => void;
 }
 
 export default function useSongs({ bandId }: UseSongsProps): UseSongsResult {
@@ -29,10 +30,10 @@ export default function useSongs({ bandId }: UseSongsProps): UseSongsResult {
     [bandId, supabase]
   );
 
-  const { data, isLoading, error } = useQuery<SongsComposite[]>(query, {
+  const { data, isLoading, error, mutate } = useQuery<SongsComposite[]>(query, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, mutate };
 }
