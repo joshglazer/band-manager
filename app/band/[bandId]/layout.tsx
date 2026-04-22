@@ -1,6 +1,7 @@
 'use client';
 
 import Loading from '@/components/design/Loading';
+import BandBreadcrumbs from '@/components/layout/BandBreadcrumbs';
 import useBand from '@/hooks/useBand';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
@@ -26,6 +27,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
     return (
       <>
         <Box sx={{ pt: 3, pb: 2 }}>
+          <BandBreadcrumbs bandId={bandId} bandName={band.name} />
           <Typography variant="h4" fontWeight={700} color="text.primary">
             {band.name}
           </Typography>
