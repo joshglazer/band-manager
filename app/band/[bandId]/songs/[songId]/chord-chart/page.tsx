@@ -20,7 +20,7 @@ interface ChordChartPageProps {
 export default function ChordChartPage({ params }: Readonly<ChordChartPageProps>) {
   const { bandId, songId } = params;
 
-  const { data: song, isLoading, mutate } = useSong({ songId: +songId });
+  const { data: song, isLoading } = useSong({ songId: +songId });
 
   if (isLoading) {
     return <Loading />;
@@ -53,7 +53,7 @@ export default function ChordChartPage({ params }: Readonly<ChordChartPageProps>
       </Typography>
 
       <Box sx={{ maxWidth: 800 }}>
-        {song && <ChordChartForm song={song} onSuccess={mutate} />}
+        {song && <ChordChartForm song={song} />}
       </Box>
     </>
   );
