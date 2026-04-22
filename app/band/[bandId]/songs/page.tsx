@@ -3,6 +3,7 @@
 import Loading from '@/components/design/Loading';
 import Table, { TableProps, TablePropsDataType, TableRow } from '@/components/design/Table';
 import AddSongModal from '@/components/modals/AddSongModal';
+import EditSongModal from '@/components/modals/EditSongModal';
 import SongCommentsModal from '@/components/modals/SongCommentsModal';
 import useSongs, { SongsComposite } from '@/hooks/useSongs';
 import Box from '@mui/material/Box';
@@ -27,6 +28,10 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
   const { bandId } = params;
 
   const { data: songs, isLoading, mutate } = useSongs({ bandId });
+
+  function formatActions(_value: TablePropsDataType | null, row: TableRow) {
+    return <EditSongModal song={row as unknown as SongsComposite} onSuccess={mutate} />;
+  }
 
   if (isLoading) {
     return <Loading />;
@@ -67,6 +72,12 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
           dataKey: 'commentsCount',
           className: 'whitespace-nowrap',
           dataFormatter: formatComments,
+        },
+        {
+          name: '',
+          dataKey: 'id',
+          dataFormatter: formatActions,
+          className: 'whitespace-nowrap',
         },
       ],
       rows: songsForTable,
