@@ -328,6 +328,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_id_by_email: {
+        Args: {
+          email_arg: string
+        }
+        Returns: string | null
+      }
       is_band_member: {
         Args: {
           band_id_arg: number
