@@ -13,6 +13,7 @@ interface UseSongResult {
   data?: Tables<'songs'> | null;
   isLoading: boolean;
   error?: PostgrestError;
+  mutate: () => void;
 }
 
 export default function useSong({ songId }: UseSongProps): UseSongResult {
@@ -23,10 +24,10 @@ export default function useSong({ songId }: UseSongProps): UseSongResult {
     [songId, supabase]
   );
 
-  const { data, isLoading, error } = useQuery<Tables<'songs'>>(query, {
+  const { data, isLoading, error, mutate } = useQuery<Tables<'songs'>>(query, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, mutate };
 }

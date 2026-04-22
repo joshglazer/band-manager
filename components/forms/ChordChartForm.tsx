@@ -30,29 +30,24 @@ interface ChordChartFormValues {
 }
 
 interface ChordChartFormProps {
-  songId: number;
-  existingChart?: Tables<'chord_charts'> | null;
+  song: Tables<'songs'>;
   onSuccess?: () => void;
 }
 
-export default function ChordChartForm({
-  songId,
-  existingChart,
-  onSuccess,
-}: Readonly<ChordChartFormProps>) {
+export default function ChordChartForm({ song, onSuccess }: Readonly<ChordChartFormProps>) {
   const supabase = createClient();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState(false);
 
-  const existingSections = existingChart?.sections as ChordChartSection[] | undefined;
+  const existingSections = song.sections as ChordChartSection[] | undefined;
 
   const { register, control, handleSubmit } = useForm<ChordChartFormValues>({
     defaultValues: {
-      key: existingChart?.key ?? '',
-      bpm: existingChart?.bpm?.toString() ?? '',
-      time_signature: existingChart?.time_signature ?? '',
-      notes: existingChart?.notes ?? '',
+      key: song.key ?? '',
+      bpm: song.bpm?.toString() ?? '',
+      time_signature: song.time_signature ?? '',
+      notes: song.notes ?? '',
       sections: existingSections?.length ? existingSections : [{ name: '', chords: '' }],
     },
   });
@@ -64,25 +59,16 @@ export default function ChordChartForm({
     setErrorMessage('');
     setSavedMessage(false);
 
-    const payload = {
-      song_id: songId,
-      key: data.key || null,
-      bpm: data.bpm ? parseInt(data.bpm, 10) : null,
-      time_signature: data.time_signature || null,
-      notes: data.notes || null,
-      sections: data.sections.filter((s) => s.name || s.chords),
-      updated_at: new Date().toISOString(),
-    };
-
-    let error;
-    if (existingChart) {
-      ({ error } = await supabase
-        .from('chord_charts')
-        .update(payload)
-        .eq('id', existingChart.id));
-    } else {
-      ({ error } = await supabase.from('chord_charts').insert(payload));
-    }
+    const { error } = await supabase
+      .from('songs')
+      .update({
+        key: data.key || null,
+        bpm: data.bpm ? parseInt(data.bpm, 10) : null,
+        time_signature: data.time_signature || null,
+        notes: data.notes || null,
+        sections: data.sections.filter((s) => s.name || s.chords),
+      })
+      .eq('id', song.id);
 
     setIsSaving(false);
     if (error) {

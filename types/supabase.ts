@@ -9,47 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      chord_charts: {
-        Row: {
-          bpm: number | null
-          id: number
-          key: string | null
-          notes: string | null
-          sections: Json
-          song_id: number
-          time_signature: string | null
-          updated_at: string
-        }
-        Insert: {
-          bpm?: number | null
-          id?: number
-          key?: string | null
-          notes?: string | null
-          sections?: Json
-          song_id: number
-          time_signature?: string | null
-          updated_at?: string
-        }
-        Update: {
-          bpm?: number | null
-          id?: number
-          key?: string | null
-          notes?: string | null
-          sections?: Json
-          song_id?: number
-          time_signature?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chord_charts_song_id_fkey"
-            columns: ["song_id"]
-            isOneToOne: true
-            referencedRelation: "songs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       band_invitations: {
         Row: {
           band_id: number
@@ -298,26 +257,41 @@ export type Database = {
         Row: {
           artist: string | null
           band_id: number
+          bpm: number | null
           created_at: string
           duration: number | null
           id: number
+          key: string | null
           name: string | null
+          notes: string | null
+          sections: Json
+          time_signature: string | null
         }
         Insert: {
           artist?: string | null
           band_id: number
+          bpm?: number | null
           created_at?: string
           duration?: number | null
           id?: number
+          key?: string | null
           name?: string | null
+          notes?: string | null
+          sections?: Json
+          time_signature?: string | null
         }
         Update: {
           artist?: string | null
           band_id?: number
+          bpm?: number | null
           created_at?: string
           duration?: number | null
           id?: number
+          key?: string | null
           name?: string | null
+          notes?: string | null
+          sections?: Json
+          time_signature?: string | null
         }
         Relationships: [
           {

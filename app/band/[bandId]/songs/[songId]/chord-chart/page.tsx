@@ -2,7 +2,6 @@
 
 import Loading from '@/components/design/Loading';
 import ChordChartForm from '@/components/forms/ChordChartForm';
-import useChordChart from '@/hooks/useChordChart';
 import useSong from '@/hooks/useSong';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Box from '@mui/material/Box';
@@ -20,12 +19,10 @@ interface ChordChartPageProps {
 
 export default function ChordChartPage({ params }: Readonly<ChordChartPageProps>) {
   const { bandId, songId } = params;
-  const songIdNum = +songId;
 
-  const { data: song, isLoading: songLoading } = useSong({ songId: songIdNum });
-  const { data: chordChart, isLoading: chartLoading, mutate } = useChordChart({ songId: songIdNum });
+  const { data: song, isLoading, mutate } = useSong({ songId: +songId });
 
-  if (songLoading || chartLoading) {
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -56,7 +53,7 @@ export default function ChordChartPage({ params }: Readonly<ChordChartPageProps>
       </Typography>
 
       <Box sx={{ maxWidth: 800 }}>
-        <ChordChartForm songId={songIdNum} existingChart={chordChart} onSuccess={mutate} />
+        {song && <ChordChartForm song={song} onSuccess={mutate} />}
       </Box>
     </>
   );
