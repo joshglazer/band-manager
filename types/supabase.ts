@@ -257,41 +257,29 @@ export type Database = {
         Row: {
           artist: string | null
           band_id: number
-          bpm: number | null
+          chord_chart: string | null
           created_at: string
           duration: number | null
           id: number
-          key: string | null
           name: string | null
-          notes: string | null
-          sections: Json
-          time_signature: string | null
         }
         Insert: {
           artist?: string | null
           band_id: number
-          bpm?: number | null
+          chord_chart?: string | null
           created_at?: string
           duration?: number | null
           id?: number
-          key?: string | null
           name?: string | null
-          notes?: string | null
-          sections?: Json
-          time_signature?: string | null
         }
         Update: {
           artist?: string | null
           band_id?: number
-          bpm?: number | null
+          chord_chart?: string | null
           created_at?: string
           duration?: number | null
           id?: number
-          key?: string | null
           name?: string | null
-          notes?: string | null
-          sections?: Json
-          time_signature?: string | null
         }
         Relationships: [
           {
