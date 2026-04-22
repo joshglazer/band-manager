@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
 import LoginIcon from '@mui/icons-material/Login';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { useMemo } from 'react';
 import { FieldValues } from 'react-hook-form';
@@ -36,8 +35,7 @@ export default function LoginForm({ errorMessage }: Readonly<LoginFormProps>) {
 
     const { email, password } = data;
 
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
