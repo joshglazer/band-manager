@@ -40,7 +40,7 @@ export default function ChordChartForm({ song, onSuccess }: Readonly<ChordChartF
   const [isSaving, setIsSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState(false);
 
-  const existingSections = song.sections as ChordChartSection[] | undefined;
+  const existingSections = song.sections as unknown as ChordChartSection[] | undefined;
 
   const { register, control, handleSubmit } = useForm<ChordChartFormValues>({
     defaultValues: {
