@@ -8,6 +8,7 @@ import Form, { FormField } from '../design/Form';
 
 interface ChordChartFormProps {
   song: Tables<'songs'>;
+  onSaved?: (chordChart: string | null) => void;
 }
 
 const formFields: FormField[] = [
@@ -20,19 +21,22 @@ const formFields: FormField[] = [
   },
 ];
 
-export default function ChordChartForm({ song }: Readonly<ChordChartFormProps>) {
+export default function ChordChartForm({ song, onSaved }: Readonly<ChordChartFormProps>) {
   const supabase = createClient();
   const [errorMessage, setErrorMessage] = useState<string>();
 
   async function onSuccess(data: FieldValues) {
     setErrorMessage('');
+    const newValue = data.chord_chart || null;
     const { error } = await supabase
       .from('songs')
-      .update({ chord_chart: data.chord_chart || null })
+      .update({ chord_chart: newValue })
       .eq('id', song.id);
 
     if (error) {
       setErrorMessage(error.message);
+    } else {
+      onSaved?.(newValue);
     }
   }
 

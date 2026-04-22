@@ -26,6 +26,7 @@ export function adaptSetlist(setlist: SetlistComposite, songs: Tables<'songs'>[]
     if (!song) {
       song = {
         band_id,
+        chord_chart: null,
         duration: 0,
         id: -1,
         name: 'Not Found',

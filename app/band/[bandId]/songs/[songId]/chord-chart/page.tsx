@@ -2,13 +2,16 @@
 
 import Loading from '@/components/design/Loading';
 import ChordChartForm from '@/components/forms/ChordChartForm';
+import ChordChartViewer from '@/components/ChordChartViewer';
 import useSong from '@/hooks/useSong';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import EditIcon from '@mui/icons-material/Edit';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
+import { useState } from 'react';
 
 interface ChordChartPageProps {
   params: {
@@ -21,9 +24,18 @@ export default function ChordChartPage({ params }: Readonly<ChordChartPageProps>
   const { bandId, songId } = params;
 
   const { data: song, isLoading } = useSong({ songId: +songId });
+  const [isEditing, setIsEditing] = useState(false);
+  const [chordChart, setChordChart] = useState<string | null | undefined>(undefined);
 
   if (isLoading) {
     return <Loading />;
+  }
+
+  const currentChordChart = chordChart !== undefined ? chordChart : song?.chord_chart ?? null;
+
+  function handleSaved(newValue: string | null) {
+    setChordChart(newValue);
+    setIsEditing(false);
   }
 
   return (
@@ -48,12 +60,33 @@ export default function ChordChartPage({ params }: Readonly<ChordChartPageProps>
 
       <Divider sx={{ my: 3 }} />
 
-      <Typography variant="h5" sx={{ mb: 3 }}>
-        Chord Chart
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Typography variant="h5">Chord Chart</Typography>
+        {!isEditing && (
+          <Button
+            variant="outlined"
+            startIcon={<EditIcon />}
+            onClick={() => setIsEditing(true)}
+          >
+            {currentChordChart ? 'Edit' : 'Add'}
+          </Button>
+        )}
+        {isEditing && (
+          <Button variant="text" onClick={() => setIsEditing(false)}>
+            Cancel
+          </Button>
+        )}
+      </Box>
 
       <Box sx={{ maxWidth: 800 }}>
-        {song && <ChordChartForm song={song} />}
+        {isEditing && song ? (
+          <ChordChartForm
+            song={{ ...song, chord_chart: currentChordChart }}
+            onSaved={handleSaved}
+          />
+        ) : (
+          <ChordChartViewer chordChart={currentChordChart ?? ''} />
+        )}
       </Box>
     </>
   );
