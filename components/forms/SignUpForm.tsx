@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import LoginIcon from '@mui/icons-material/Login';
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { useMemo } from 'react';
 import { FieldValues } from 'react-hook-form';
@@ -50,8 +50,9 @@ export default function SignUpForm({ errorMessage }: Readonly<SignUpFormProps>) 
 
     const { email, password } = data;
 
-    const origin = (await headers()).get('origin');
-    const supabase = await createClient();
+    const origin = headers().get('origin');
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
 
     const { error } = await supabase.auth.signUp({
       email,
