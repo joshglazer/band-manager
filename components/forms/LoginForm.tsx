@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import LoginIcon from '@mui/icons-material/Login';
 import { redirect } from 'next/navigation';
+import { useMemo } from 'react';
 import { FieldValues } from 'react-hook-form';
 import Form, { FormField } from '../design/Form';
 
@@ -8,24 +9,27 @@ interface LoginFormProps {
   errorMessage?: string;
 }
 
-const formFields: FormField[] = [
-  {
-    fieldType: 'text' as FormField['fieldType'],
-    name: 'email',
-    label: 'Email',
-    fullWidth: true,
-    required: true,
-  },
-  {
-    fieldType: 'password' as FormField['fieldType'],
-    name: 'password',
-    label: 'Password',
-    fullWidth: true,
-    required: true,
-  },
-];
-
 export default function LoginForm({ errorMessage }: Readonly<LoginFormProps>) {
+  const formFields: FormField[] = useMemo(
+    () => [
+      {
+        fieldType: 'text' as FormField['fieldType'],
+        name: 'email',
+        label: 'Email',
+        fullWidth: true,
+        required: true,
+      },
+      {
+        fieldType: 'password' as FormField['fieldType'],
+        name: 'password',
+        label: 'Password',
+        fullWidth: true,
+        required: true,
+      },
+    ],
+    []
+  );
+
   async function onSuccess(data: FieldValues) {
     'use server';
 
