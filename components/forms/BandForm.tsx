@@ -31,12 +31,24 @@ export default function BandForm({ bandId }: Readonly<BandFormProps>) {
 
   async function onSuccess(data: FieldValues) {
     if (!bandId) {
-      const { error: submitError } = await supabase.from('bands').insert({ name: data.name });
+      const { data: band, error: submitError } = await supabase
+        .from('bands')
+        .insert({ name: data.name })
+        .select('id')
+        .single();
       if (submitError) {
         setErrorMessage(submitError.message);
-      } else {
-        router.push('/');
+        return;
       }
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error: memberError } = await supabase
+        .from('band_members')
+        .insert({ band_id: band.id, user_id: user!.id });
+      if (memberError) {
+        setErrorMessage(memberError.message);
+        return;
+      }
+      router.push('/');
     }
   }
 
