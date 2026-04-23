@@ -1,5 +1,6 @@
 import Card, { CardProps } from '@/components/design/Card';
 import ResponsiveGrid from '@/components/design/ResponsiveGrid';
+import ChecklistIcon from '@mui/icons-material/Checklist';
 import GroupIcon from '@mui/icons-material/Group';
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
@@ -28,6 +29,12 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
         description: 'What are you playing at your gigs?',
         link: `/band/${bandId}/setlists`,
         icon: <QueueMusicIcon />,
+      },
+      {
+        title: 'Practice',
+        description: 'Track your readiness for the next gig.',
+        link: `/band/${bandId}/practice`,
+        icon: <ChecklistIcon />,
       },
     ],
     [bandId]
