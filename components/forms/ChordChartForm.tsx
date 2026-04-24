@@ -18,6 +18,7 @@ const formFields: FormField[] = [
     label: 'Chord Chart',
     fullWidth: true,
     rows: 15,
+    inputProps: { style: { fontFamily: 'monospace', fontSize: '0.95rem', lineHeight: 1.8 } },
   },
 ];
 
