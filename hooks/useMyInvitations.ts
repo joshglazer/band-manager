@@ -3,7 +3,7 @@
 import { Tables } from '@/types/supabase';
 import { createClient } from '@/utils/supabase/client';
 import { PostgrestError, useQuery } from '@supabase-cache-helpers/postgrest-swr';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export interface InvitationWithBand extends Tables<'band_invitations'> {
   bands: Pick<Tables<'bands'>, 'name'>;
@@ -17,14 +17,22 @@ interface UseMyInvitationsResult {
 
 export default function useMyInvitations(): UseMyInvitationsResult {
   const supabase = createClient();
+  const [userId, setUserId] = useState<string>('');
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id ?? '');
+    });
+  }, [supabase]);
 
   const query = useMemo(
     () =>
       supabase
         .from('band_invitations')
         .select('*, bands(name)')
-        .eq('status', 'pending'),
-    [supabase]
+        .eq('status', 'pending')
+        .eq('invitee_user_id', userId),
+    [supabase, userId]
   );
 
   const { data, isLoading, error } = useQuery<InvitationWithBand[]>(query, {

@@ -21,13 +21,20 @@ export default function PendingInvitations() {
   if (isLoading) return null;
   if (!invitations?.length) return null;
 
-  async function handleAccept(invitationId: number, bandId: number, inviteeUserId: string) {
+  async function handleAccept(invitationId: number, bandId: number) {
     setProcessingId(invitationId);
     setErrorMessage(undefined);
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setErrorMessage('Not authenticated.');
+      setProcessingId(null);
+      return;
+    }
+
     const { error: memberError } = await supabase
       .from('band_members')
-      .insert({ band_id: bandId, user_id: inviteeUserId });
+      .insert({ band_id: bandId, user_id: user.id });
 
     if (memberError) {
       setErrorMessage('Failed to join band.');
@@ -103,7 +110,7 @@ export default function PendingInvitations() {
                     size="small"
                     startIcon={<CheckIcon />}
                     onClick={() =>
-                      handleAccept(invitation.id, invitation.band_id, invitation.invitee_user_id)
+                      handleAccept(invitation.id, invitation.band_id)
                     }
                   >
                     Accept
