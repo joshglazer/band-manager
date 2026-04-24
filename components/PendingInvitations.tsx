@@ -25,30 +25,13 @@ export default function PendingInvitations() {
     setProcessingId(invitationId);
     setErrorMessage(undefined);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setErrorMessage('Not authenticated.');
-      setProcessingId(null);
-      return;
-    }
+    const response = await fetch(`/api/bands/${bandId}/invitations/${invitationId}/accept`, {
+      method: 'POST',
+    });
 
-    const { error: memberError } = await supabase
-      .from('band_members')
-      .insert({ band_id: bandId, user_id: user.id });
-
-    if (memberError) {
-      setErrorMessage('Failed to join band.');
-      setProcessingId(null);
-      return;
-    }
-
-    const { error: updateError } = await supabase
-      .from('band_invitations')
-      .update({ status: 'accepted' })
-      .eq('id', invitationId);
-
-    if (updateError) {
-      setErrorMessage('Failed to update invitation.');
+    if (!response.ok) {
+      const body = await response.json();
+      setErrorMessage(body.error ?? 'Failed to join band.');
     }
 
     setProcessingId(null);
