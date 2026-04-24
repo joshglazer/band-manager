@@ -257,6 +257,7 @@ export type Database = {
         Row: {
           artist: string | null
           band_id: number
+          chord_chart: string | null
           created_at: string
           duration: number | null
           id: number
@@ -265,6 +266,7 @@ export type Database = {
         Insert: {
           artist?: string | null
           band_id: number
+          chord_chart?: string | null
           created_at?: string
           duration?: number | null
           id?: number
@@ -273,6 +275,7 @@ export type Database = {
         Update: {
           artist?: string | null
           band_id?: number
+          chord_chart?: string | null
           created_at?: string
           duration?: number | null
           id?: number
