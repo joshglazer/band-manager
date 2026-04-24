@@ -1,4 +1,3 @@
-import { createAdminClient } from '@/utils/supabase/admin';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -19,7 +18,6 @@ export async function POST(
   }
 
   // Verify the invitation exists, belongs to this band, and is addressed to the current user.
-  // Using the regular client here so RLS acts as a second layer of defence.
   const { data: invitation, error: invitationError } = await supabase
     .from('band_invitations')
     .select('id')
@@ -33,11 +31,10 @@ export async function POST(
     return NextResponse.json({ error: 'Invitation not found' }, { status: 404 });
   }
 
-  // Use the admin client for writes so RLS on band_members/band_invitations doesn't
-  // block a user who isn't yet a member of the band.
-  const admin = createAdminClient();
-
-  const { error: memberError } = await admin
+  // The server-side client reliably attaches the user's JWT via cookies, so the
+  // existing RLS policies (self-insert into band_members, invitee-only update on
+  // band_invitations) are satisfied without needing the service role key.
+  const { error: memberError } = await supabase
     .from('band_members')
     .insert({ band_id: bandId, user_id: user.id });
 
@@ -45,7 +42,7 @@ export async function POST(
     return NextResponse.json({ error: memberError.message }, { status: 500 });
   }
 
-  const { error: updateError } = await admin
+  const { error: updateError } = await supabase
     .from('band_invitations')
     .update({ status: 'accepted' })
     .eq('id', invitationId);
