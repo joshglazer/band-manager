@@ -6,6 +6,7 @@ import TableCell, { TableCellProps } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
 
 type TablePropsDataType = string | number | null | undefined;
 
@@ -22,6 +23,9 @@ interface TableProps {
     isHeader?: boolean;
     headerDataKey?: TablePropsDataType;
     className?: string;
+    sortable?: boolean;
+    sortDirection?: 'asc' | 'desc';
+    onSort?: () => void;
   }[];
   rows: TableRow[];
 }
@@ -44,8 +48,20 @@ export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>
       <MUITable aria-label="Table of Songs">
         <TableHead>
           <TableRow>
-            {columns.map(({ name }) => (
-              <TableCell key={name}>{name}</TableCell>
+            {columns.map(({ name, sortable, sortDirection, onSort }) => (
+              <TableCell key={name}>
+                {sortable ? (
+                  <TableSortLabel
+                    active={sortDirection !== undefined}
+                    direction={sortDirection ?? 'asc'}
+                    onClick={onSort}
+                  >
+                    {name}
+                  </TableSortLabel>
+                ) : (
+                  name
+                )}
+              </TableCell>
             ))}
           </TableRow>
         </TableHead>
