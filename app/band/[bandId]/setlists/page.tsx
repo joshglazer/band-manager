@@ -5,6 +5,8 @@ import Table, { TableProps, TablePropsDataType } from '@/components/design/Table
 import { adaptSetlist } from '@/components/setlistEditor/helpers';
 import useSetlists from '@/hooks/useSetlists';
 import useSongs from '@/hooks/useSongs';
+import { TablesInsert } from '@/types/supabase';
+import { createClient } from '@/utils/supabase/client';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -25,7 +27,8 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
   const [nameFilter, setNameFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
 
-  const { data: setlists, isLoading: isLoadingSetlists } = useSetlists({ bandId });
+  const supabase = createClient();
+  const { data: setlists, isLoading: isLoadingSetlists, mutate: mutateSetlists } = useSetlists({ bandId });
   const { data: songs, isLoading: isLoadingSongs } = useSongs({ bandId });
 
   const today = useMemo(() => {
@@ -54,6 +57,37 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
     return '--';
   }, []);
 
+  const duplicateSetlist = useCallback(
+    async (setlistId: number) => {
+      const original = setlists?.find((s) => s.id === setlistId);
+      if (!original) return;
+
+      const newSetlistData: TablesInsert<'setlists'> = {
+        band_id: original.band_id,
+        name: `Copy of ${original.name}`,
+        date: original.date,
+      };
+
+      const { data: inserted } = await supabase.from('setlists').insert(newSetlistData).select();
+      if (!inserted?.[0]) return;
+
+      const newSetlistId = inserted[0].id;
+
+      if (original.setlist_songs.length > 0) {
+        const songInserts: TablesInsert<'setlist_songs'>[] = original.setlist_songs.map((s) => ({
+          setlist_id: newSetlistId,
+          song_id: s.song_id,
+          set: s.set,
+          set_weight: s.set_weight,
+        }));
+        await supabase.from('setlist_songs').insert(songInserts);
+      }
+
+      mutateSetlists();
+    },
+    [setlists, supabase, mutateSetlists]
+  );
+
   const formatEditButton = useCallback(
     (setlistId: TablePropsDataType) => {
       return (
@@ -70,10 +104,16 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
           >
             Edit
           </Button>
+          <Button
+            variant="outlined"
+            onClick={() => duplicateSetlist(setlistId as number)}
+          >
+            Duplicate
+          </Button>
         </Box>
       );
     },
-    [bandId, router]
+    [bandId, router, duplicateSetlist]
   );
 
   const isLoading = useMemo(() => {
