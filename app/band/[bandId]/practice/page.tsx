@@ -2,11 +2,17 @@
 
 import Loading from '@/components/design/Loading';
 import usePracticeProgress from '@/hooks/usePracticeProgress';
+import useSetlists from '@/hooks/useSetlists';
 import useSongs from '@/hooks/useSongs';
 import { createClient } from '@/utils/supabase/client';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
+import Select from '@mui/material/Select';
 import Snackbar from '@mui/material/Snackbar';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -48,8 +54,9 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
   const { data: practiceRows, isLoading: progressLoading } = usePracticeProgress({
     bandId: +bandId,
   });
+  const { data: setlists, isLoading: setlistsLoading } = useSetlists({ bandId: +bandId });
 
-  const isLoading = songsLoading || progressLoading;
+  const isLoading = songsLoading || progressLoading || setlistsLoading;
 
   const initialProgress = useMemo<Record<number, SongProgress>>(() => {
     if (!songs) return {};
@@ -69,7 +76,8 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
   const [sortConfig, setSortConfig] = useState<{ key: SortColumn; direction: SortDir } | null>(
     null
   );
-  const [statusFilter, setStatusFilter] = useState<PracticeStatus | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<PracticeStatus[]>([]);
+  const [setlistFilter, setSetlistFilter] = useState<number | ''>('');
   const [toast, setToast] = useState<ToastState>({ open: false, severity: 'success', message: '' });
   const debounceRefs = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
 
@@ -83,6 +91,66 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
       Object.values(refs).forEach(clearTimeout);
     };
   }, []);
+
+  const setlistOrderMap = useMemo<Map<number, number>>(() => {
+    if (!setlistFilter || !setlists) return new Map();
+    const setlist = setlists.find((s) => s.id === setlistFilter);
+    if (!setlist) return new Map();
+    const ordered = [...setlist.setlist_songs].sort((a, b) =>
+      a.set !== b.set ? a.set - b.set : a.set_weight - b.set_weight
+    );
+    const map = new Map<number, number>();
+    ordered.forEach((ss, idx) => map.set(ss.song_id, idx + 1));
+    return map;
+  }, [setlistFilter, setlists]);
+
+  const rows = useMemo(
+    () =>
+      (songs ?? []).map((song) => ({
+        song,
+        p: progress[song.id] ?? { status: 'not_ready' as PracticeStatus, notes: '' },
+      })),
+    [songs, progress]
+  );
+
+  const visibleRows = useMemo(() => {
+    const setlistFiltered = setlistFilter
+      ? rows.filter((r) => setlistOrderMap.has(r.song.id))
+      : rows;
+
+    const statusFiltered =
+      statusFilter.length === 0
+        ? setlistFiltered
+        : setlistFiltered.filter((r) => statusFilter.includes(r.p.status));
+
+    if (setlistFilter) {
+      return [...statusFiltered].sort((a, b) => {
+        const aOrder = setlistOrderMap.get(a.song.id) ?? Infinity;
+        const bOrder = setlistOrderMap.get(b.song.id) ?? Infinity;
+        return aOrder - bOrder;
+      });
+    }
+
+    if (sortConfig) {
+      return [...statusFiltered].sort((a, b) => {
+        let cmp = 0;
+        if (sortConfig.key === 'name') {
+          const aName = a.song.name ?? '';
+          const bName = b.song.name ?? '';
+          cmp = aName < bName ? -1 : aName > bName ? 1 : 0;
+        } else if (sortConfig.key === 'status') {
+          cmp = STATUS_ORDER[a.p.status] - STATUS_ORDER[b.p.status];
+        } else if (sortConfig.key === 'notes') {
+          const aN = a.p.notes ?? '';
+          const bN = b.p.notes ?? '';
+          cmp = aN < bN ? -1 : aN > bN ? 1 : 0;
+        }
+        return sortConfig.direction === 'asc' ? cmp : -cmp;
+      });
+    }
+
+    return statusFiltered;
+  }, [rows, setlistFilter, setlistOrderMap, statusFilter, sortConfig]);
 
   async function save(songId: number, status: PracticeStatus, notes: string) {
     const {
@@ -149,6 +217,44 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
     });
   }
 
+  async function handleResetProgress() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setToast({ open: true, severity: 'error', message: 'Not logged in.' });
+      return;
+    }
+
+    if (visibleRows.length === 0) return;
+
+    const updates: Record<number, SongProgress> = {};
+    for (const { song, p } of visibleRows) {
+      updates[song.id] = { ...p, status: 'not_ready' };
+    }
+    setProgress((prev) => ({ ...prev, ...updates }));
+
+    const upserts = visibleRows.map(({ song, p }) => ({
+      song_id: song.id,
+      user_id: user.id,
+      band_id: +bandId,
+      status: 'not_ready' as const,
+      notes: p.notes,
+      updated_at: new Date().toISOString(),
+    }));
+
+    const { error } = await supabase
+      .from('practice_progress')
+      .upsert(upserts, { onConflict: 'song_id,user_id' });
+
+    if (error) {
+      setToast({ open: true, severity: 'error', message: error.message });
+    } else {
+      setToast({ open: true, severity: 'success', message: 'Progress reset' });
+    }
+  }
+
   if (isLoading) {
     return <Loading />;
   }
@@ -157,95 +263,118 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
     return <Typography>No songs have been added to this band yet.</Typography>;
   }
 
-  const rows = songs.map((song) => ({
-    song,
-    p: progress[song.id] ?? { status: 'not_ready' as PracticeStatus, notes: '' },
-  }));
-
-  const filtered =
-    statusFilter === 'all' ? rows : rows.filter((r) => r.p.status === statusFilter);
-
-  const sorted = sortConfig
-    ? [...filtered].sort((a, b) => {
-        let cmp = 0;
-        if (sortConfig.key === 'name') {
-          const aName = a.song.name ?? '';
-          const bName = b.song.name ?? '';
-          cmp = aName < bName ? -1 : aName > bName ? 1 : 0;
-        } else if (sortConfig.key === 'status') {
-          cmp = STATUS_ORDER[a.p.status] - STATUS_ORDER[b.p.status];
-        } else if (sortConfig.key === 'notes') {
-          const aN = a.p.notes ?? '';
-          const bN = b.p.notes ?? '';
-          cmp = aN < bN ? -1 : aN > bN ? 1 : 0;
-        }
-        return sortConfig.direction === 'asc' ? cmp : -cmp;
-      })
-    : filtered;
-
   const sortDir = (key: SortColumn) =>
     sortConfig?.key === key ? sortConfig.direction : undefined;
 
   return (
     <>
-      <Box sx={{ mb: 2, display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
-        <Typography variant="body2" color="text.secondary">
-          Filter:
-        </Typography>
-        <ToggleButtonGroup
-          value={statusFilter}
-          exclusive
-          onChange={(_, value) => value && setStatusFilter(value)}
-          size="small"
-        >
-          <ToggleButton value="all">All</ToggleButton>
-          <ToggleButton value="not_ready" color="error">
-            Not Ready
-          </ToggleButton>
-          <ToggleButton value="passable" color="warning">
-            Passable
-          </ToggleButton>
-          <ToggleButton value="ready" color="success">
-            Ready
-          </ToggleButton>
-        </ToggleButtonGroup>
+      <Box
+        sx={{
+          mb: 2,
+          display: 'flex',
+          gap: 1.5,
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography variant="body2" color="text.secondary">
+            Filter:
+          </Typography>
+          <ToggleButtonGroup
+            value={statusFilter}
+            onChange={(_, value: PracticeStatus[]) => setStatusFilter(value)}
+            size="small"
+          >
+            <ToggleButton value="not_ready" color="error">
+              Not Ready
+            </ToggleButton>
+            <ToggleButton value="passable" color="warning">
+              Passable
+            </ToggleButton>
+            <ToggleButton value="ready" color="success">
+              Ready
+            </ToggleButton>
+          </ToggleButtonGroup>
+          {setlists && setlists.length > 0 && (
+            <FormControl size="small" sx={{ minWidth: 180 }}>
+              <InputLabel>Setlist</InputLabel>
+              <Select
+                value={setlistFilter}
+                label="Setlist"
+                onChange={(e) => setSetlistFilter(e.target.value as number | '')}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {setlists.map((sl) => (
+                  <MenuItem key={sl.id} value={sl.id}>
+                    {sl.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </Box>
+        <Button variant="outlined" color="warning" size="small" onClick={handleResetProgress}>
+          Reset Progress
+        </Button>
       </Box>
       <TableContainer component={Paper}>
         <Table aria-label="Practice progress">
           <TableHead>
             <TableRow>
+              {setlistFilter && <TableCell>#</TableCell>}
               <TableCell>
-                <TableSortLabel
-                  active={sortConfig?.key === 'name'}
-                  direction={sortDir('name') ?? 'asc'}
-                  onClick={() => handleSort('name')}
-                >
-                  Song
-                </TableSortLabel>
+                {setlistFilter ? (
+                  'Song'
+                ) : (
+                  <TableSortLabel
+                    active={sortConfig?.key === 'name'}
+                    direction={sortDir('name') ?? 'asc'}
+                    onClick={() => handleSort('name')}
+                  >
+                    Song
+                  </TableSortLabel>
+                )}
               </TableCell>
               <TableCell>
-                <TableSortLabel
-                  active={sortConfig?.key === 'status'}
-                  direction={sortDir('status') ?? 'asc'}
-                  onClick={() => handleSort('status')}
-                >
-                  Your Status
-                </TableSortLabel>
+                {setlistFilter ? (
+                  'Your Status'
+                ) : (
+                  <TableSortLabel
+                    active={sortConfig?.key === 'status'}
+                    direction={sortDir('status') ?? 'asc'}
+                    onClick={() => handleSort('status')}
+                  >
+                    Your Status
+                  </TableSortLabel>
+                )}
               </TableCell>
               <TableCell>
-                <TableSortLabel
-                  active={sortConfig?.key === 'notes'}
-                  direction={sortDir('notes') ?? 'asc'}
-                  onClick={() => handleSort('notes')}
-                >
-                  Notes
-                </TableSortLabel>
+                {setlistFilter ? (
+                  'Notes'
+                ) : (
+                  <TableSortLabel
+                    active={sortConfig?.key === 'notes'}
+                    direction={sortDir('notes') ?? 'asc'}
+                    onClick={() => handleSort('notes')}
+                  >
+                    Notes
+                  </TableSortLabel>
+                )}
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {sorted.map(({ song, p }) => (
+            {visibleRows.map(({ song, p }) => (
               <TableRow key={song.id}>
+                {setlistFilter && (
+                  <TableCell sx={{ color: 'text.secondary', width: 40 }}>
+                    {setlistOrderMap.get(song.id)}
+                  </TableCell>
+                )}
                 <TableCell component="th" scope="row">
                   <Typography fontWeight={600}>{song.name}</Typography>
                   {song.artist && (
