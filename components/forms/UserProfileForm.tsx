@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import Loading from '../design/Loading';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 
 import Form, { FormField } from '../design/Form';
 interface UserProfileFormProps {
@@ -15,6 +17,8 @@ interface UserProfileFormProps {
 
 export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>) {
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [resetMessage, setResetMessage] = useState<string>();
+  const [resetError, setResetError] = useState<string>();
 
   const supabase = createClient();
   const router = useRouter();
@@ -23,6 +27,13 @@ export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>
 
   const formFields: FormField[] = useMemo(
     () => [
+      {
+        fieldType: 'text' as FormField['fieldType'],
+        name: 'email',
+        label: 'Email',
+        fullWidth: true,
+        disabled: true,
+      },
       {
         fieldType: 'text' as FormField['fieldType'],
         name: 'firstName',
@@ -50,11 +61,12 @@ export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>
 
   const defaultValues = useMemo(
     () => ({
+      email: user.email,
       firstName: userProfile?.first_name,
       lastName: userProfile?.last_name,
       bio: userProfile?.bio,
     }),
-    [userProfile]
+    [user.email, userProfile]
   );
 
   if (isLoading) {
@@ -77,12 +89,42 @@ export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>
     }
   }
 
+  async function handleResetPassword() {
+    if (!user.email) return;
+    setResetMessage(undefined);
+    setResetError(undefined);
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email);
+    if (error) {
+      setResetError(error.message);
+    } else {
+      setResetMessage('Password reset email sent. Check your inbox.');
+    }
+  }
+
   return (
-    <Form
-      defaultValues={defaultValues}
-      onSuccess={onSuccess}
-      formFields={formFields}
-      errorMessage={errorMessage}
-    ></Form>
+    <>
+      <Form
+        defaultValues={defaultValues}
+        onSuccess={onSuccess}
+        formFields={formFields}
+        errorMessage={errorMessage}
+      />
+      <div className="mt-6">
+        <h3 className="text-lg font-medium mb-2">Password</h3>
+        <Button variant="outlined" onClick={handleResetPassword}>
+          Reset Password
+        </Button>
+        {resetMessage && (
+          <Alert severity="success" className="mt-2">
+            {resetMessage}
+          </Alert>
+        )}
+        {resetError && (
+          <Alert severity="error" className="mt-2">
+            {resetError}
+          </Alert>
+        )}
+      </div>
+    </>
   );
 }
