@@ -18,6 +18,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   create: 'Create Setlist',
   edit: 'Edit Setlist',
   'spotify-import': 'Import from Spotify',
+  practice: 'Practice',
 };
 
 export default function BandBreadcrumbs({ bandId, bandName }: BandBreadcrumbsProps) {
@@ -27,9 +28,7 @@ export default function BandBreadcrumbs({ bandId, bandName }: BandBreadcrumbsPro
   const rest = pathname.replace(basePath, '').split('/').filter(Boolean);
   const isBandDashboard = rest.length === 0;
 
-  const breadcrumbs: { label: string; href: string | null }[] = [
-    { label: 'Home', href: '/' },
-  ];
+  const breadcrumbs: { label: string; href: string | null }[] = [{ label: 'Home', href: '/' }];
 
   if (isBandDashboard) {
     breadcrumbs.push({ label: bandName, href: null });
