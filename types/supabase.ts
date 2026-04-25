@@ -328,6 +328,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_my_bands: {
+        Args: Record<never, never>
+        Returns: {
+          id: number
+          name: string
+          created_at: string
+          song_count: number
+          member_count: number
+        }[]
+      }
       accept_band_invitation: {
         Args: {
           invitation_id_arg: number

@@ -1,44 +1,34 @@
 'use client';
 
-import { Tables } from '@/types/supabase';
 import { createClient } from '@/utils/supabase/client';
-import {
-  PostgrestError,
-  useQuery,
-} from '@supabase-cache-helpers/postgrest-swr';
-import { useMemo } from 'react';
+import useSWR from 'swr';
 
-export interface BandsComposite extends Tables<'bands'> {
-  songs: {
-    count: number;
-  }[];
-  band_members: {
-    count: number;
-  }[];
+export interface BandsComposite {
+  id: number;
+  name: string;
+  created_at: string;
+  song_count: number;
+  member_count: number;
 }
 
 interface UseBandsResult {
   data?: BandsComposite[] | null;
   isLoading: boolean;
-  error?: PostgrestError;
+  error?: Error;
 }
 
 export default function useBands(): UseBandsResult {
   const supabase = createClient();
 
-  const query = useMemo(
-    () =>
-      supabase
-        .from('bands')
-        .select('id, name, created_at, songs(count), band_members!inner(count)')
-        .order('name', { ascending: true }),
-    [supabase]
+  const { data, isLoading, error } = useSWR(
+    'my-bands',
+    async () => {
+      const { data, error } = await supabase.rpc('get_my_bands');
+      if (error) throw error;
+      return data as BandsComposite[];
+    },
+    { revalidateOnFocus: false, revalidateOnReconnect: false }
   );
-
-  const { data, isLoading, error } = useQuery<BandsComposite[]>(query, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-  });
 
   return { data, isLoading, error };
 }
