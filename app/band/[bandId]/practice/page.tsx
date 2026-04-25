@@ -4,6 +4,9 @@ import Loading from '@/components/design/Loading';
 import usePracticeProgress from '@/hooks/usePracticeProgress';
 import useSongs from '@/hooks/useSongs';
 import { createClient } from '@/utils/supabase/client';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { LoadingButton } from '@mui/lab';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -14,16 +17,20 @@ import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { useEffect, useMemo, useState } from 'react';
 import { BandRouteProps } from '../types';
 
 type PracticeStatus = 'not_ready' | 'passable' | 'ready';
+type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
 interface SongProgress {
   id?: number;
   status: PracticeStatus;
   notes: string;
+  saveState: SaveState;
+  errorMessage?: string;
 }
 
 export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
@@ -46,6 +53,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
         id: pp?.id,
         status: (pp?.status as PracticeStatus) ?? 'not_ready',
         notes: pp?.notes ?? '',
+        saveState: 'idle',
       };
     }
     return map;
@@ -57,11 +65,23 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
     setProgress(initialProgress);
   }, [initialProgress]);
 
-  async function upsert(songId: number, status: PracticeStatus, notes: string) {
+  async function save(songId: number, status: PracticeStatus, notes: string) {
+    setProgress((prev) => ({
+      ...prev,
+      [songId]: { ...prev[songId], saveState: 'saving' },
+    }));
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return;
+
+    if (!user) {
+      setProgress((prev) => ({
+        ...prev,
+        [songId]: { ...prev[songId], saveState: 'error', errorMessage: 'Not logged in.' },
+      }));
+      return;
+    }
 
     const { data, error } = await supabase
       .from('practice_progress')
@@ -79,10 +99,15 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
       .select('id')
       .single();
 
-    if (!error && data) {
+    if (error) {
       setProgress((prev) => ({
         ...prev,
-        [songId]: { ...prev[songId], id: data.id },
+        [songId]: { ...prev[songId], saveState: 'error', errorMessage: error.message },
+      }));
+    } else {
+      setProgress((prev) => ({
+        ...prev,
+        [songId]: { ...prev[songId], id: data?.id, saveState: 'saved', errorMessage: undefined },
       }));
     }
   }
@@ -90,22 +115,21 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
   function handleStatusChange(songId: number, status: PracticeStatus) {
     setProgress((prev) => ({
       ...prev,
-      [songId]: { ...prev[songId], status },
+      [songId]: { ...prev[songId], status, saveState: 'idle' },
     }));
-    upsert(songId, status, progress[songId]?.notes ?? '');
   }
 
   function handleNotesChange(songId: number, notes: string) {
     setProgress((prev) => ({
       ...prev,
-      [songId]: { ...prev[songId], notes },
+      [songId]: { ...prev[songId], notes, saveState: 'idle' },
     }));
   }
 
-  function handleNotesBlur(songId: number) {
+  function handleSave(songId: number) {
     const p = progress[songId];
     if (p) {
-      upsert(songId, p.status, p.notes);
+      save(songId, p.status, p.notes);
     }
   }
 
@@ -125,11 +149,16 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
             <TableCell>Song</TableCell>
             <TableCell>Your Status</TableCell>
             <TableCell>Notes</TableCell>
+            <TableCell />
           </TableRow>
         </TableHead>
         <TableBody>
           {songs.map((song) => {
-            const p = progress[song.id] ?? { status: 'not_ready' as PracticeStatus, notes: '' };
+            const p = progress[song.id] ?? {
+              status: 'not_ready' as PracticeStatus,
+              notes: '',
+              saveState: 'idle' as SaveState,
+            };
             return (
               <TableRow key={song.id}>
                 <TableCell component="th" scope="row">
@@ -164,13 +193,32 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   <TextField
                     value={p.notes}
                     onChange={(e) => handleNotesChange(song.id, e.target.value)}
-                    onBlur={() => handleNotesBlur(song.id)}
                     placeholder="Quick note to yourself..."
                     size="small"
                     fullWidth
                     multiline
                     maxRows={3}
                   />
+                </TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                  {p.saveState === 'saved' && (
+                    <Tooltip title="Saved">
+                      <CheckCircleOutlineIcon color="success" sx={{ mr: 1, verticalAlign: 'middle' }} />
+                    </Tooltip>
+                  )}
+                  {p.saveState === 'error' && (
+                    <Tooltip title={p.errorMessage ?? 'Save failed'}>
+                      <ErrorOutlineIcon color="error" sx={{ mr: 1, verticalAlign: 'middle' }} />
+                    </Tooltip>
+                  )}
+                  <LoadingButton
+                    variant="contained"
+                    size="small"
+                    loading={p.saveState === 'saving'}
+                    onClick={() => handleSave(song.id)}
+                  >
+                    Save
+                  </LoadingButton>
                 </TableCell>
               </TableRow>
             );
