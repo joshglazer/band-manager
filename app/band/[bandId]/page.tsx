@@ -10,7 +10,7 @@ import { BandRouteProps } from './types';
 export default function BandDashboardPage({ params }: Readonly<BandRouteProps>): JSX.Element {
   const { bandId } = params;
 
-  const actions: Required<Omit<CardProps, 'className'>>[] = useMemo(
+  const actions: Required<Omit<CardProps, 'className' | 'variant'>>[] = useMemo(
     () => [
       {
         title: 'Manage Members',
@@ -45,7 +45,7 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
   const responsiveGridItems = useMemo(() => {
     return actions.map((action) => ({
       key: action.link,
-      content: <Card {...action} className={cardClassName} />,
+      content: <Card {...action} className={cardClassName} variant="feature" />,
     }));
   }, [actions]);
 
