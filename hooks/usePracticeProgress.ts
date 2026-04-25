@@ -9,16 +9,13 @@ interface UsePracticeProgressProps {
   bandId: number;
 }
 
-export interface SongWithProgress extends Tables<'songs'> {
-  practice_progress: {
-    id: number;
-    status: string;
-    notes: string | null;
-  }[];
-}
+export type PracticeProgressRow = Pick<
+  Tables<'practice_progress'>,
+  'id' | 'song_id' | 'status' | 'notes'
+>;
 
 interface UsePracticeProgressResult {
-  data?: SongWithProgress[] | null;
+  data?: PracticeProgressRow[] | null;
   isLoading: boolean;
   error?: PostgrestError;
   mutate: () => void;
@@ -32,13 +29,13 @@ export default function usePracticeProgress({
   const query = useMemo(
     () =>
       supabase
-        .from('songs')
-        .select('*, practice_progress(id, status, notes)')
+        .from('practice_progress')
+        .select('id, song_id, status, notes')
         .eq('band_id', bandId),
     [bandId, supabase]
   );
 
-  const { data, isLoading, error, mutate } = useQuery<SongWithProgress[]>(query, {
+  const { data, isLoading, error, mutate } = useQuery<PracticeProgressRow[]>(query, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });

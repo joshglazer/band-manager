@@ -2,6 +2,7 @@
 
 import Loading from '@/components/design/Loading';
 import usePracticeProgress from '@/hooks/usePracticeProgress';
+import useSongs from '@/hooks/useSongs';
 import { createClient } from '@/utils/supabase/client';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -14,7 +15,7 @@ import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BandRouteProps } from '../types';
 
 type PracticeStatus = 'not_ready' | 'passable' | 'ready';
@@ -29,22 +30,32 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
   const { bandId } = params;
   const supabase = createClient();
 
-  const { data: songs, isLoading } = usePracticeProgress({ bandId: +bandId });
-  const [progress, setProgress] = useState<Record<number, SongProgress>>({});
+  const { data: songs, isLoading: songsLoading } = useSongs({ bandId });
+  const { data: practiceRows, isLoading: progressLoading } = usePracticeProgress({
+    bandId: +bandId,
+  });
 
-  useEffect(() => {
-    if (!songs) return;
-    const initial: Record<number, SongProgress> = {};
+  const isLoading = songsLoading || progressLoading;
+
+  const initialProgress = useMemo<Record<number, SongProgress>>(() => {
+    if (!songs) return {};
+    const map: Record<number, SongProgress> = {};
     for (const song of songs) {
-      const pp = song.practice_progress[0];
-      initial[song.id] = {
+      const pp = practiceRows?.find((r) => r.song_id === song.id);
+      map[song.id] = {
         id: pp?.id,
         status: (pp?.status as PracticeStatus) ?? 'not_ready',
         notes: pp?.notes ?? '',
       };
     }
-    setProgress(initial);
-  }, [songs]);
+    return map;
+  }, [songs, practiceRows]);
+
+  const [progress, setProgress] = useState<Record<number, SongProgress>>({});
+
+  useEffect(() => {
+    setProgress(initialProgress);
+  }, [initialProgress]);
 
   async function upsert(songId: number, status: PracticeStatus, notes: string) {
     const {
