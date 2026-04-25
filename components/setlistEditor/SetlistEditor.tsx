@@ -47,8 +47,8 @@ export default function SetlistEditor({
   }
 
   async function saveSetlist() {
-    const { id, name, bandId } = setlist;
-    const upsertData: TablesInsert<'setlists'> = { name, band_id: bandId };
+    const { id, name, date, bandId } = setlist;
+    const upsertData: TablesInsert<'setlists'> = { name, band_id: bandId, date: date || null };
     let setlistIdForSongs: number | undefined;
     if (id) {
       setlistIdForSongs = id;
@@ -176,9 +176,18 @@ export default function SetlistEditor({
     }));
   }
 
+  function handleDateChange(
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    setSetlist((value) => ({
+      ...value,
+      date: event.target.value || undefined,
+    }));
+  }
+
   return (
     <>
-      <Box className="flex justify-between pb-3">
+      <Box className="flex gap-4 pb-3">
         <TextField
           id="title"
           label="Title"
@@ -187,7 +196,15 @@ export default function SetlistEditor({
           onChange={handleTitleChange}
           placeholder="My Setlist"
         />
-        {/* <Typography variant="h6">{setlist.title}</Typography> */}
+        <TextField
+          id="date"
+          label="Date"
+          variant="outlined"
+          type="date"
+          value={setlist.date ?? ''}
+          onChange={handleDateChange}
+          InputLabelProps={{ shrink: true }}
+        />
       </Box>
       <DragDropContext onDragEnd={onDragEnd}>
         <Grid container spacing={2}>
