@@ -30,7 +30,7 @@ export default function useBands(): UseBandsResult {
     () =>
       supabase
         .from('bands')
-        .select('id, name, created_at, songs(count), band_members(count)')
+        .select('id, name, created_at, songs(count), band_members!inner(count)')
         .order('name', { ascending: true }),
     [supabase]
   );
