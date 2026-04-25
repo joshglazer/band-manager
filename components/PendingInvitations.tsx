@@ -21,27 +21,17 @@ export default function PendingInvitations() {
   if (isLoading) return null;
   if (!invitations?.length) return null;
 
-  async function handleAccept(invitationId: number, bandId: number, inviteeUserId: string) {
+  async function handleAccept(invitationId: number, bandId: number) {
     setProcessingId(invitationId);
     setErrorMessage(undefined);
 
-    const { error: memberError } = await supabase
-      .from('band_members')
-      .insert({ band_id: bandId, user_id: inviteeUserId });
+    const response = await fetch(`/api/bands/${bandId}/invitations/${invitationId}/accept`, {
+      method: 'POST',
+    });
 
-    if (memberError) {
-      setErrorMessage('Failed to join band.');
-      setProcessingId(null);
-      return;
-    }
-
-    const { error: updateError } = await supabase
-      .from('band_invitations')
-      .update({ status: 'accepted' })
-      .eq('id', invitationId);
-
-    if (updateError) {
-      setErrorMessage('Failed to update invitation.');
+    if (!response.ok) {
+      const body = await response.json();
+      setErrorMessage(body.error ?? 'Failed to join band.');
     }
 
     setProcessingId(null);
@@ -103,7 +93,7 @@ export default function PendingInvitations() {
                     size="small"
                     startIcon={<CheckIcon />}
                     onClick={() =>
-                      handleAccept(invitation.id, invitation.band_id, invitation.invitee_user_id)
+                      handleAccept(invitation.id, invitation.band_id)
                     }
                   >
                     Accept

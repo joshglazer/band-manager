@@ -1,4 +1,3 @@
-import { createAdminClient } from '@/utils/supabase/admin';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -22,26 +21,26 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const admin = createAdminClient();
+  const { data: inviteeId, error: lookupError } = await supabase.rpc('get_user_id_by_email', {
+    email_arg: email,
+  });
 
-  const { data: userList, error: listError } = await admin.auth.admin.listUsers();
-  if (listError) {
+  if (lookupError) {
     return NextResponse.json({ error: 'Failed to look up user' }, { status: 500 });
   }
 
-  const invitee = userList.users.find((u) => u.email === email);
-  if (!invitee) {
+  if (!inviteeId) {
     // Don't reveal whether the email exists — silently succeed
     return NextResponse.json({ success: true });
   }
 
-  if (invitee.id === user.id) {
+  if (inviteeId === user.id) {
     return NextResponse.json({ error: 'You cannot invite yourself' }, { status: 400 });
   }
 
   const { error: insertError } = await supabase.from('band_invitations').insert({
     band_id: bandId,
-    invitee_user_id: invitee.id,
+    invitee_user_id: inviteeId,
     invited_by: user.id,
   });
 
