@@ -26,6 +26,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { BandRouteProps } from '../types';
 
 type PracticeStatus = 'not_ready' | 'passable' | 'ready';
@@ -49,6 +50,8 @@ interface ToastState {
 export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
   const { bandId } = params;
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const setlistParam = searchParams.get('setlist');
 
   const { data: songs, isLoading: songsLoading } = useSongs({ bandId });
   const { data: practiceRows, isLoading: progressLoading } = usePracticeProgress({
@@ -77,7 +80,9 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
     null
   );
   const [statusFilter, setStatusFilter] = useState<PracticeStatus[]>([]);
-  const [setlistFilter, setSetlistFilter] = useState<number | ''>('');
+  const [setlistFilter, setSetlistFilter] = useState<number | ''>(
+    setlistParam ? +setlistParam : ''
+  );
   const [toast, setToast] = useState<ToastState>({ open: false, severity: 'success', message: '' });
   const debounceRefs = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
 
