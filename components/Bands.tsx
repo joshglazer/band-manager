@@ -36,18 +36,18 @@ export default function Bands() {
   return (
     <>
       <Grid container spacing={2} justifyContent="flex-start" alignItems="stretch">
-        {data.map(({ id, name, songs, band_members }) => {
+        {data.map(({ id, name, song_count, member_count }) => {
           const bandCardDescription = (
             <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
               <Chip
                 icon={<PeopleIcon />}
-                label={`${band_members[0]['count']} member${band_members[0]['count'] !== 1 ? 's' : ''}`}
+                label={`${member_count} member${member_count !== 1 ? 's' : ''}`}
                 size="small"
                 variant="outlined"
               />
               <Chip
                 icon={<LibraryMusicIcon />}
-                label={`${songs[0]['count']} song${songs[0]['count'] !== 1 ? 's' : ''}`}
+                label={`${song_count} song${song_count !== 1 ? 's' : ''}`}
                 size="small"
                 variant="outlined"
               />
