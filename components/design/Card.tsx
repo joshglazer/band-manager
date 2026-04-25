@@ -11,6 +11,7 @@ interface CardProps {
   description?: string | JSX.Element | null;
   link?: string;
   className?: string;
+  variant?: 'default' | 'feature';
 }
 
 export default function Card({
@@ -19,8 +20,43 @@ export default function Card({
   icon,
   link,
   className,
+  variant = 'default',
 }: Readonly<CardProps>): JSX.Element {
-  const content = (
+  const isFeature = variant === 'feature';
+
+  const content = isFeature ? (
+    <CardContent sx={{ p: 4, textAlign: 'center' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+        {!!icon && (
+          <Box
+            sx={{
+              color: 'primary.main',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 48,
+              width: 80,
+              height: 80,
+              borderRadius: '50%',
+              bgcolor: 'action.hover',
+            }}
+          >
+            {icon}
+          </Box>
+        )}
+        {!!title && (
+          <Typography component="div" variant="h6" fontWeight={600}>
+            {title}
+          </Typography>
+        )}
+        {!!description && (
+          <Typography variant="body2" color="text.secondary" component="div">
+            {description}
+          </Typography>
+        )}
+      </Box>
+    </CardContent>
+  ) : (
     <CardContent sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         {(!!title || !!icon) && (

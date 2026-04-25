@@ -45,7 +45,7 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
   const responsiveGridItems = useMemo(() => {
     return actions.map((action) => ({
       key: action.link,
-      content: <Card {...action} className={cardClassName} />,
+      content: <Card {...action} className={cardClassName} variant="feature" />,
     }));
   }, [actions]);
 
