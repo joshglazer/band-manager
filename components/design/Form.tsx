@@ -45,10 +45,10 @@ export default function Form({
 }: Readonly<FormProps>) {
   const [isFormProcessing, setIsFormProcessing] = useState(false);
 
-  function handleSuccess(data: FieldValues) {
+  async function handleSuccess(data: FieldValues) {
     setIsFormProcessing(true);
     if (onSuccess) {
-      onSuccess(data);
+      await onSuccess(data);
     }
     setIsFormProcessing(false);
   }
