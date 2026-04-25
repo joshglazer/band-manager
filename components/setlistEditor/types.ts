@@ -4,7 +4,7 @@ interface Setlist {
   id?: number;
   bandId: number;
   name: string;
-  date?: Date;
+  date?: string;
   sets: Set[];
   unusedSongs: Tables<'songs'>[];
 }

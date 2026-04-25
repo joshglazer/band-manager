@@ -8,7 +8,7 @@ export function getDragDropBackgroundColorClassName(snapshot: DroppableStateSnap
 }
 
 export function adaptSetlist(setlist: SetlistComposite, songs: Tables<'songs'>[]): Setlist {
-  const { id, name, setlist_songs, band_id } = setlist;
+  const { id, name, date, setlist_songs, band_id } = setlist;
 
   const sets: Set[] = [];
 
@@ -51,6 +51,7 @@ export function adaptSetlist(setlist: SetlistComposite, songs: Tables<'songs'>[]
     id,
     bandId: band_id,
     name: name ?? '',
+    date: date ?? undefined,
     sets,
     unusedSongs: unusedSongs,
   };

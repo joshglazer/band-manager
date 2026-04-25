@@ -234,18 +234,21 @@ export type Database = {
         Row: {
           band_id: number
           created_at: string
+          date: string | null
           id: number
           name: string | null
         }
         Insert: {
           band_id: number
           created_at?: string
+          date?: string | null
           id?: number
           name?: string | null
         }
         Update: {
           band_id?: number
           created_at?: string
+          date?: string | null
           id?: number
           name?: string | null
         }
