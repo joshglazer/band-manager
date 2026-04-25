@@ -76,7 +76,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
   const [sortConfig, setSortConfig] = useState<{ key: SortColumn; direction: SortDir } | null>(
     null
   );
-  const [statusFilter, setStatusFilter] = useState<PracticeStatus | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<PracticeStatus[]>([]);
   const [setlistFilter, setSetlistFilter] = useState<number | ''>('');
   const [toast, setToast] = useState<ToastState>({ open: false, severity: 'success', message: '' });
   const debounceRefs = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
@@ -119,9 +119,9 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
       : rows;
 
     const statusFiltered =
-      statusFilter === 'all'
+      statusFilter.length === 0
         ? setlistFiltered
-        : setlistFiltered.filter((r) => r.p.status === statusFilter);
+        : setlistFiltered.filter((r) => statusFilter.includes(r.p.status));
 
     if (setlistFilter) {
       return [...statusFiltered].sort((a, b) => {
@@ -284,11 +284,9 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
           </Typography>
           <ToggleButtonGroup
             value={statusFilter}
-            exclusive
-            onChange={(_, value) => value && setStatusFilter(value)}
+            onChange={(_, value: PracticeStatus[]) => setStatusFilter(value)}
             size="small"
           >
-            <ToggleButton value="all">All</ToggleButton>
             <ToggleButton value="not_ready" color="error">
               Not Ready
             </ToggleButton>
