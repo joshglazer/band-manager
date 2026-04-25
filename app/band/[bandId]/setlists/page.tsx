@@ -36,12 +36,20 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
   const formatEditButton = useCallback(
     (setlistId: TablePropsDataType) => {
       return (
-        <Button
-          variant="outlined"
-          onClick={() => router.push(`/band/${bandId}/setlists/${setlistId}/edit`)}
-        >
-          Edit
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={() => router.push(`/band/${bandId}/practice?setlist=${setlistId}`)}
+          >
+            Practice
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => router.push(`/band/${bandId}/setlists/${setlistId}/edit`)}
+          >
+            Edit
+          </Button>
+        </Box>
       );
     },
     [bandId, router]
