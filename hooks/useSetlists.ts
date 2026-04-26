@@ -13,6 +13,7 @@ interface UseSetlistsResult {
   data?: SetlistComposite[] | null;
   isLoading: boolean;
   error?: PostgrestError;
+  mutate: () => void;
 }
 
 export default function useSetlists({ bandId }: UseSetlistsProps): UseSetlistsResult {
@@ -23,10 +24,10 @@ export default function useSetlists({ bandId }: UseSetlistsProps): UseSetlistsRe
     [bandId, supabase]
   );
 
-  const { data, isLoading, error } = useQuery<SetlistComposite[]>(query, {
+  const { data, isLoading, error, mutate } = useQuery<SetlistComposite[]>(query, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, mutate };
 }
