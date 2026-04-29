@@ -7,8 +7,13 @@ export interface BandsComposite {
   id: number;
   name: string;
   created_at: string;
+  archived_at: string | null;
   song_count: number;
   member_count: number;
+}
+
+interface UseBandsOptions {
+  includeArchived?: boolean;
 }
 
 interface UseBandsResult {
@@ -17,13 +22,13 @@ interface UseBandsResult {
   error?: Error;
 }
 
-export default function useBands(): UseBandsResult {
+export default function useBands({ includeArchived = false }: UseBandsOptions = {}): UseBandsResult {
   const supabase = createClient();
 
   const { data, isLoading, error } = useSWR(
-    'my-bands',
+    `my-bands-${includeArchived ? 'archived' : 'active'}`,
     async () => {
-      const { data, error } = await supabase.rpc('get_my_bands');
+      const { data, error } = await supabase.rpc('get_my_bands', { archived_only: includeArchived });
       if (error) throw error;
       return data as BandsComposite[];
     },
