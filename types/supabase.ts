@@ -154,16 +154,19 @@ export type Database = {
       }
       bands: {
         Row: {
+          archived_at: string | null
           created_at: string
           id: number
           name: string
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
           id?: number
           name: string
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
           id?: number
           name?: string

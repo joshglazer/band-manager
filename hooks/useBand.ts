@@ -22,7 +22,7 @@ export default function useBand({ bandId }: UseBandProps): UseBandResult {
   const supabase = createClient();
 
   const query = useMemo(
-    () => supabase.from('bands').select().eq('id', bandId).maybeSingle(),
+    () => supabase.from('bands').select('id, name, created_at, archived_at').eq('id', bandId).maybeSingle(),
     [bandId, supabase]
   );
 
