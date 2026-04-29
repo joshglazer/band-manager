@@ -33,7 +33,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
   if (band) {
     const isArchived = !!band.archived_at;
 
-    async function toggleArchive() {
+    const toggleArchive = async () => {
       setArchiving(true);
       try {
         await fetch(`/api/bands/${bandId}/archive`, { method: 'POST' });
@@ -41,7 +41,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
       } finally {
         setArchiving(false);
       }
-    }
+    };
 
     return (
       <>
