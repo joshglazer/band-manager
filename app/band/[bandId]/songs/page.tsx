@@ -52,19 +52,6 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
     return <Loading />;
   }
 
-  function formatChordChart(_value: TablePropsDataType | null, row: TableRow) {
-    return (
-      <Button
-        component={Link}
-        href={`/band/${bandId}/songs/${row.id}/chord-chart`}
-        size="small"
-        variant="outlined"
-      >
-        View / Edit
-      </Button>
-    );
-  }
-
   let pageContent: JSX.Element;
 
   if (songs?.length) {
@@ -130,12 +117,6 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
           dataKey: 'commentsCount',
           className: 'whitespace-nowrap',
           dataFormatter: formatComments,
-        },
-        {
-          name: 'Chord Chart',
-          dataKey: 'id',
-          className: 'whitespace-nowrap',
-          dataFormatter: formatChordChart,
         },
         {
           name: '',

@@ -25,7 +25,7 @@ export default function EditSongModal({ song, onSuccess }: Readonly<EditSongModa
       <IconButton aria-label="Edit song" size="small" onClick={() => setOpen(true)}>
         <EditIcon fontSize="small" />
       </IconButton>
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Edit Song</DialogTitle>
         <DialogContent className="pt-3">
           <EditSongForm song={song} onSuccess={handleSuccess} />

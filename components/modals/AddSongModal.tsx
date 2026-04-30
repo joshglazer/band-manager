@@ -23,7 +23,7 @@ export default function AddSongModal({ bandId, onSuccess }: Readonly<AddSongModa
       <Button variant="contained" onClick={() => setOpen(true)}>
         Add Song
       </Button>
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Add Song</DialogTitle>
         <DialogContent className="pt-3">
           <AddSongForm bandId={bandId} onSuccess={handleSuccess} />
