@@ -50,6 +50,14 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         placeholder: 'e.g. 3:45',
         fullWidth: true,
       },
+      {
+        fieldType: 'textarea' as FormField['fieldType'],
+        name: 'chord_chart',
+        label: 'Chord Chart',
+        fullWidth: true,
+        rows: 10,
+        inputProps: { style: { fontFamily: 'monospace', fontSize: '0.95rem', lineHeight: 1.8 } },
+      },
     ],
     []
   );
@@ -59,6 +67,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       name: song.name ?? '',
       artist: song.artist ?? '',
       duration: song.duration ? formatMsToDuration(song.duration) : '',
+      chord_chart: song.chord_chart ?? '',
     }),
     [song]
   );
@@ -78,6 +87,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         name: data.name,
         artist: data.artist || null,
         duration,
+        chord_chart: data.chord_chart || null,
       })
       .eq('id', song.id);
 

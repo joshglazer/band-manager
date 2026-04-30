@@ -3,6 +3,7 @@
 import Loading from '@/components/design/Loading';
 import Table, { TableProps, TablePropsDataType, TableRow } from '@/components/design/Table';
 import AddSongModal from '@/components/modals/AddSongModal';
+import ChordChartViewModal from '@/components/modals/ChordChartViewModal';
 import EditSongModal from '@/components/modals/EditSongModal';
 import SongCommentsModal from '@/components/modals/SongCommentsModal';
 import useSongs, { SongsComposite } from '@/hooks/useSongs';
@@ -44,25 +45,17 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
     });
   }
 
+  function formatChordChart(value: TablePropsDataType | null, row: TableRow) {
+    if (!value) return '';
+    return <ChordChartViewModal songName={row.name as string | null} chordChart={value as string} />;
+  }
+
   function formatActions(_value: TablePropsDataType | null, row: TableRow) {
     return <EditSongModal song={row as unknown as SongsComposite} onSuccess={mutate} />;
   }
 
   if (isLoading) {
     return <Loading />;
-  }
-
-  function formatChordChart(_value: TablePropsDataType | null, row: TableRow) {
-    return (
-      <Button
-        component={Link}
-        href={`/band/${bandId}/songs/${row.id}/chord-chart`}
-        size="small"
-        variant="outlined"
-      >
-        View / Edit
-      </Button>
-    );
   }
 
   let pageContent: JSX.Element;
@@ -73,6 +66,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
       name: song.name,
       artist: song.artist,
       duration: song.duration,
+      chord_chart: song.chord_chart,
       commentsCount: song.song_comments[0].count,
     }));
 
@@ -133,7 +127,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
         },
         {
           name: 'Chord Chart',
-          dataKey: 'id',
+          dataKey: 'chord_chart',
           className: 'whitespace-nowrap',
           dataFormatter: formatChordChart,
         },
