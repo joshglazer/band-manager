@@ -17,21 +17,23 @@ interface UseMyInvitationsResult {
 
 export default function useMyInvitations(): UseMyInvitationsResult {
   const supabase = createClient();
-  const [userId, setUserId] = useState<string>('');
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setUserId(data.user?.id ?? '');
+      setUserId(data.user?.id ?? null);
     });
   }, [supabase]);
 
   const query = useMemo(
     () =>
-      supabase
-        .from('band_invitations')
-        .select('*, bands(name)')
-        .eq('status', 'pending')
-        .eq('invitee_user_id', userId),
+      userId
+        ? supabase
+            .from('band_invitations')
+            .select('*, bands(name)')
+            .eq('status', 'pending')
+            .eq('invitee_user_id', userId)
+        : null,
     [supabase, userId]
   );
 
