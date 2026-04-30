@@ -1,9 +1,13 @@
+'use client';
+
+import BandEventsCalendar from '@/components/BandEventsCalendar';
 import Card, { CardProps } from '@/components/design/Card';
 import ResponsiveGrid from '@/components/design/ResponsiveGrid';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import GroupIcon from '@mui/icons-material/Group';
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
+import Divider from '@mui/material/Divider';
 import { useMemo } from 'react';
 import { BandRouteProps } from './types';
 
@@ -49,5 +53,11 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
     }));
   }, [actions]);
 
-  return <ResponsiveGrid items={responsiveGridItems} />;
+  return (
+    <>
+      <BandEventsCalendar bandId={bandId} />
+      <Divider sx={{ my: 3 }} />
+      <ResponsiveGrid items={responsiveGridItems} />
+    </>
+  );
 }
