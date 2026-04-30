@@ -66,8 +66,7 @@ export default function ChordChartViewer({ chordChart }: Readonly<ChordChartView
         fontFamily: 'monospace',
         fontSize: '0.95rem',
         lineHeight: 1.8,
-        whiteSpace: 'pre',
-        overflowX: 'auto',
+        whiteSpace: 'pre-wrap',
       }}
     >
       {lines.map((line, i) => {
