@@ -5,7 +5,7 @@ import { PostgrestError, useQuery } from '@supabase-cache-helpers/postgrest-swr'
 import { useMemo } from 'react';
 
 interface UseBandMemberEmailsProps {
-  bandId: string;
+  bandId: number;
 }
 
 interface UseBandMemberEmailsResult {
@@ -20,7 +20,7 @@ export default function useBandMemberEmails({
   const supabase = createClient();
 
   const query = useMemo(
-    () => supabase.rpc('get_band_member_emails', { band_id_arg: Number(bandId) }),
+    () => supabase.rpc('get_band_member_emails', { band_id_arg: bandId }),
     [bandId, supabase]
   );
 
