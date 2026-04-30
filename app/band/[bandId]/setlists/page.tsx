@@ -110,6 +110,12 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
           >
             Duplicate
           </Button>
+          <Button
+            variant="outlined"
+            onClick={() => window.open(`/print/setlist/${setlistId}/chord-charts`, '_blank')}
+          >
+            Print Chord Charts
+          </Button>
         </Box>
       );
     },
