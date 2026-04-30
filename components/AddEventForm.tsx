@@ -21,6 +21,7 @@ export default function AddEventForm({ bandId, onSuccess, onCancel }: AddEventFo
   const [type, setType] = useState<EventType>('practice');
   const [location, setLocation] = useState('');
   const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +38,7 @@ export default function AddEventForm({ bandId, onSuccess, onCancel }: AddEventFo
       type,
       location: location.trim(),
       date,
+      time: time || null,
     });
 
     if (insertError) {
@@ -71,16 +73,27 @@ export default function AddEventForm({ bandId, onSuccess, onCancel }: AddEventFo
         placeholder="e.g. Rehearsal Studio, The Roxy"
       />
 
-      <TextField
-        label="Date"
-        type="date"
-        size="small"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        required
-        fullWidth
-        InputLabelProps={{ shrink: true }}
-      />
+      <Box sx={{ display: 'flex', gap: 1.5 }}>
+        <TextField
+          label="Date"
+          type="date"
+          size="small"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          required
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Time"
+          type="time"
+          size="small"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
+      </Box>
 
       {error && (
         <Box sx={{ color: 'error.main', typography: 'caption' }}>{error}</Box>

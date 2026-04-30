@@ -28,7 +28,8 @@ export default function useBandEvents({ bandId }: UseBandEventsProps): UseBandEv
       .from('band_events')
       .select('*')
       .eq('band_id', bandId)
-      .order('date', { ascending: true });
+      .order('date', { ascending: true })
+      .order('time', { ascending: true, nullsFirst: false });
 
     if (fetchError) {
       setError(fetchError.message);

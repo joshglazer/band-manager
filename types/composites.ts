@@ -12,5 +12,6 @@ export interface BandEvent {
   type: EventType;
   location: string;
   date: string;
+  time: string | null;
   created_at: string;
 }

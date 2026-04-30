@@ -55,9 +55,9 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
 
   return (
     <>
-      <ResponsiveGrid items={responsiveGridItems} />
-      <Divider sx={{ mt: 2 }} />
       <BandEventsCalendar bandId={bandId} />
+      <Divider sx={{ my: 3 }} />
+      <ResponsiveGrid items={responsiveGridItems} />
     </>
   );
 }

@@ -5,11 +5,13 @@ import useBandEvents from '@/hooks/useBandEvents';
 import { BandEvent } from '@/types/composites';
 import { createClient } from '@/utils/supabase/client';
 import AddIcon from '@mui/icons-material/Add';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import MicIcon from '@mui/icons-material/Mic';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import ViewListIcon from '@mui/icons-material/ViewList';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
@@ -20,6 +22,8 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { useMemo, useState } from 'react';
@@ -31,10 +35,19 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-function formatDisplayDate(dateStr: string): string {
+function todayDateStr(): string {
+  const t = new Date();
+  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+}
+
+function formatDateTime(dateStr: string, timeStr: string | null): string {
   const [year, month, day] = dateStr.split('-').map(Number);
   const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  const datePart = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  if (!timeStr) return datePart;
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  const t = new Date(year, month - 1, day, hours, minutes);
+  return datePart + ' · ' + t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
 function EventIcon({ type }: { type: BandEvent['type'] }) {
@@ -91,14 +104,46 @@ function EventRow({ event, onDelete }: EventRowProps) {
           {event.location}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          {formatDisplayDate(event.date)}
+          {formatDateTime(event.date, event.time)}
         </Typography>
       </Box>
       <Tooltip title="Delete event">
-        <IconButton size="small" onClick={handleDelete} disabled={deleting} sx={{ flexShrink: 0, opacity: 0.5, '&:hover': { opacity: 1 } }}>
+        <IconButton
+          size="small"
+          onClick={handleDelete}
+          disabled={deleting}
+          sx={{ flexShrink: 0, opacity: 0.5, '&:hover': { opacity: 1 } }}
+        >
           <DeleteOutlineIcon fontSize="small" />
         </IconButton>
       </Tooltip>
+    </Box>
+  );
+}
+
+interface EventListProps {
+  events: BandEvent[];
+  isLoading: boolean;
+  emptyMessage: string;
+  onDelete: () => void;
+}
+
+function EventList({ events, isLoading, emptyMessage, onDelete }: EventListProps) {
+  if (isLoading) {
+    return <Typography variant="body2" color="text.secondary">Loading…</Typography>;
+  }
+  if (events.length === 0) {
+    return (
+      <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
+        {emptyMessage}
+      </Typography>
+    );
+  }
+  return (
+    <Box>
+      {events.map((event, i) => (
+        <EventRow key={i} event={event} onDelete={onDelete} />
+      ))}
     </Box>
   );
 }
@@ -144,7 +189,6 @@ function CalendarGrid({ year, month, eventDates, selectedDate, today, onSelectDa
               key={i}
               onClick={() => onSelectDate(isSelected ? null : dateStr)}
               sx={{
-                position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -194,16 +238,13 @@ interface BandEventsCalendarProps {
 export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) {
   const { data: events, isLoading, mutate } = useBandEvents({ bandId });
   const [addOpen, setAddOpen] = useState(false);
+  const [view, setView] = useState<'list' | 'calendar'>('list');
   const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-
-  const todayStr = useMemo(() => {
-    const t = new Date();
-    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
-  }, []);
-
   const [calYear, setCalYear] = useState(() => new Date().getFullYear());
   const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
+
+  const today = useMemo(todayDateStr, []);
 
   const eventDates = useMemo(() => {
     const s = new Set<string>();
@@ -212,13 +253,13 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
   }, [events]);
 
   const upcoming = useMemo(
-    () => (events ?? []).filter((e) => e.date >= todayStr),
-    [events, todayStr]
+    () => (events ?? []).filter((e) => e.date >= today),
+    [events, today]
   );
 
   const past = useMemo(
-    () => (events ?? []).filter((e) => e.date < todayStr).reverse(),
-    [events, todayStr]
+    () => (events ?? []).filter((e) => e.date < today).reverse(),
+    [events, today]
   );
 
   const filteredByDate = useMemo(() => {
@@ -226,7 +267,7 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
     return (events ?? []).filter((e) => e.date === selectedDate);
   }, [events, selectedDate]);
 
-  const displayList = filteredByDate ?? (tab === 'upcoming' ? upcoming : past);
+  const handleDelete = () => mutate();
 
   const prevMonth = () => {
     if (calMonth === 0) { setCalMonth(11); setCalYear((y) => y - 1); }
@@ -238,17 +279,36 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
     else setCalMonth((m) => m + 1);
   };
 
-  const handleDelete = () => {
-    mutate();
-  };
-
   return (
-    <Box sx={{ mt: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+    <Box>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1, flexWrap: 'wrap' }}>
         <Typography variant="h6" fontWeight={600}>
           Events
         </Typography>
-        <Box sx={{ ml: 'auto' }}>
+        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ToggleButtonGroup
+            value={view}
+            exclusive
+            size="small"
+            onChange={(_, v) => {
+              if (v) {
+                setView(v);
+                setSelectedDate(null);
+              }
+            }}
+          >
+            <ToggleButton value="list" aria-label="list view">
+              <Tooltip title="List view">
+                <ViewListIcon fontSize="small" />
+              </Tooltip>
+            </ToggleButton>
+            <ToggleButton value="calendar" aria-label="calendar view">
+              <Tooltip title="Calendar view">
+                <CalendarMonthIcon fontSize="small" />
+              </Tooltip>
+            </ToggleButton>
+          </ToggleButtonGroup>
           <Button
             variant="outlined"
             size="small"
@@ -260,91 +320,109 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
         </Box>
       </Box>
 
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 3,
-          flexDirection: { xs: 'column', md: 'row' },
-          alignItems: { xs: 'stretch', md: 'flex-start' },
-        }}
-      >
-        {/* Calendar grid */}
-        <Box sx={{ flexShrink: 0, width: { xs: '100%', md: 260 } }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <IconButton size="small" onClick={prevMonth}>
-              <ChevronLeftIcon fontSize="small" />
-            </IconButton>
-            <Typography variant="body2" fontWeight={600} sx={{ flex: 1, textAlign: 'center' }}>
-              {MONTH_NAMES[calMonth]} {calYear}
-            </Typography>
-            <IconButton size="small" onClick={nextMonth}>
-              <ChevronRightIcon fontSize="small" />
-            </IconButton>
-          </Box>
-          <CalendarGrid
-            year={calYear}
-            month={calMonth}
-            eventDates={eventDates}
-            selectedDate={selectedDate}
-            today={todayStr}
-            onSelectDate={(d) => {
-              setSelectedDate(d);
-              if (d) {
-                const isPast = d < todayStr;
-                setTab(isPast ? 'past' : 'upcoming');
-              }
-            }}
+      {view === 'list' ? (
+        /* ── List view ── */
+        <Box>
+          <Tabs
+            value={tab}
+            onChange={(_, v) => setTab(v)}
+            sx={{ mb: 1.5, minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0 } }}
+          >
+            <Tab
+              label={`Upcoming${upcoming.length ? ` (${upcoming.length})` : ''}`}
+              value="upcoming"
+            />
+            <Tab
+              label={`Past${past.length ? ` (${past.length})` : ''}`}
+              value="past"
+            />
+          </Tabs>
+          <EventList
+            events={tab === 'upcoming' ? upcoming : past}
+            isLoading={isLoading}
+            emptyMessage={tab === 'upcoming' ? 'No upcoming events.' : 'No past events.'}
+            onDelete={handleDelete}
           />
-          {selectedDate && (
-            <Button size="small" sx={{ mt: 1 }} onClick={() => setSelectedDate(null)}>
-              Clear filter
-            </Button>
-          )}
         </Box>
-
-        <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' } }} />
-        <Divider sx={{ display: { xs: 'block', md: 'none' } }} />
-
-        {/* Event list */}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          {!selectedDate && (
-            <Tabs
-              value={tab}
-              onChange={(_, v) => setTab(v)}
-              sx={{ mb: 1, minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0 } }}
-            >
-              <Tab
-                label={`Upcoming${upcoming.length ? ` (${upcoming.length})` : ''}`}
-                value="upcoming"
-              />
-              <Tab
-                label={`Past${past.length ? ` (${past.length})` : ''}`}
-                value="past"
-              />
-            </Tabs>
-          )}
-
-          {selectedDate && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
-              {formatDisplayDate(selectedDate)}
-            </Typography>
-          )}
-
-          {isLoading ? (
-            <Typography variant="body2" color="text.secondary">Loading…</Typography>
-          ) : displayList.length === 0 ? (
-            <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-              {selectedDate ? 'No events on this day.' : tab === 'upcoming' ? 'No upcoming events.' : 'No past events.'}
-            </Typography>
-          ) : (
-            <Box>
-              {displayList.map((event, i) => (
-                <EventRow key={i} event={event} onDelete={handleDelete} />
-              ))}
+      ) : (
+        /* ── Calendar view ── */
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 3,
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'stretch', md: 'flex-start' },
+          }}
+        >
+          {/* Month grid */}
+          <Box sx={{ flexShrink: 0, width: { xs: '100%', md: 260 } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <IconButton size="small" onClick={prevMonth}>
+                <ChevronLeftIcon fontSize="small" />
+              </IconButton>
+              <Typography variant="body2" fontWeight={600} sx={{ flex: 1, textAlign: 'center' }}>
+                {MONTH_NAMES[calMonth]} {calYear}
+              </Typography>
+              <IconButton size="small" onClick={nextMonth}>
+                <ChevronRightIcon fontSize="small" />
+              </IconButton>
             </Box>
-          )}
+            <CalendarGrid
+              year={calYear}
+              month={calMonth}
+              eventDates={eventDates}
+              selectedDate={selectedDate}
+              today={today}
+              onSelectDate={(d) => {
+                setSelectedDate(d);
+                if (d) setTab(d < today ? 'past' : 'upcoming');
+              }}
+            />
+            {selectedDate && (
+              <Button size="small" sx={{ mt: 1 }} onClick={() => setSelectedDate(null)}>
+                Clear filter
+              </Button>
+            )}
+          </Box>
+
+          <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' } }} />
+          <Divider sx={{ display: { xs: 'block', md: 'none' } }} />
+
+          {/* Event list */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            {selectedDate ? (
+              <>
+                <Typography variant="body2" fontWeight={500} color="text.secondary" sx={{ mb: 1 }}>
+                  {formatDateTime(selectedDate, null)}
+                </Typography>
+                <EventList
+                  events={filteredByDate ?? []}
+                  isLoading={isLoading}
+                  emptyMessage="No events on this day."
+                  onDelete={handleDelete}
+                />
+              </>
+            ) : (
+              <>
+                <Tabs
+                  value={tab}
+                  onChange={(_, v) => setTab(v)}
+                  sx={{ mb: 1, minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0 } }}
+                >
+                  <Tab label={`Upcoming${upcoming.length ? ` (${upcoming.length})` : ''}`} value="upcoming" />
+                  <Tab label={`Past${past.length ? ` (${past.length})` : ''}`} value="past" />
+                </Tabs>
+                <EventList
+                  events={tab === 'upcoming' ? upcoming : past}
+                  isLoading={isLoading}
+                  emptyMessage={tab === 'upcoming' ? 'No upcoming events.' : 'No past events.'}
+                  onDelete={handleDelete}
+                />
+              </>
+            )}
+          </Box>
         </Box>
-      </Box>
+      )}
 
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle>Add Event</DialogTitle>
