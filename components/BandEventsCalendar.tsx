@@ -1,6 +1,6 @@
 'use client';
 
-import AddEventForm from '@/components/AddEventForm';
+import EventForm from '@/components/EventForm';
 import useBandEvents from '@/hooks/useBandEvents';
 import { BandEvent } from '@/types/composites';
 import { createClient } from '@/utils/supabase/client';
@@ -9,6 +9,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import MicIcon from '@mui/icons-material/Mic';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import ViewListIcon from '@mui/icons-material/ViewList';
@@ -71,64 +72,83 @@ function EventChip({ type }: { type: BandEvent['type'] }) {
 
 interface EventRowProps {
   event: BandEvent;
-  onDelete: () => void;
+  bandId: number;
+  onMutate: () => void;
 }
 
-function EventRow({ event, onDelete }: EventRowProps) {
+function EventRow({ event, bandId, onMutate }: EventRowProps) {
   const [deleting, setDeleting] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const handleDelete = async () => {
     setDeleting(true);
     const supabase = createClient();
     await supabase.from('band_events').delete().eq('id', event.id);
-    onDelete();
+    onMutate();
   };
 
+  const iconSx = { flexShrink: 0, opacity: 0.5, '&:hover': { opacity: 1 } };
+
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1.5,
-        py: 1,
-        px: 1.5,
-        borderRadius: 1,
-        '&:hover': { bgcolor: 'action.hover' },
-      }}
-    >
-      <Box sx={{ flexShrink: 0 }}>
-        <EventChip type={event.type} />
+    <>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          py: 1,
+          px: 1.5,
+          borderRadius: 1,
+          '&:hover': { bgcolor: 'action.hover' },
+        }}
+      >
+        <Box sx={{ flexShrink: 0 }}>
+          <EventChip type={event.type} />
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="body2" fontWeight={500} noWrap>
+            {event.location}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {formatDateTime(event.date, event.time)}
+          </Typography>
+        </Box>
+        <Tooltip title="Edit event">
+          <IconButton size="small" onClick={() => setEditOpen(true)} sx={iconSx}>
+            <EditOutlinedIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete event">
+          <IconButton size="small" onClick={handleDelete} disabled={deleting} sx={iconSx}>
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </Box>
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="body2" fontWeight={500} noWrap>
-          {event.location}
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          {formatDateTime(event.date, event.time)}
-        </Typography>
-      </Box>
-      <Tooltip title="Delete event">
-        <IconButton
-          size="small"
-          onClick={handleDelete}
-          disabled={deleting}
-          sx={{ flexShrink: 0, opacity: 0.5, '&:hover': { opacity: 1 } }}
-        >
-          <DeleteOutlineIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </Box>
+
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Edit Event</DialogTitle>
+        <DialogContent>
+          <EventForm
+            bandId={bandId}
+            event={event}
+            onSuccess={() => { setEditOpen(false); onMutate(); }}
+            onCancel={() => setEditOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
 interface EventListProps {
   events: BandEvent[];
+  bandId: number;
   isLoading: boolean;
   emptyMessage: string;
-  onDelete: () => void;
+  onMutate: () => void;
 }
 
-function EventList({ events, isLoading, emptyMessage, onDelete }: EventListProps) {
+function EventList({ events, bandId, isLoading, emptyMessage, onMutate }: EventListProps) {
   if (isLoading) {
     return <Typography variant="body2" color="text.secondary">Loading…</Typography>;
   }
@@ -142,7 +162,7 @@ function EventList({ events, isLoading, emptyMessage, onDelete }: EventListProps
   return (
     <Box>
       {events.map((event, i) => (
-        <EventRow key={i} event={event} onDelete={onDelete} />
+        <EventRow key={i} event={event} bandId={bandId} onMutate={onMutate} />
       ))}
     </Box>
   );
@@ -267,7 +287,7 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
     return (events ?? []).filter((e) => e.date === selectedDate);
   }, [events, selectedDate]);
 
-  const handleDelete = () => mutate();
+  const handleMutate = () => mutate();
 
   const prevMonth = () => {
     if (calMonth === 0) { setCalMonth(11); setCalYear((y) => y - 1); }
@@ -341,7 +361,8 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
             events={tab === 'upcoming' ? upcoming : past}
             isLoading={isLoading}
             emptyMessage={tab === 'upcoming' ? 'No upcoming events.' : 'No past events.'}
-            onDelete={handleDelete}
+            bandId={bandId}
+            onMutate={handleMutate}
           />
         </Box>
       ) : (
@@ -397,9 +418,10 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
                 </Typography>
                 <EventList
                   events={filteredByDate ?? []}
+                  bandId={bandId}
                   isLoading={isLoading}
                   emptyMessage="No events on this day."
-                  onDelete={handleDelete}
+                  onMutate={handleMutate}
                 />
               </>
             ) : (
@@ -414,9 +436,10 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
                 </Tabs>
                 <EventList
                   events={tab === 'upcoming' ? upcoming : past}
+                  bandId={bandId}
                   isLoading={isLoading}
                   emptyMessage={tab === 'upcoming' ? 'No upcoming events.' : 'No past events.'}
-                  onDelete={handleDelete}
+                  onMutate={handleMutate}
                 />
               </>
             )}
@@ -427,12 +450,9 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle>Add Event</DialogTitle>
         <DialogContent>
-          <AddEventForm
+          <EventForm
             bandId={bandId}
-            onSuccess={() => {
-              setAddOpen(false);
-              mutate();
-            }}
+            onSuccess={() => { setAddOpen(false); mutate(); }}
             onCancel={() => setAddOpen(false)}
           />
         </DialogContent>
