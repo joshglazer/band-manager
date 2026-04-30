@@ -46,7 +46,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
   }
 
   function formatChordChart(value: TablePropsDataType | null, row: TableRow) {
-    if (!value) return null;
+    if (!value) return '';
     return <ChordChartViewModal songName={row.name as string | null} chordChart={value as string} />;
   }
 
