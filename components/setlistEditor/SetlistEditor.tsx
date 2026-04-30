@@ -10,6 +10,7 @@ import Hidden from '@mui/material/Hidden';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import PrintIcon from '@mui/icons-material/Print';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
@@ -214,9 +215,20 @@ export default function SetlistEditor({
               <Button variant="contained" onClick={addSetlist}>
                 Add Set
               </Button>
-              <Button variant="contained" onClick={saveSetlist}>
-                Save Setlist
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                {setlist.id && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<PrintIcon />}
+                    onClick={() => window.open(`/print/setlist/${setlist.id}/chord-charts`, '_blank')}
+                  >
+                    Print Chord Charts
+                  </Button>
+                )}
+                <Button variant="contained" onClick={saveSetlist}>
+                  Save Setlist
+                </Button>
+              </Box>
             </Box>
           </Grid>
           <Grid item xs={12} sm={6}>
