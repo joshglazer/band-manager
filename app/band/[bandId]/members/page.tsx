@@ -4,6 +4,7 @@ import Card from '@/components/design/Card';
 import Loading from '@/components/design/Loading';
 import ResponsiveGrid from '@/components/design/ResponsiveGrid';
 import InviteMemberForm from '@/components/forms/InviteMemberForm';
+import useBandMemberEmails from '@/hooks/useBandMemberEmails';
 import useBandMembers from '@/hooks/useBandMembers';
 import useUserProfiles from '@/hooks/useUserProfiles';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -27,15 +28,21 @@ export default function BandMembersPage({ params }: Readonly<BandRouteProps>): J
     userIds: bandMemberUserIds ?? [],
   });
 
+  const { data: bandMemberEmails, isLoading: isLoadingBandMemberEmails } = useBandMemberEmails({
+    bandId,
+  });
+
   const responsiveGridItems = useMemo(
     () =>
       bandMembers?.map(({ user_id }) => {
         const bandMemberUserProfile = userProfiles?.find(
           (userProfile) => userProfile.user_id === user_id
         );
-        const bandMemberName = [bandMemberUserProfile?.first_name, bandMemberUserProfile?.last_name]
+        const profileName = [bandMemberUserProfile?.first_name, bandMemberUserProfile?.last_name]
           .filter(Boolean)
           .join(' ');
+        const fallbackEmail = bandMemberEmails?.find((m) => m.user_id === user_id)?.email ?? '';
+        const bandMemberName = profileName || fallbackEmail;
 
         return {
           key: user_id,
@@ -44,12 +51,12 @@ export default function BandMembersPage({ params }: Readonly<BandRouteProps>): J
           ),
         };
       }),
-    [bandMembers, userProfiles]
+    [bandMembers, userProfiles, bandMemberEmails]
   );
 
   const isLoading = useMemo(
-    () => isLoadingBandMembers || isLoadingUserProfiles,
-    [isLoadingBandMembers, isLoadingUserProfiles]
+    () => isLoadingBandMembers || isLoadingUserProfiles || isLoadingBandMemberEmails,
+    [isLoadingBandMembers, isLoadingUserProfiles, isLoadingBandMemberEmails]
   );
 
   if (isLoading) {

@@ -420,6 +420,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_band_member_emails: {
+        Args: {
+          band_id_arg: number
+        }
+        Returns: {
+          user_id: string
+          email: string
+        }[]
+      }
     }
     Enums: {
       "Comment Type": "Instrument Setting" | "Instrument Tuning"
