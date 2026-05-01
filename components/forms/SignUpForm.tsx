@@ -1,3 +1,4 @@
+import { createAdminClient } from '@/utils/supabase/admin';
 import { createClient } from '@/utils/supabase/server';
 import LoginIcon from '@mui/icons-material/Login';
 import { cookies, headers } from 'next/headers';
@@ -54,18 +55,24 @@ export default function SignUpForm({ errorMessage }: Readonly<SignUpFormProps>) 
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
 
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${origin}/auth/callback`,
-        data: { first_name: firstName, last_name: lastName },
       },
     });
 
-    if (error) {
+    if (error || !signUpData.user) {
       return redirect('/login?message=Could not authenticate user');
     }
+
+    const adminClient = createAdminClient();
+    await adminClient.from('user_profiles').insert({
+      user_id: signUpData.user.id,
+      first_name: firstName,
+      last_name: lastName,
+    });
 
     return redirect('/login?message=Check email to continue sign in process');
   }
