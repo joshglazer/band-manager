@@ -7,9 +7,13 @@ import useSetlists from '@/hooks/useSetlists';
 import useSongs from '@/hooks/useSongs';
 import { TablesInsert } from '@/types/supabase';
 import { createClient } from '@/utils/supabase/client';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
@@ -19,9 +23,67 @@ import prettyMilliseconds from 'pretty-ms';
 import { useCallback, useMemo, useState } from 'react';
 import { BandRouteProps } from '../types';
 
+function SetlistActionsMenu({
+  setlistId,
+  bandId,
+  onDuplicate,
+}: {
+  setlistId: number;
+  bandId: string;
+  onDuplicate: (id: number) => void;
+}) {
+  const router = useRouter();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+
+  return (
+    <>
+      <IconButton onClick={handleOpen} aria-label="actions" size="small">
+        <MoreVertIcon />
+      </IconButton>
+      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+        <MenuItem
+          onClick={() => {
+            router.push(`/band/${bandId}/practice?setlist=${setlistId}`);
+            handleClose();
+          }}
+        >
+          Practice
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            router.push(`/band/${bandId}/setlists/${setlistId}/edit`);
+            handleClose();
+          }}
+        >
+          Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            onDuplicate(setlistId);
+            handleClose();
+          }}
+        >
+          Duplicate
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            window.open(`/print/setlist/${setlistId}/chord-charts`, '_blank');
+            handleClose();
+          }}
+        >
+          Print Chord Charts
+        </MenuItem>
+      </Menu>
+    </>
+  );
+}
+
 export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
   const { bandId } = params;
-  const router = useRouter();
 
   const [showPast, setShowPast] = useState(false);
   const [nameFilter, setNameFilter] = useState('');
@@ -91,35 +153,14 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
   const formatEditButton = useCallback(
     (setlistId: TablePropsDataType) => {
       return (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            onClick={() => router.push(`/band/${bandId}/practice?setlist=${setlistId}`)}
-          >
-            Practice
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => router.push(`/band/${bandId}/setlists/${setlistId}/edit`)}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => duplicateSetlist(setlistId as number)}
-          >
-            Duplicate
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => window.open(`/print/setlist/${setlistId}/chord-charts`, '_blank')}
-          >
-            Print Chord Charts
-          </Button>
-        </Box>
+        <SetlistActionsMenu
+          setlistId={setlistId as number}
+          bandId={bandId}
+          onDuplicate={duplicateSetlist}
+        />
       );
     },
-    [bandId, router, duplicateSetlist]
+    [bandId, duplicateSetlist]
   );
 
   const isLoading = useMemo(() => {
@@ -192,7 +233,7 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
         { name: 'Name', dataKey: 'name', isHeader: true, headerDataKey: 'id' },
         { name: 'Date', dataKey: 'date', dataFormatter: formatDate },
         { name: 'Sets', dataKey: 'sets', dataFormatter: formatSets },
-        { name: 'Actions', dataKey: 'id', dataFormatter: formatEditButton },
+        { name: 'Actions', dataKey: 'id', dataFormatter: formatEditButton, stickyRight: true },
       ],
       rows: setlistsAdaptedForTable,
     };
