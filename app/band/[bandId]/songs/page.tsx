@@ -1,30 +1,100 @@
 'use client';
 
+import ChordChartViewer from '@/components/ChordChartViewer';
 import Loading from '@/components/design/Loading';
 import Table, { TableProps, TablePropsDataType, TableRow } from '@/components/design/Table';
+import EditSongForm from '@/components/forms/EditSongForm';
+import SongCommentForm from '@/components/forms/SongCommentForm';
 import AddSongModal from '@/components/modals/AddSongModal';
-import ChordChartViewModal from '@/components/modals/ChordChartViewModal';
-import EditSongModal from '@/components/modals/EditSongModal';
-import SongCommentsModal from '@/components/modals/SongCommentsModal';
 import useSongs, { SongsComposite } from '@/hooks/useSongs';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Link from 'next/link';
 import prettyMilliseconds from 'pretty-ms';
 import { useState } from 'react';
 import { BandRouteProps } from '../types';
 
+function SongActionsMenu({
+  song,
+  onEditSuccess,
+}: {
+  song: SongsComposite;
+  onEditSuccess: () => void;
+}) {
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const [activeModal, setActiveModal] = useState<'edit' | 'comments' | 'chords' | null>(null);
+
+  const menuOpen = Boolean(menuAnchor);
+  const commentsCount = song.song_comments[0].count;
+  const hasChordChart = Boolean(song.chord_chart);
+
+  const openMenu = (e: React.MouseEvent<HTMLElement>) => setMenuAnchor(e.currentTarget);
+  const closeMenu = () => setMenuAnchor(null);
+  const openModal = (modal: 'edit' | 'comments' | 'chords') => {
+    closeMenu();
+    setActiveModal(modal);
+  };
+  const closeModal = () => setActiveModal(null);
+
+  return (
+    <>
+      <IconButton onClick={openMenu} aria-label="actions" size="small">
+        <MoreVertIcon />
+      </IconButton>
+      <Menu anchorEl={menuAnchor} open={menuOpen} onClose={closeMenu}>
+        <MenuItem onClick={() => openModal('comments')}>
+          Comments ({commentsCount})
+        </MenuItem>
+        {hasChordChart && (
+          <MenuItem onClick={() => openModal('chords')}>View Chord Chart</MenuItem>
+        )}
+        <MenuItem onClick={() => openModal('edit')}>Edit</MenuItem>
+      </Menu>
+
+      <Dialog open={activeModal === 'edit'} onClose={closeModal} maxWidth="md" fullWidth>
+        <DialogTitle>Edit Song</DialogTitle>
+        <DialogContent className="pt-3">
+          <EditSongForm
+            song={song}
+            onSuccess={() => {
+              closeModal();
+              onEditSuccess();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={activeModal === 'comments'} onClose={closeModal} maxWidth="md" fullWidth>
+        <DialogTitle>{song.name} Comments</DialogTitle>
+        <DialogContent>
+          <SongCommentForm songId={song.id} />
+        </DialogContent>
+      </Dialog>
+
+      {hasChordChart && (
+        <Dialog open={activeModal === 'chords'} onClose={closeModal} maxWidth="md" fullWidth>
+          <DialogTitle>{song.name ?? 'Chord Chart'}</DialogTitle>
+          <DialogContent>
+            <ChordChartViewer chordChart={song.chord_chart!} />
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
+}
+
 function formatDuration(value?: TablePropsDataType | null) {
   return value && typeof value === 'number'
     ? prettyMilliseconds(value, { secondsDecimalDigits: 0 })
     : '--';
-}
-
-function formatComments(value: TablePropsDataType | null, row: TableRow) {
-  return (
-    <SongCommentsModal commentsCount={+(value ?? 0)} song={row as unknown as SongsComposite} />
-  );
 }
 
 export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
@@ -45,13 +115,10 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
     });
   }
 
-  function formatChordChart(value: TablePropsDataType | null, row: TableRow) {
-    if (!value) return '';
-    return <ChordChartViewModal songName={row.name as string | null} chordChart={value as string} />;
-  }
-
   function formatActions(_value: TablePropsDataType | null, row: TableRow) {
-    return <EditSongModal song={row as unknown as SongsComposite} onSuccess={mutate} />;
+    const song = songs?.find((s) => s.id === row.id);
+    if (!song) return null;
+    return <SongActionsMenu song={song} onEditSuccess={mutate} />;
   }
 
   if (isLoading) {
@@ -66,8 +133,6 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
       name: song.name,
       artist: song.artist,
       duration: song.duration,
-      chord_chart: song.chord_chart,
-      commentsCount: song.song_comments[0].count,
     }));
 
     const q = searchQuery.toLowerCase();
@@ -120,22 +185,10 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
           onSort: () => handleSort('duration'),
         },
         {
-          name: 'Comments',
-          dataKey: 'commentsCount',
-          className: 'whitespace-nowrap',
-          dataFormatter: formatComments,
-        },
-        {
-          name: 'Chord Chart',
-          dataKey: 'chord_chart',
-          className: 'whitespace-nowrap',
-          dataFormatter: formatChordChart,
-        },
-        {
-          name: '',
+          name: 'Actions',
           dataKey: 'id',
           dataFormatter: formatActions,
-          className: 'whitespace-nowrap',
+          stickyRight: true,
         },
       ],
       rows: songsForTable,
