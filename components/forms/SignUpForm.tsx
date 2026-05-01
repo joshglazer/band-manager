@@ -52,33 +52,26 @@ export default function SignUpForm({ errorMessage }: Readonly<SignUpFormProps>) 
     const { email, password, firstName, lastName } = data;
 
     const origin = headers().get('origin');
-    const adminClient = createAdminClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
 
-    // Create the account via admin API, which separates account creation
-    // from email sending and won't fail due to email rate limits.
-    const { data: createData, error: createError } = await adminClient.auth.admin.createUser({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
-      email_confirm: false,
+      options: {
+        emailRedirectTo: `${origin}/auth/callback`,
+      },
     });
 
-    if (createError || !createData.user) {
+    if (error || !signUpData.user) {
       return redirect('/login?message=Could not authenticate user');
     }
 
+    const adminClient = createAdminClient();
     await adminClient.from('user_profiles').insert({
-      user_id: createData.user.id,
+      user_id: signUpData.user.id,
       first_name: firstName,
       last_name: lastName,
-    });
-
-    // Send confirmation email — best effort, account creation already succeeded.
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
-    await supabase.auth.resend({
-      type: 'signup',
-      email,
-      options: { emailRedirectTo: `${origin}/auth/callback` },
     });
 
     return redirect('/login?message=Check email to continue sign in process');
