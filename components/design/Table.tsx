@@ -26,6 +26,7 @@ interface TableProps {
     sortable?: boolean;
     sortDirection?: 'asc' | 'desc';
     onSort?: () => void;
+    stickyRight?: boolean;
   }[];
   rows: TableRow[];
 }
@@ -48,8 +49,11 @@ export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>
       <MUITable aria-label="Table of Songs">
         <TableHead>
           <TableRow>
-            {columns.map(({ name, sortable, sortDirection, onSort }) => (
-              <TableCell key={name}>
+            {columns.map(({ name, sortable, sortDirection, onSort, stickyRight }) => (
+              <TableCell
+                key={name}
+                sx={stickyRight ? { position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 2 } : undefined}
+              >
                 {sortable ? (
                   <TableSortLabel
                     active={sortDirection !== undefined}
@@ -70,7 +74,7 @@ export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>
             return (
               <TableRow key={row[headerColumn.headerDataKey ?? '']}>
                 {columns.map(
-                  ({ name, dataKey, dataFormatter, isHeader, headerDataKey, className }) => {
+                  ({ name, dataKey, dataFormatter, isHeader, headerDataKey, className, stickyRight }) => {
                     let component: TableCellProps['component'] = 'td';
                     let scope: TableCellProps['scope'];
                     let value: TablePropsDataType | JSX.Element = row[dataKey];
@@ -90,6 +94,7 @@ export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>
                         scope={scope}
                         key={name}
                         className={className}
+                        sx={stickyRight ? { position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 1 } : undefined}
                       >
                         {value}
                       </TableCell>
