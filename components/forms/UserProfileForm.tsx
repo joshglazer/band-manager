@@ -53,7 +53,6 @@ export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>
         name: 'bio',
         label: 'Bio',
         fullWidth: true,
-        required: true,
       },
     ],
     []
