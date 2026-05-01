@@ -117,7 +117,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
 
   function formatActions(_value: TablePropsDataType | null, row: TableRow) {
     const song = songs?.find((s) => s.id === row.id);
-    if (!song) return null;
+    if (!song) return '';
     return <SongActionsMenu song={song} onEditSuccess={mutate} />;
   }
 

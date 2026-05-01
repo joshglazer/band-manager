@@ -29,7 +29,7 @@ function SetlistActionsMenu({
   onDuplicate,
 }: {
   setlistId: number;
-  bandId: string;
+  bandId: number;
   onDuplicate: (id: number) => void;
 }) {
   const router = useRouter();
