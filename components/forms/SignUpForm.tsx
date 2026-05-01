@@ -48,7 +48,7 @@ export default function SignUpForm({ errorMessage }: Readonly<SignUpFormProps>) 
   async function onSuccess(data: FieldValues) {
     'use server';
 
-    const { email, password } = data;
+    const { email, password, firstName, lastName } = data;
 
     const origin = headers().get('origin');
     const cookieStore = cookies();
@@ -59,6 +59,7 @@ export default function SignUpForm({ errorMessage }: Readonly<SignUpFormProps>) 
       password,
       options: {
         emailRedirectTo: `${origin}/auth/callback`,
+        data: { first_name: firstName, last_name: lastName },
       },
     });
 
