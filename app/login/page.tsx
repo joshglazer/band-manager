@@ -1,7 +1,9 @@
 import LoginForm from '@/components/forms/LoginForm';
+import ResendConfirmationForm from '@/components/forms/ResendConfirmationForm';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import Divider from '@mui/material/Divider';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import NextLink from 'next/link';
@@ -30,6 +32,8 @@ export default function LoginPage({ searchParams }: Readonly<LoginPageProps>) {
               Sign up
             </Link>
           </Typography>
+          <Divider sx={{ my: 3 }} />
+          <ResendConfirmationForm />
         </CardContent>
       </Card>
     </Box>
