@@ -51,12 +51,12 @@ function SongActionsMenu({
       </IconButton>
       <Menu anchorEl={menuAnchor} open={menuOpen} onClose={closeMenu}>
         <MenuItem onClick={() => openModal('comments')}>
-          Comments ({commentsCount})
+          💬 Comments ({commentsCount})
         </MenuItem>
         {hasChordChart && (
-          <MenuItem onClick={() => openModal('chords')}>View Chord Chart</MenuItem>
+          <MenuItem onClick={() => openModal('chords')}>🎵 View Chord Chart</MenuItem>
         )}
-        <MenuItem onClick={() => openModal('edit')}>Edit</MenuItem>
+        <MenuItem onClick={() => openModal('edit')}>✏️ Edit</MenuItem>
       </Menu>
 
       <Dialog open={activeModal === 'edit'} onClose={closeModal} maxWidth="md" fullWidth>

@@ -51,7 +51,7 @@ function SetlistActionsMenu({
             handleClose();
           }}
         >
-          Practice
+          🎤 Practice
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -59,7 +59,7 @@ function SetlistActionsMenu({
             handleClose();
           }}
         >
-          Edit
+          ✏️ Edit
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -67,7 +67,7 @@ function SetlistActionsMenu({
             handleClose();
           }}
         >
-          Duplicate
+          📋 Duplicate
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -75,7 +75,7 @@ function SetlistActionsMenu({
             handleClose();
           }}
         >
-          Print Chord Charts
+          🖨️ Print Chord Charts
         </MenuItem>
       </Menu>
     </>
