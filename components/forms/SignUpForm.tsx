@@ -63,7 +63,7 @@ export default function SignUpForm({ errorMessage }: Readonly<SignUpFormProps>) 
       },
     });
 
-    if (error || !signUpData.user) {
+    if (!signUpData.user) {
       return redirect('/login?message=Could not authenticate user');
     }
 
