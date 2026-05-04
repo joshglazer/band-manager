@@ -2,19 +2,24 @@
 
 import { Tables, TablesInsert } from '@/types/supabase';
 import { createClient } from '@/utils/supabase/client';
+import useBandEvents from '@/hooks/useBandEvents';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
 import Hidden from '@mui/material/Hidden';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
+import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PrintIcon from '@mui/icons-material/Print';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
-import { getDragDropBackgroundColorClassName } from './helpers';
+import { getDragDropBackgroundColorClassName, getEventDisplayName } from './helpers';
 import SetEditor from './SetEditor';
 import SongDragAndDrop from './SongDragAndDrop';
 import { Set, Setlist } from './types';
@@ -30,6 +35,9 @@ export default function SetlistEditor({
 
   const router = useRouter();
   const supabase = createClient();
+  const { data: events } = useBandEvents({ bandId: setlist.bandId });
+
+  const selectedEvent = events?.find((e) => e.id === setlist.eventId) ?? null;
 
   function renderSet(set: Set, index: number): JSX.Element {
     return <SetEditor key={index} index={index} set={set} />;
@@ -48,8 +56,12 @@ export default function SetlistEditor({
   }
 
   async function saveSetlist() {
-    const { id, name, date, bandId } = setlist;
-    const upsertData: TablesInsert<'setlists'> = { name, band_id: bandId, date: date || null };
+    const { id, name, eventId, bandId } = setlist;
+    const upsertData: TablesInsert<'setlists'> = {
+      name: name?.trim() || null,
+      band_id: bandId,
+      event_id: eventId ?? null,
+    };
     let setlistIdForSongs: number | undefined;
     if (id) {
       setlistIdForSongs = id;
@@ -177,35 +189,43 @@ export default function SetlistEditor({
     }));
   }
 
-  function handleDateChange(
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
+  function handleEventChange(eventId: number | '') {
+    const newEvent = eventId ? (events?.find((e) => e.id === eventId) ?? null) : null;
     setSetlist((value) => ({
       ...value,
-      date: event.target.value || undefined,
+      eventId: eventId || undefined,
+      event: newEvent,
     }));
   }
 
   return (
     <>
-      <Box className="flex gap-4 pb-3">
+      <Box className="flex gap-4 pb-3" sx={{ flexWrap: 'wrap' }}>
         <TextField
           id="title"
           label="Title"
           variant="outlined"
-          value={setlist.name}
+          value={setlist.name ?? ''}
           onChange={handleTitleChange}
-          placeholder="My Setlist"
+          placeholder={selectedEvent ? getEventDisplayName(selectedEvent) : 'My Setlist'}
+          helperText={selectedEvent && !setlist.name ? 'Using event name' : undefined}
         />
-        <TextField
-          id="date"
-          label="Date"
-          variant="outlined"
-          type="date"
-          value={setlist.date ?? ''}
-          onChange={handleDateChange}
-          InputLabelProps={{ shrink: true }}
-        />
+        <FormControl variant="outlined" sx={{ minWidth: 220 }}>
+          <InputLabel id="event-select-label">Event</InputLabel>
+          <Select
+            labelId="event-select-label"
+            label="Event"
+            value={setlist.eventId ?? ''}
+            onChange={(e) => handleEventChange(e.target.value as number | '')}
+          >
+            <MenuItem value=""><em>None</em></MenuItem>
+            {events?.map((event) => (
+              <MenuItem key={event.id} value={event.id}>
+                {getEventDisplayName(event)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
       <DragDropContext onDragEnd={onDragEnd}>
         <Grid container spacing={2}>

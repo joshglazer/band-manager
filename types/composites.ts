@@ -2,6 +2,7 @@ import { Tables } from './supabase';
 
 export interface SetlistComposite extends Tables<'setlists'> {
   setlist_songs: Tables<'setlist_songs'>[];
+  band_events: BandEvent | null;
 }
 
 export type EventType = 'practice' | 'gig';

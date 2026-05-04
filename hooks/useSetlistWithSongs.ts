@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/client';
 import { Tables } from '@/types/supabase';
+import { BandEvent } from '@/types/composites';
 import { PostgrestError, useQuery } from '@supabase-cache-helpers/postgrest-swr';
 import { useMemo } from 'react';
 
@@ -11,6 +12,7 @@ interface SetlistSongWithSong extends Tables<'setlist_songs'> {
 
 interface SetlistWithSongs extends Tables<'setlists'> {
   setlist_songs: SetlistSongWithSong[];
+  band_events: BandEvent | null;
 }
 
 interface UseSetlistWithSongsProps {
@@ -32,7 +34,7 @@ export default function useSetlistWithSongs({ setlistId }: UseSetlistWithSongsPr
     () =>
       supabase
         .from('setlists')
-        .select('*, setlist_songs(*, songs(*))')
+        .select('*, setlist_songs(*, songs(*)), band_events(*)')
         .eq('id', setlistId)
         .maybeSingle(),
     [setlistId, supabase]

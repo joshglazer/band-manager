@@ -315,7 +315,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                 </MenuItem>
                 {setlists.map((sl) => (
                   <MenuItem key={sl.id} value={sl.id}>
-                    {sl.name}
+                    {sl.name ?? (sl.band_events ? `${sl.band_events.type === 'gig' ? 'Gig' : 'Practice'} — ${sl.band_events.location}` : 'Untitled Setlist')}
                   </MenuItem>
                 ))}
               </Select>

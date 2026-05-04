@@ -237,21 +237,21 @@ export type Database = {
         Row: {
           band_id: number
           created_at: string
-          date: string | null
+          event_id: number | null
           id: number
           name: string | null
         }
         Insert: {
           band_id: number
           created_at?: string
-          date?: string | null
+          event_id?: number | null
           id?: number
           name?: string | null
         }
         Update: {
           band_id?: number
           created_at?: string
-          date?: string | null
+          event_id?: number | null
           id?: number
           name?: string | null
         }
@@ -261,6 +261,13 @@ export type Database = {
             columns: ["band_id"]
             isOneToOne: false
             referencedRelation: "bands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "setlists_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "band_events"
             referencedColumns: ["id"]
           },
         ]

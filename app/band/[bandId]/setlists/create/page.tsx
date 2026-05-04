@@ -14,7 +14,6 @@ export default function SetlistCreate({ params }: Readonly<BandRouteProps>) {
   const initialSetlist: Setlist = useMemo(
     () => ({
       bandId,
-      name: 'New Setlist',
       sets: [
         {
           songs: [],

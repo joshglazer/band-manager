@@ -19,7 +19,7 @@ export default function useSetlist({ setlistId }: UseSetlistProps): UseSetlistRe
   const supabase = createClient();
 
   const query = useMemo(
-    () => supabase.from('setlists').select('*, setlist_songs(*)').eq('id', setlistId).maybeSingle(),
+    () => supabase.from('setlists').select('*, setlist_songs(*), band_events(*)').eq('id', setlistId).maybeSingle(),
     [setlistId, supabase]
   );
 
