@@ -27,6 +27,7 @@ interface TableProps {
     sortDirection?: 'asc' | 'desc';
     onSort?: () => void;
     stickyRight?: boolean;
+    hideHeader?: boolean;
   }[];
   rows: TableRow[];
 }
@@ -49,7 +50,7 @@ export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>
       <MUITable aria-label="Table of Songs">
         <TableHead>
           <TableRow>
-            {columns.map(({ name, sortable, sortDirection, onSort, stickyRight }) => (
+            {columns.map(({ name, sortable, sortDirection, onSort, stickyRight, hideHeader }) => (
               <TableCell
                 key={name}
                 sx={stickyRight ? { position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 2 } : undefined}
@@ -60,8 +61,10 @@ export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>
                     direction={sortDirection ?? 'asc'}
                     onClick={onSort}
                   >
-                    {name}
+                    {hideHeader ? <span className="sr-only">{name}</span> : name}
                   </TableSortLabel>
+                ) : hideHeader ? (
+                  <span className="sr-only">{name}</span>
                 ) : (
                   name
                 )}

@@ -243,7 +243,7 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
         { name: 'Name', dataKey: 'name', isHeader: true, headerDataKey: 'id' },
         { name: 'Date', dataKey: 'date', dataFormatter: formatDate },
         { name: 'Sets', dataKey: 'sets', dataFormatter: formatSets },
-        { name: 'Actions', dataKey: 'id', dataFormatter: formatEditButton, stickyRight: true },
+        { name: 'Actions', dataKey: 'id', dataFormatter: formatEditButton, stickyRight: true, hideHeader: true },
       ],
       rows: setlistsAdaptedForTable,
     };

@@ -201,6 +201,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
           dataKey: 'id',
           dataFormatter: formatActions,
           stickyRight: true,
+          hideHeader: true,
         },
       ],
       rows: songsForTable,
