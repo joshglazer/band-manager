@@ -7,13 +7,18 @@ import EditSongForm from '@/components/forms/EditSongForm';
 import SongCommentForm from '@/components/forms/SongCommentForm';
 import AddSongModal from '@/components/modals/AddSongModal';
 import useSongs, { SongsComposite } from '@/hooks/useSongs';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
@@ -51,12 +56,19 @@ function SongActionsMenu({
       </IconButton>
       <Menu anchorEl={menuAnchor} open={menuOpen} onClose={closeMenu}>
         <MenuItem onClick={() => openModal('comments')}>
-          💬 Comments ({commentsCount})
+          <ListItemIcon><ChatBubbleOutlineIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Comments ({commentsCount})</ListItemText>
         </MenuItem>
         {hasChordChart && (
-          <MenuItem onClick={() => openModal('chords')}>🎵 View Chord Chart</MenuItem>
+          <MenuItem onClick={() => openModal('chords')}>
+            <ListItemIcon><MusicNoteIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>View Chord Chart</ListItemText>
+          </MenuItem>
         )}
-        <MenuItem onClick={() => openModal('edit')}>✏️ Edit</MenuItem>
+        <MenuItem onClick={() => openModal('edit')}>
+          <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Edit</ListItemText>
+        </MenuItem>
       </Menu>
 
       <Dialog open={activeModal === 'edit'} onClose={closeModal} maxWidth="md" fullWidth>

@@ -8,10 +8,16 @@ import useSongs from '@/hooks/useSongs';
 import { TablesInsert } from '@/types/supabase';
 import { createClient } from '@/utils/supabase/client';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ChecklistIcon from '@mui/icons-material/Checklist';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import EditIcon from '@mui/icons-material/Edit';
+import PrintIcon from '@mui/icons-material/Print';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import IconButton from '@mui/material/IconButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
@@ -51,7 +57,8 @@ function SetlistActionsMenu({
             handleClose();
           }}
         >
-          🎤 Practice
+          <ListItemIcon><ChecklistIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Practice</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -59,7 +66,8 @@ function SetlistActionsMenu({
             handleClose();
           }}
         >
-          ✏️ Edit
+          <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Edit</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -67,7 +75,8 @@ function SetlistActionsMenu({
             handleClose();
           }}
         >
-          📋 Duplicate
+          <ListItemIcon><ContentCopyIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Duplicate</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -75,7 +84,8 @@ function SetlistActionsMenu({
             handleClose();
           }}
         >
-          🖨️ Print Chord Charts
+          <ListItemIcon><PrintIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Print Chord Charts</ListItemText>
         </MenuItem>
       </Menu>
     </>
