@@ -79,7 +79,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
           sx={{
             width: 200,
             flexShrink: 0,
-            bgcolor: 'background.paper',
+            bgcolor: '#fef2f2',
             borderRight: '1px solid',
             borderColor: 'divider',
             pt: 3,
