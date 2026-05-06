@@ -62,8 +62,63 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
     ];
 
     return (
-      <>
-        <Box sx={{ pt: 3, pb: 2 }}>
+      // Negative margins break out of the root layout's p-3 container padding so the
+      // sidebar background and border extend flush to the app header and page edges.
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'stretch',
+          mx: '-0.75rem',
+          mt: '-0.75rem',
+          mb: '-0.75rem',
+          minHeight: 'calc(100vh - 64px)',
+        }}
+      >
+        <Box
+          component="nav"
+          sx={{
+            width: 200,
+            flexShrink: 0,
+            bgcolor: 'background.paper',
+            borderRight: '1px solid',
+            borderColor: 'divider',
+            pt: 3,
+            px: 1.5,
+          }}
+        >
+          <List disablePadding>
+            {navItems.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              return (
+                <ListItem key={item.href} disablePadding>
+                  <ListItemButton
+                    component={NextLink}
+                    href={item.href}
+                    selected={isActive}
+                    sx={{
+                      borderRadius: 1,
+                      mb: 0.5,
+                      '&.Mui-selected': {
+                        bgcolor: 'primary.main',
+                        color: 'primary.contrastText',
+                        '& .MuiListItemIcon-root': { color: 'primary.contrastText' },
+                        '&:hover': { bgcolor: 'primary.dark' },
+                      },
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
+                    <ListItemText
+                      primary={item.label}
+                      primaryTypographyProps={{ variant: 'body2' }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </List>
+        </Box>
+
+        <Box sx={{ flex: 1, minWidth: 0, pt: 3, pb: 2, pl: 3, pr: '0.75rem' }}>
           <BandBreadcrumbs bandId={bandId} bandName={band.name} />
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
             <Typography variant="h4" fontWeight={700} color="text.primary">
@@ -86,53 +141,10 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
               </Button>
             </Box>
           </Box>
-          <Divider sx={{ mt: 2 }} />
+          <Divider sx={{ mt: 2, mb: 3 }} />
+          {children}
         </Box>
-        <Box sx={{ display: 'flex', gap: 3 }}>
-          <Box
-            component="nav"
-            sx={{
-              width: 200,
-              flexShrink: 0,
-              borderRight: '1px solid',
-              borderColor: 'divider',
-              pr: 1,
-            }}
-          >
-            <List disablePadding>
-              {navItems.map((item) => {
-                const isActive = pathname.startsWith(item.href);
-                return (
-                  <ListItem key={item.href} disablePadding>
-                    <ListItemButton
-                      component={NextLink}
-                      href={item.href}
-                      selected={isActive}
-                      sx={{
-                        borderRadius: 1,
-                        mb: 0.5,
-                        '&.Mui-selected': {
-                          bgcolor: 'primary.main',
-                          color: 'primary.contrastText',
-                          '& .MuiListItemIcon-root': { color: 'primary.contrastText' },
-                          '&:hover': { bgcolor: 'primary.dark' },
-                        },
-                      }}
-                    >
-                      <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
-                      <ListItemText
-                        primary={item.label}
-                        primaryTypographyProps={{ variant: 'body2' }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                );
-              })}
-            </List>
-          </Box>
-          <Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>
-        </Box>
-      </>
+      </Box>
     );
   }
 
