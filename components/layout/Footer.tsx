@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 export default function Footer() {
   return (
     <footer className="w-full flex justify-center border-t h-16">
-      <div className="w-full max-w-4xl flex justify-between items-center p-3">
+      <div className="w-full flex justify-between items-center px-3">
         <Typography variant="caption" color="text.secondary">
           A{' '}
           <Link href="https://joshglazer.com" target="_blank" rel="noreferrer" underline="hover" color="inherit" fontWeight={600}>
