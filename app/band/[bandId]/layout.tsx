@@ -8,12 +8,15 @@ import ChecklistIcon from '@mui/icons-material/Checklist';
 import GridViewIcon from '@mui/icons-material/GridView';
 import GroupIcon from '@mui/icons-material/Group';
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
+import MenuIcon from '@mui/icons-material/Menu';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -31,10 +34,13 @@ interface ConsumerProps {
 
 type BandLayoutProps = BandRouteProps & ConsumerProps;
 
+const SIDEBAR_WIDTH = 200;
+
 export default function BandLayout({ children, params }: BandLayoutProps) {
   const { bandId } = params;
   const { data: band, isLoading } = useBand({ bandId });
   const [archiving, setArchiving] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -65,6 +71,40 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
       { label: 'Practice', href: `${basePath}/practice`, icon: <ChecklistIcon fontSize="small" /> },
     ];
 
+    const navList = (onNavigate?: () => void) => (
+      <List disablePadding>
+        {navItems.map((item) => {
+          const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+          return (
+            <ListItem key={item.href} disablePadding>
+              <ListItemButton
+                component={NextLink}
+                href={item.href}
+                selected={isActive}
+                onClick={onNavigate}
+                sx={{
+                  borderRadius: 1,
+                  mb: 0.5,
+                  '&.Mui-selected': {
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                    '& .MuiListItemIcon-root': { color: 'primary.contrastText' },
+                    '&:hover': { bgcolor: 'primary.dark' },
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
+                <ListItemText
+                  primary={item.label}
+                  primaryTypographyProps={{ variant: 'body2' }}
+                />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
+      </List>
+    );
+
     return (
       // Breaks out of the root layout's max-w-4xl centered container and p-3 padding.
       // calc(50% - 50vw - 0.75rem) shifts left by: half the centering gap + the padding.
@@ -79,10 +119,12 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
           minHeight: 'calc(100vh - 64px)',
         }}
       >
+        {/* Permanent sidebar — desktop only */}
         <Box
           component="nav"
           sx={{
-            width: 200,
+            display: { xs: 'none', sm: 'block' },
+            width: SIDEBAR_WIDTH,
             flexShrink: 0,
             bgcolor: '#fef2f2',
             borderRight: '1px solid',
@@ -91,40 +133,42 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
             px: 1.5,
           }}
         >
-          <List disablePadding>
-            {navItems.map((item) => {
-              const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
-              return (
-                <ListItem key={item.href} disablePadding>
-                  <ListItemButton
-                    component={NextLink}
-                    href={item.href}
-                    selected={isActive}
-                    sx={{
-                      borderRadius: 1,
-                      mb: 0.5,
-                      '&.Mui-selected': {
-                        bgcolor: 'primary.main',
-                        color: 'primary.contrastText',
-                        '& .MuiListItemIcon-root': { color: 'primary.contrastText' },
-                        '&:hover': { bgcolor: 'primary.dark' },
-                      },
-                    }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
-                    <ListItemText
-                      primary={item.label}
-                      primaryTypographyProps={{ variant: 'body2' }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              );
-            })}
-          </List>
+          {navList()}
         </Box>
 
-        <Box sx={{ flex: 1, minWidth: 0, pt: 3, pb: 2, pl: 3, pr: '0.75rem' }}>
-          <BandBreadcrumbs bandId={bandId} bandName={band.name} />
+        {/* Temporary drawer — mobile only */}
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          ModalProps={{ keepMounted: true }}
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': {
+              width: SIDEBAR_WIDTH,
+              bgcolor: '#fef2f2',
+              pt: 3,
+              px: 1.5,
+              boxSizing: 'border-box',
+            },
+          }}
+        >
+          {navList(() => setMobileOpen(false))}
+        </Drawer>
+
+        <Box sx={{ flex: 1, minWidth: 0, pt: 3, pb: 2, pl: { xs: 2, sm: 3 }, pr: { xs: 2, sm: '0.75rem' } }}>
+          {/* Mobile menu toggle + breadcrumbs row */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0 }}>
+            <IconButton
+              onClick={() => setMobileOpen(true)}
+              size="small"
+              sx={{ display: { sm: 'none' }, mr: 0.5 }}
+              aria-label="Open navigation menu"
+            >
+              <MenuIcon fontSize="small" />
+            </IconButton>
+            <BandBreadcrumbs bandId={bandId} bandName={band.name} />
+          </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
             <Typography variant="h4" fontWeight={700} color="text.primary">
               {band.name}
