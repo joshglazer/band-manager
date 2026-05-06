@@ -158,18 +158,21 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
 
         <Box sx={{ flex: 1, minWidth: 0, pt: 3, pb: 2, pl: { xs: 2, sm: 3 }, pr: { xs: 2, sm: '0.75rem' } }}>
           {/* Mobile menu toggle + breadcrumbs row */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <IconButton
               onClick={() => setMobileOpen(true)}
               size="small"
-              sx={{ display: { sm: 'none' }, mr: 0.5 }}
+              sx={{ display: { sm: 'none' }, mr: 0.5, flexShrink: 0 }}
               aria-label="Open navigation menu"
             >
               <MenuIcon fontSize="small" />
             </IconButton>
-            <BandBreadcrumbs bandId={bandId} bandName={band.name} />
+            {/* Wrapper zeroes out the mb:2 on MuiBreadcrumbs so it doesn't offset flex centering */}
+            <Box sx={{ '& .MuiBreadcrumbs-root': { mb: 0 } }}>
+              <BandBreadcrumbs bandId={bandId} bandName={band.name} />
+            </Box>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', mt: 2 }}>
             <Typography variant="h4" fontWeight={700} color="text.primary">
               {band.name}
             </Typography>
