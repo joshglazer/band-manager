@@ -66,13 +66,14 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
     ];
 
     return (
-      // Negative margins break out of the root layout's p-3 container padding so the
-      // sidebar background and border extend flush to the app header and page edges.
+      // Breaks out of the root layout's max-w-4xl centered container and p-3 padding.
+      // calc(50% - 50vw - 0.75rem) shifts left by: half the centering gap + the padding.
       <Box
         sx={{
           display: 'flex',
           alignItems: 'stretch',
-          mx: '-0.75rem',
+          width: '100vw',
+          ml: 'calc(50% - 50vw - 0.75rem)',
           mt: '-0.75rem',
           mb: '-0.75rem',
           minHeight: 'calc(100vh - 64px)',
