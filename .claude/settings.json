@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/joshglazer/work/band-manager && BUILD_OUTPUT=$(npm run build 2>&1); BUILD_EXIT=$?; if [ $BUILD_EXIT -ne 0 ]; then printf \"%s\" \"$BUILD_OUTPUT\" | jq -Rs '{\"continue\": false, \"stopReason\": (\"npm run build failed. Fix the build errors:\\n\\n\" + .)}'; fi",
+            "timeout": 120,
+            "statusMessage": "Verifying build passes..."
+          }
+        ]
+      }
+    ]
+  }
+}
