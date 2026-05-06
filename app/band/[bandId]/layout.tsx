@@ -150,7 +150,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
           {navList(() => setMobileOpen(false))}
         </Drawer>
 
-        <Box sx={{ flex: 1, minWidth: 0, pt: 3, pb: 2, pl: { xs: 2, sm: 3 }, pr: { xs: 2, sm: '0.75rem' } }}>
+        <Box sx={{ flex: 1, minWidth: 0, pt: 3, pb: 2, pl: 3, pr: { xs: 3, sm: '0.75rem' } }}>
           <BandBreadcrumbs bandId={bandId} bandName={band.name} />
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
             <Typography variant="h4" fontWeight={700} color="text.primary">
