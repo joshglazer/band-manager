@@ -201,12 +201,12 @@ export default function SetlistEditor({
   return (
     <>
       <Box className="flex gap-4 pb-3" sx={{ flexWrap: 'wrap' }}>
-        <FormControl variant="outlined" size="medium" sx={{ width: 300 }}>
+        <FormControl variant="outlined" size="small" sx={{ width: 300 }}>
           <InputLabel id="event-select-label">Event</InputLabel>
           <Select
             labelId="event-select-label"
             label="Event"
-            size="medium"
+            size="small"
             value={setlist.eventId ?? ''}
             onChange={(e) => handleEventChange(e.target.value as number | '')}
           >
