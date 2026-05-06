@@ -2,16 +2,20 @@
 
 import EventForm from '@/components/EventForm';
 import useBandEvents from '@/hooks/useBandEvents';
+import useSetlists from '@/hooks/useSetlists';
 import { BandEvent } from '@/types/composites';
 import { createClient } from '@/utils/supabase/client';
 import AddIcon from '@mui/icons-material/Add';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import ChecklistIcon from '@mui/icons-material/Checklist';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import MicIcon from '@mui/icons-material/Mic';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -21,12 +25,16 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -73,21 +81,23 @@ function EventChip({ type }: { type: BandEvent['type'] }) {
 interface EventRowProps {
   event: BandEvent;
   bandId: number;
+  setlistId?: number;
   onMutate: () => void;
 }
 
-function EventRow({ event, bandId, onMutate }: EventRowProps) {
+function EventRow({ event, bandId, setlistId, onMutate }: EventRowProps) {
+  const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
   const handleDelete = async () => {
     setDeleting(true);
+    setMenuAnchor(null);
     const supabase = createClient();
     await supabase.from('band_events').delete().eq('id', event.id);
     onMutate();
   };
-
-  const iconSx = { flexShrink: 0, opacity: 0.5, '&:hover': { opacity: 1 } };
 
   return (
     <>
@@ -113,17 +123,40 @@ function EventRow({ event, bandId, onMutate }: EventRowProps) {
             {formatDateTime(event.date, event.time)}
           </Typography>
         </Box>
-        <Tooltip title="Edit event">
-          <IconButton size="small" onClick={() => setEditOpen(true)} sx={iconSx}>
-            <EditOutlinedIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete event">
-          <IconButton size="small" onClick={handleDelete} disabled={deleting} sx={iconSx}>
-            <DeleteOutlineIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        <IconButton
+          size="small"
+          onClick={(e) => setMenuAnchor(e.currentTarget)}
+          sx={{ flexShrink: 0, opacity: 0.5, '&:hover': { opacity: 1 } }}
+        >
+          <MoreVertIcon fontSize="small" />
+        </IconButton>
       </Box>
+
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={() => setMenuAnchor(null)}
+      >
+        <MenuItem onClick={() => { setMenuAnchor(null); setEditOpen(true); }}>
+          <ListItemIcon><EditOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Edit</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleDelete} disabled={deleting}>
+          <ListItemIcon><DeleteOutlineIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Delete</ListItemText>
+        </MenuItem>
+        {setlistId !== undefined && [
+          <Divider key="divider" />,
+          <MenuItem key="practice" onClick={() => { setMenuAnchor(null); router.push(`/band/${bandId}/practice?setlist=${setlistId}`); }}>
+            <ListItemIcon><ChecklistIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>Practice</ListItemText>
+          </MenuItem>,
+          <MenuItem key="setlist" onClick={() => { setMenuAnchor(null); router.push(`/band/${bandId}/setlists/${setlistId}/edit`); }}>
+            <ListItemIcon><QueueMusicIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>Setlist</ListItemText>
+          </MenuItem>,
+        ]}
+      </Menu>
 
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle>Edit Event</DialogTitle>
@@ -146,9 +179,10 @@ interface EventListProps {
   isLoading: boolean;
   emptyMessage: string;
   onMutate: () => void;
+  setlistsByEventId: Map<number, number>;
 }
 
-function EventList({ events, bandId, isLoading, emptyMessage, onMutate }: EventListProps) {
+function EventList({ events, bandId, isLoading, emptyMessage, onMutate, setlistsByEventId }: EventListProps) {
   if (isLoading) {
     return <Typography variant="body2" color="text.secondary">Loading…</Typography>;
   }
@@ -162,7 +196,13 @@ function EventList({ events, bandId, isLoading, emptyMessage, onMutate }: EventL
   return (
     <Box>
       {events.map((event, i) => (
-        <EventRow key={i} event={event} bandId={bandId} onMutate={onMutate} />
+        <EventRow
+          key={i}
+          event={event}
+          bandId={bandId}
+          setlistId={setlistsByEventId.get(event.id)}
+          onMutate={onMutate}
+        />
       ))}
     </Box>
   );
@@ -257,6 +297,7 @@ interface BandEventsCalendarProps {
 
 export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) {
   const { data: events, isLoading, mutate } = useBandEvents({ bandId });
+  const { data: setlists } = useSetlists({ bandId });
   const [addOpen, setAddOpen] = useState(false);
   const [view, setView] = useState<'list' | 'calendar'>('list');
   const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming');
@@ -265,6 +306,14 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
   const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
 
   const today = useMemo(todayDateStr, []);
+
+  const setlistsByEventId = useMemo(() => {
+    const map = new Map<number, number>();
+    setlists?.forEach((s) => {
+      if (s.event_id) map.set(s.event_id, s.id);
+    });
+    return map;
+  }, [setlists]);
 
   const eventDates = useMemo(() => {
     const s = new Set<string>();
@@ -319,14 +368,10 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
             }}
           >
             <ToggleButton value="list" aria-label="list view">
-              <Tooltip title="List view">
-                <ViewListIcon fontSize="small" />
-              </Tooltip>
+              <ViewListIcon fontSize="small" />
             </ToggleButton>
             <ToggleButton value="calendar" aria-label="calendar view">
-              <Tooltip title="Calendar view">
-                <CalendarMonthIcon fontSize="small" />
-              </Tooltip>
+              <CalendarMonthIcon fontSize="small" />
             </ToggleButton>
           </ToggleButtonGroup>
           <Button
@@ -363,6 +408,7 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
             emptyMessage={tab === 'upcoming' ? 'No upcoming events.' : 'No past events.'}
             bandId={bandId}
             onMutate={handleMutate}
+            setlistsByEventId={setlistsByEventId}
           />
         </Box>
       ) : (
@@ -422,6 +468,7 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
                   isLoading={isLoading}
                   emptyMessage="No events on this day."
                   onMutate={handleMutate}
+                  setlistsByEventId={setlistsByEventId}
                 />
               </>
             ) : (
@@ -440,6 +487,7 @@ export default function BandEventsCalendar({ bandId }: BandEventsCalendarProps) 
                   isLoading={isLoading}
                   emptyMessage={tab === 'upcoming' ? 'No upcoming events.' : 'No past events.'}
                   onMutate={handleMutate}
+                  setlistsByEventId={setlistsByEventId}
                 />
               </>
             )}

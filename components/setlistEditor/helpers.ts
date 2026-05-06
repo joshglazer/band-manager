@@ -1,14 +1,35 @@
 import { DroppableStateSnapshot } from 'react-beautiful-dnd';
 import { Set, Setlist } from './types';
 import { Tables } from '@/types/supabase';
-import { SetlistComposite } from '@/types/composites';
+import { BandEvent, SetlistComposite } from '@/types/composites';
 
 export function getDragDropBackgroundColorClassName(snapshot: DroppableStateSnapshot): string {
   return snapshot.isDraggingOver ? 'bg-slate-300' : 'bg-white';
 }
 
+export function getEventDisplayName(event: BandEvent): string {
+  const type = event.type === 'gig' ? 'Gig' : 'Practice';
+  const [year, month, day] = event.date.split('-');
+  return `${type} — ${event.location} (${month}/${day}/${year})`;
+}
+
+export function getSetlistDisplayName(setlist: {
+  name?: string | null;
+  event?: BandEvent | null;
+  band_events?: BandEvent | null;
+}): string {
+  const event = setlist.event ?? setlist.band_events;
+  const eventName = event ? getEventDisplayName(event) : null;
+  const name = setlist.name?.trim() || null;
+
+  if (eventName && name) return `${eventName} — ${name}`;
+  if (eventName) return eventName;
+  if (name) return name;
+  return 'Untitled Setlist';
+}
+
 export function adaptSetlist(setlist: SetlistComposite, songs: Tables<'songs'>[]): Setlist {
-  const { id, name, date, setlist_songs, band_id } = setlist;
+  const { id, name, event_id, band_events, setlist_songs, band_id } = setlist;
 
   const sets: Set[] = [];
 
@@ -50,8 +71,9 @@ export function adaptSetlist(setlist: SetlistComposite, songs: Tables<'songs'>[]
   return {
     id,
     bandId: band_id,
-    name: name ?? '',
-    date: date ?? undefined,
+    name: name ?? undefined,
+    eventId: event_id ?? undefined,
+    event: band_events,
     sets,
     unusedSongs: unusedSongs,
   };

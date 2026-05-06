@@ -2,6 +2,7 @@
 
 import Loading from '@/components/design/Loading';
 import ChordChartViewer from '@/components/ChordChartViewer';
+import { getSetlistDisplayName } from '@/components/setlistEditor/helpers';
 import useSetlistWithSongs from '@/hooks/useSetlistWithSongs';
 import { Tables } from '@/types/supabase';
 import Box from '@mui/material/Box';
@@ -62,7 +63,7 @@ export default function PrintChordChartsPage({ params }: Readonly<PrintChordChar
 
       <Box className="no-print" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
         <Typography variant="h5" fontWeight={700}>
-          {setlist.name} — Chord Charts
+          {getSetlistDisplayName(setlist)} — Chord Charts
         </Typography>
         <Button variant="contained" startIcon={<PrintIcon />} onClick={() => window.print()}>
           Print
