@@ -19,6 +19,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   edit: 'Edit Setlist',
   'spotify-import': 'Import from Spotify',
   practice: 'Practice',
+  settings: 'Settings',
 };
 
 export default function BandBreadcrumbs({ bandId, bandName }: BandBreadcrumbsProps) {

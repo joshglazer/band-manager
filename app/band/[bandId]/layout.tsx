@@ -4,15 +4,13 @@ import Loading from '@/components/design/Loading';
 import BandBreadcrumbs from '@/components/layout/BandBreadcrumbs';
 import { useNav } from '@/components/layout/NavContext';
 import useBand from '@/hooks/useBand';
-import ArchiveIcon from '@mui/icons-material/Archive';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import GridViewIcon from '@mui/icons-material/GridView';
 import GroupIcon from '@mui/icons-material/Group';
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
-import UnarchiveIcon from '@mui/icons-material/Unarchive';
+import SettingsIcon from '@mui/icons-material/Settings';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
@@ -23,8 +21,8 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import NextLink from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { ReactNode, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { ReactNode } from 'react';
 import { BandRouteProps } from './types';
 
 interface ConsumerProps {
@@ -39,9 +37,7 @@ const SIDEBAR_BG = { light: '#fef2f2', dark: '#1a0b0d' };
 export default function BandLayout({ children, params }: BandLayoutProps) {
   const { bandId } = params;
   const { data: band, isLoading } = useBand({ bandId });
-  const [archiving, setArchiving] = useState(false);
   const { mobileOpen, setMobileOpen } = useNav();
-  const router = useRouter();
   const pathname = usePathname();
 
   if (isLoading) {
@@ -51,16 +47,6 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
   if (band) {
     const isArchived = !!band.archived_at;
 
-    const toggleArchive = async () => {
-      setArchiving(true);
-      try {
-        await fetch(`/api/bands/${bandId}/archive`, { method: 'POST' });
-        router.refresh();
-      } finally {
-        setArchiving(false);
-      }
-    };
-
     const basePath = `/band/${bandId}`;
 
     const navItems = [
@@ -69,6 +55,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
       { label: 'Songs', href: `${basePath}/songs`, icon: <LibraryMusicIcon fontSize="small" /> },
       { label: 'Setlists', href: `${basePath}/setlists`, icon: <QueueMusicIcon fontSize="small" /> },
       { label: 'Practice', href: `${basePath}/practice`, icon: <ChecklistIcon fontSize="small" /> },
+      { label: 'Settings', href: `${basePath}/settings`, icon: <SettingsIcon fontSize="small" /> },
     ];
 
     const navList = (onNavigate?: () => void) => (
@@ -159,19 +146,6 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
             {isArchived && (
               <Chip label="Archived" size="small" color="default" variant="outlined" />
             )}
-            <Box sx={{ ml: 'auto' }}>
-              <Button
-                size="small"
-                variant="text"
-                color="inherit"
-                startIcon={isArchived ? <UnarchiveIcon /> : <ArchiveIcon />}
-                onClick={toggleArchive}
-                disabled={archiving}
-                sx={{ color: 'text.secondary' }}
-              >
-                {isArchived ? 'Unarchive band' : 'Archive band'}
-              </Button>
-            </Box>
           </Box>
           <Divider sx={{ mt: 2, mb: 3 }} />
           {children}
