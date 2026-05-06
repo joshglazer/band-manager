@@ -1,5 +1,6 @@
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
+import { NavProvider } from '@/components/layout/NavContext';
 import ThemeRegistry from '@/components/ThemeRegistry';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import { GeistSans } from 'geist/font/sans';
@@ -27,13 +28,15 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
       <html lang="en" className={GeistSans.className}>
         <body>
           <ThemeRegistry>
-            <div className="min-h-screen flex-1 w-full flex flex-col items-center">
-              <Header />
-              <main className="flex flex-col items-center grow w-full">
-                <div className="w-full max-w-4xl p-3">{children}</div>
-              </main>
-              <Footer />
-            </div>
+            <NavProvider>
+              <div className="min-h-screen flex-1 w-full flex flex-col items-center">
+                <Header />
+                <main className="flex flex-col items-center grow w-full">
+                  <div className="w-full max-w-4xl p-3">{children}</div>
+                </main>
+                <Footer />
+              </div>
+            </NavProvider>
           </ThemeRegistry>
         </body>
       </html>

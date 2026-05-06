@@ -2,13 +2,13 @@
 
 import Loading from '@/components/design/Loading';
 import BandBreadcrumbs from '@/components/layout/BandBreadcrumbs';
+import { useNav } from '@/components/layout/NavContext';
 import useBand from '@/hooks/useBand';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import GridViewIcon from '@mui/icons-material/GridView';
 import GroupIcon from '@mui/icons-material/Group';
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
-import MenuIcon from '@mui/icons-material/Menu';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import Box from '@mui/material/Box';
@@ -16,7 +16,6 @@ import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
-import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -35,12 +34,13 @@ interface ConsumerProps {
 type BandLayoutProps = BandRouteProps & ConsumerProps;
 
 const SIDEBAR_WIDTH = 200;
+const SIDEBAR_BG = { light: '#fef2f2', dark: '#1a0b0d' };
 
 export default function BandLayout({ children, params }: BandLayoutProps) {
   const { bandId } = params;
   const { data: band, isLoading } = useBand({ bandId });
   const [archiving, setArchiving] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { mobileOpen, setMobileOpen } = useNav();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -105,6 +105,15 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
       </List>
     );
 
+    const sidebarSx = {
+      bgcolor: (theme: { palette: { mode: string } }) =>
+        theme.palette.mode === 'dark' ? SIDEBAR_BG.dark : SIDEBAR_BG.light,
+      borderRight: '1px solid',
+      borderColor: 'divider',
+      pt: 3,
+      px: 1.5,
+    };
+
     return (
       // Breaks out of the root layout's max-w-4xl centered container and p-3 padding.
       // calc(50% - 50vw - 0.75rem) shifts left by: half the centering gap + the padding.
@@ -122,16 +131,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
         {/* Permanent sidebar — desktop only */}
         <Box
           component="nav"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            width: SIDEBAR_WIDTH,
-            flexShrink: 0,
-            bgcolor: '#fef2f2',
-            borderRight: '1px solid',
-            borderColor: 'divider',
-            pt: 3,
-            px: 1.5,
-          }}
+          sx={{ display: { xs: 'none', sm: 'block' }, width: SIDEBAR_WIDTH, flexShrink: 0, ...sidebarSx }}
         >
           {navList()}
         </Box>
@@ -144,35 +144,15 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': {
-              width: SIDEBAR_WIDTH,
-              bgcolor: '#fef2f2',
-              pt: 3,
-              px: 1.5,
-              boxSizing: 'border-box',
-            },
+            '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH, boxSizing: 'border-box', ...sidebarSx },
           }}
         >
           {navList(() => setMobileOpen(false))}
         </Drawer>
 
-        <Box sx={{ flex: 1, minWidth: 0, pt: 3, pb: 2, pl: { xs: 2, sm: 3 }, pr: { xs: 2, sm: '0.75rem' } }}>
-          {/* Mobile menu toggle + breadcrumbs row */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton
-              onClick={() => setMobileOpen(true)}
-              size="small"
-              sx={{ display: { sm: 'none' }, mr: 0.5, flexShrink: 0 }}
-              aria-label="Open navigation menu"
-            >
-              <MenuIcon fontSize="small" />
-            </IconButton>
-            {/* Wrapper zeroes out the mb:2 on MuiBreadcrumbs so it doesn't offset flex centering */}
-            <Box sx={{ '& .MuiBreadcrumbs-root': { mb: 0 } }}>
-              <BandBreadcrumbs bandId={bandId} bandName={band.name} />
-            </Box>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', mt: 2 }}>
+        <Box sx={{ flex: 1, minWidth: 0, pt: 3, pb: 2, pl: 3, pr: { xs: 3, sm: '0.75rem' } }}>
+          <BandBreadcrumbs bandId={bandId} bandName={band.name} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
             <Typography variant="h4" fontWeight={700} color="text.primary">
               {band.name}
             </Typography>

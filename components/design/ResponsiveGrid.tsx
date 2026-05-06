@@ -10,7 +10,7 @@ interface ResponsiveGridProps {
 
 export default function ResponsiveGrid({ items }: Readonly<ResponsiveGridProps>) {
   return (
-    <Grid container spacing={2} justifyContent="flex-start" alignItems="center">
+    <Grid container spacing={2} justifyContent="flex-start" alignItems="center" sx={{ mt: 0, ml: 0, width: '100%' }}>
       {items.map(({ key, content }) => (
         <Fragment key={key}>{content}</Fragment>
       ))}
