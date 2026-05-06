@@ -1,10 +1,21 @@
 import GitHubIcon from '@mui/icons-material/GitHub';
+import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 
 export default function Footer() {
   return (
-    <footer className="w-full flex justify-center border-t h-16">
+    <Box
+      component="footer"
+      sx={{
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        borderTop: '1px solid',
+        borderColor: 'divider',
+        height: 64,
+      }}
+    >
       <div className="w-full flex justify-between items-center px-3">
         <Typography variant="caption" color="text.secondary">
           A{' '}
@@ -24,6 +35,6 @@ export default function Footer() {
           <GitHubIcon sx={{ fontSize: 16 }} /> Source Code
         </Link>
       </div>
-    </footer>
+    </Box>
   );
 }
