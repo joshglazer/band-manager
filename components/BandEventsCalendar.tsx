@@ -1,6 +1,8 @@
 'use client';
 
 import EventForm from '@/components/EventForm';
+import Table from '@/components/design/Table';
+import type { TableProps, TablePropsDataType, TableRow as TableRowType } from '@/components/design/Table';
 import useBandEvents from '@/hooks/useBandEvents';
 import useSetlists from '@/hooks/useSetlists';
 import { BandEvent } from '@/types/composites';
@@ -78,14 +80,14 @@ function EventChip({ type }: { type: BandEvent['type'] }) {
   );
 }
 
-interface EventRowProps {
+interface EventActionsMenuProps {
   event: BandEvent;
   bandId: number;
   setlistId?: number;
   onMutate: () => void;
 }
 
-function EventRow({ event, bandId, setlistId, onMutate }: EventRowProps) {
+function EventActionsMenu({ event, bandId, setlistId, onMutate }: EventActionsMenuProps) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -101,36 +103,13 @@ function EventRow({ event, bandId, setlistId, onMutate }: EventRowProps) {
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1.5,
-          py: 1,
-          px: 1.5,
-          borderRadius: 1,
-          '&:hover': { bgcolor: 'action.hover' },
-        }}
+      <IconButton
+        size="small"
+        onClick={(e) => setMenuAnchor(e.currentTarget)}
+        sx={{ opacity: 0.5, '&:hover': { opacity: 1 } }}
       >
-        <Box sx={{ flexShrink: 0 }}>
-          <EventChip type={event.type} />
-        </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="body2" fontWeight={500} noWrap>
-            {event.location}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {formatDateTime(event.date, event.time)}
-          </Typography>
-        </Box>
-        <IconButton
-          size="small"
-          onClick={(e) => setMenuAnchor(e.currentTarget)}
-          sx={{ flexShrink: 0, opacity: 0.5, '&:hover': { opacity: 1 } }}
-        >
-          <MoreVertIcon fontSize="small" />
-        </IconButton>
-      </Box>
+        <MoreVertIcon fontSize="small" />
+      </IconButton>
 
       <Menu
         anchorEl={menuAnchor}
@@ -183,6 +162,12 @@ interface EventListProps {
 }
 
 function EventList({ events, bandId, isLoading, emptyMessage, onMutate, setlistsByEventId }: EventListProps) {
+  const eventsById = useMemo(() => {
+    const map = new Map<number, BandEvent>();
+    events.forEach((e) => map.set(e.id, e));
+    return map;
+  }, [events]);
+
   if (isLoading) {
     return <Typography variant="body2" color="text.secondary">Loading…</Typography>;
   }
@@ -193,19 +178,53 @@ function EventList({ events, bandId, isLoading, emptyMessage, onMutate, setlists
       </Typography>
     );
   }
-  return (
-    <Box>
-      {events.map((event, i) => (
-        <EventRow
-          key={i}
-          event={event}
-          bandId={bandId}
-          setlistId={setlistsByEventId.get(event.id)}
-          onMutate={onMutate}
-        />
-      ))}
-    </Box>
-  );
+
+  const rows: TableRowType[] = events.map((event) => ({
+    id: event.id,
+    type: event.type,
+    location: event.location,
+    date: event.date,
+    time: event.time,
+  }));
+
+  const tableData: TableProps = {
+    ariaLabel: 'Table of Events',
+    columns: [
+      {
+        name: 'Type',
+        dataKey: 'type',
+        dataFormatter: (value: TablePropsDataType) => <EventChip type={value as BandEvent['type']} />,
+      },
+      {
+        name: 'Date',
+        dataKey: 'date',
+        dataFormatter: (value: TablePropsDataType, row: TableRowType) =>
+          formatDateTime(row.date as string, row.time as string | null),
+      },
+      { name: 'Location', dataKey: 'location', isHeader: true, headerDataKey: 'id' },
+      {
+        name: 'Actions',
+        dataKey: 'id',
+        stickyRight: true,
+        hideHeader: true,
+        dataFormatter: (value: TablePropsDataType) => {
+          const event = eventsById.get(value as number);
+          if (!event) return <></>;
+          return (
+            <EventActionsMenu
+              event={event}
+              bandId={bandId}
+              setlistId={setlistsByEventId.get(event.id)}
+              onMutate={onMutate}
+            />
+          );
+        },
+      },
+    ],
+    rows,
+  };
+
+  return <Table {...tableData} />;
 }
 
 interface CalendarGridProps {
