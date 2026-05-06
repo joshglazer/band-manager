@@ -201,7 +201,7 @@ export default function SetlistEditor({
   return (
     <>
       <Box className="flex gap-4 pb-3" sx={{ flexWrap: 'wrap' }}>
-        <FormControl variant="outlined" sx={{ minWidth: 220 }}>
+        <FormControl variant="outlined" sx={{ width: 300 }}>
           <InputLabel id="event-select-label">Event</InputLabel>
           <Select
             labelId="event-select-label"
@@ -224,6 +224,7 @@ export default function SetlistEditor({
           value={setlist.name ?? ''}
           onChange={handleTitleChange}
           placeholder={selectedEvent ? 'Override event name…' : 'My Setlist'}
+          sx={{ width: 300 }}
         />
       </Box>
       <DragDropContext onDragEnd={onDragEnd}>
