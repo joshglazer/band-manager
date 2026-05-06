@@ -5,6 +5,7 @@ import BandBreadcrumbs from '@/components/layout/BandBreadcrumbs';
 import useBand from '@/hooks/useBand';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import ChecklistIcon from '@mui/icons-material/Checklist';
+import GridViewIcon from '@mui/icons-material/GridView';
 import GroupIcon from '@mui/icons-material/Group';
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
@@ -54,11 +55,14 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
       }
     };
 
+    const basePath = `/band/${bandId}`;
+
     const navItems = [
-      { label: 'Members', href: `/band/${bandId}/members`, icon: <GroupIcon fontSize="small" /> },
-      { label: 'Songs', href: `/band/${bandId}/songs`, icon: <LibraryMusicIcon fontSize="small" /> },
-      { label: 'Setlists', href: `/band/${bandId}/setlists`, icon: <QueueMusicIcon fontSize="small" /> },
-      { label: 'Practice', href: `/band/${bandId}/practice`, icon: <ChecklistIcon fontSize="small" /> },
+      { label: 'Overview', href: basePath, icon: <GridViewIcon fontSize="small" />, exact: true },
+      { label: 'Members', href: `${basePath}/members`, icon: <GroupIcon fontSize="small" /> },
+      { label: 'Songs', href: `${basePath}/songs`, icon: <LibraryMusicIcon fontSize="small" /> },
+      { label: 'Setlists', href: `${basePath}/setlists`, icon: <QueueMusicIcon fontSize="small" /> },
+      { label: 'Practice', href: `${basePath}/practice`, icon: <ChecklistIcon fontSize="small" /> },
     ];
 
     return (
@@ -88,7 +92,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
         >
           <List disablePadding>
             {navItems.map((item) => {
-              const isActive = pathname.startsWith(item.href);
+              const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
               return (
                 <ListItem key={item.href} disablePadding>
                   <ListItemButton
