@@ -2,7 +2,7 @@
 
 import Loading from '@/components/design/Loading';
 import Table, { TableProps, TablePropsDataType } from '@/components/design/Table';
-import { adaptSetlist, getEventDisplayName, getSetlistDisplayName } from '@/components/setlistEditor/helpers';
+import { adaptSetlist, getSetlistDisplayName } from '@/components/setlistEditor/helpers';
 import useSetlists from '@/hooks/useSetlists';
 import useSongs from '@/hooks/useSongs';
 import { TablesInsert } from '@/types/supabase';
@@ -196,7 +196,6 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
     const setlistsAdaptedForTable = filteredAndSortedSetlists.map((setlist) => ({
       name: getSetlistDisplayName(setlist),
       id: setlist.id,
-      event: setlist.event ? getEventDisplayName(setlist.event) : '',
       sets: setlist.sets
         .map(({ songs }) => {
           const totalDuration = songs.reduce(function (acc, song) {
@@ -211,7 +210,6 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
       ariaLabel: 'Table of Setlists',
       columns: [
         { name: 'Name', dataKey: 'name', isHeader: true, headerDataKey: 'id' },
-        { name: 'Event', dataKey: 'event' },
         { name: 'Sets', dataKey: 'sets', dataFormatter: formatSets },
         { name: 'Actions', dataKey: 'id', dataFormatter: formatEditButton, stickyRight: true, hideHeader: true },
       ],

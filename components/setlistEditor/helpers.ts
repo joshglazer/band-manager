@@ -18,9 +18,13 @@ export function getSetlistDisplayName(setlist: {
   event?: BandEvent | null;
   band_events?: BandEvent | null;
 }): string {
-  if (setlist.name) return setlist.name;
   const event = setlist.event ?? setlist.band_events;
-  if (event) return getEventDisplayName(event);
+  const eventName = event ? getEventDisplayName(event) : null;
+  const name = setlist.name?.trim() || null;
+
+  if (eventName && name) return `${eventName} — ${name}`;
+  if (eventName) return eventName;
+  if (name) return name;
   return 'Untitled Setlist';
 }
 
