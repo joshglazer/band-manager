@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import BandForm from '@/components/forms/BandForm';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
