@@ -200,7 +200,7 @@ export default function SetlistEditor({
 
   return (
     <>
-      <Box className="flex gap-4 pb-3" sx={{ flexWrap: 'wrap' }}>
+      <Box className="flex gap-4 pb-3" sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
         <FormControl variant="outlined" size="small" sx={{ width: 300 }}>
           <InputLabel id="event-select-label">Event</InputLabel>
           <Select
@@ -227,6 +227,14 @@ export default function SetlistEditor({
           placeholder={selectedEvent ? 'Override event name…' : 'My Setlist'}
           sx={{ width: 300 }}
         />
+        {setlist.id && (
+          <PrintDropdownButton
+            options={[
+              { label: 'Print Setlist', url: `/print/setlist/${setlist.id}/songs` },
+              { label: 'Print Chord Charts', url: `/print/setlist/${setlist.id}/chord-charts` },
+            ]}
+          />
+        )}
       </Box>
       <DragDropContext onDragEnd={onDragEnd}>
         <Grid container spacing={2}>
@@ -236,19 +244,9 @@ export default function SetlistEditor({
               <Button variant="contained" onClick={addSetlist}>
                 Add Set
               </Button>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                {setlist.id && (
-                  <PrintDropdownButton
-                    options={[
-                      { label: 'Print Setlist', url: `/print/setlist/${setlist.id}/songs` },
-                      { label: 'Print Chord Charts', url: `/print/setlist/${setlist.id}/chord-charts` },
-                    ]}
-                  />
-                )}
-                <Button variant="contained" onClick={saveSetlist}>
-                  Save Setlist
-                </Button>
-              </Box>
+              <Button variant="contained" onClick={saveSetlist}>
+                Save Setlist
+              </Button>
             </Box>
           </Grid>
           <Grid item xs={12} sm={6}>
