@@ -4,6 +4,7 @@ import Loading from '@/components/design/Loading';
 import BandBreadcrumbs from '@/components/layout/BandBreadcrumbs';
 import { useNav } from '@/components/layout/NavContext';
 import useBand from '@/hooks/useBand';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import GridViewIcon from '@mui/icons-material/GridView';
 import GroupIcon from '@mui/icons-material/Group';
@@ -51,6 +52,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
 
     const navItems = [
       { label: 'Overview', href: basePath, icon: <GridViewIcon fontSize="small" />, exact: true },
+      { label: 'Events', href: `${basePath}/events`, icon: <CalendarMonthIcon fontSize="small" /> },
       { label: 'Members', href: `${basePath}/members`, icon: <GroupIcon fontSize="small" /> },
       { label: 'Songs', href: `${basePath}/songs`, icon: <LibraryMusicIcon fontSize="small" /> },
       { label: 'Setlists', href: `${basePath}/setlists`, icon: <QueueMusicIcon fontSize="small" /> },
