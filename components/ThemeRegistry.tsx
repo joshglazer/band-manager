@@ -6,9 +6,9 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { ReactNode, useMemo } from 'react';
 
-// Deep crimson — raw energy, rock and roll, vintage venue marquees
-// Dark: near-black with a deep red undertone
-// Light: soft warm white with rich crimson accents
+// Deep crimson meets electric violet — rock energy + stage lights
+// Dark: near-black with red undertone, accented by deep indigo
+// Light: warm white with rich crimson + violet accents
 function buildTheme(dark: boolean) {
   return createTheme({
     palette: {
@@ -20,9 +20,9 @@ function buildTheme(dark: boolean) {
         contrastText: dark ? '#0d0305' : '#ffffff',
       },
       secondary: {
-        main: dark ? '#94a3b8' : '#475569',
-        light: dark ? '#cbd5e1' : '#64748b',
-        dark: dark ? '#64748b' : '#334155',
+        main: dark ? '#a78bfa' : '#7c3aed',
+        light: dark ? '#c4b5fd' : '#8b5cf6',
+        dark: dark ? '#8b5cf6' : '#6d28d9',
         contrastText: '#ffffff',
       },
       background: {
@@ -54,7 +54,11 @@ function buildTheme(dark: boolean) {
       MuiCssBaseline: {
         styleOverrides: {
           body: {
-            scrollbarColor: dark ? '#3d1015 #0d0507' : '#f5c6c6 #fdf8f8',
+            scrollbarColor: dark ? '#3d1015 #0d0507' : '#e4d8ff #fdf8f8',
+            background: dark
+              ? 'linear-gradient(160deg, #0d0507 0%, #100820 60%, #0d0507 100%) fixed'
+              : 'linear-gradient(160deg, #fdf8f8 0%, #faf7ff 60%, #fdf8f8 100%) fixed',
+            minHeight: '100vh',
           },
         },
       },
@@ -62,8 +66,10 @@ function buildTheme(dark: boolean) {
         defaultProps: { elevation: 0 },
         styleOverrides: {
           root: {
-            backgroundColor: dark ? '#0d0507' : '#991b1b',
-            borderBottom: dark ? '1px solid rgba(248,113,113,0.15)' : 'none',
+            background: dark
+              ? 'linear-gradient(90deg, #2d1010 0%, #1e0a38 100%)'
+              : 'linear-gradient(90deg, #991b1b 0%, #5b21b6 100%)',
+            borderBottom: dark ? '1px solid rgba(167,139,250,0.12)' : 'none',
           },
         },
       },
@@ -75,9 +81,9 @@ function buildTheme(dark: boolean) {
             transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
             '&:hover': {
               boxShadow: dark
-                ? '0 4px 32px rgba(248,113,113,0.1)'
-                : '0 4px 24px rgba(185,28,28,0.1)',
-              borderColor: dark ? 'rgba(248,113,113,0.35)' : 'rgba(185,28,28,0.3)',
+                ? '0 4px 32px rgba(167,139,250,0.12)'
+                : '0 4px 24px rgba(109,40,217,0.1)',
+              borderColor: dark ? 'rgba(167,139,250,0.3)' : 'rgba(109,40,217,0.2)',
             },
           }),
         },
@@ -110,7 +116,7 @@ function buildTheme(dark: boolean) {
           root: {
             '&:last-child td': { border: 0 },
             '&:hover': {
-              backgroundColor: dark ? 'rgba(248,113,113,0.05)' : 'rgba(185,28,28,0.03)',
+              backgroundColor: dark ? 'rgba(167,139,250,0.05)' : 'rgba(109,40,217,0.03)',
             },
           },
         },

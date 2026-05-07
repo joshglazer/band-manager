@@ -33,7 +33,6 @@ interface ConsumerProps {
 type BandLayoutProps = BandRouteProps & ConsumerProps;
 
 const SIDEBAR_WIDTH = 200;
-const SIDEBAR_BG = { light: '#fef2f2', dark: '#1a0b0d' };
 
 export default function BandLayout({ children, params }: BandLayoutProps) {
   const { bandId } = params;
@@ -95,8 +94,10 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
     );
 
     const sidebarSx = {
-      bgcolor: (theme: { palette: { mode: string } }) =>
-        theme.palette.mode === 'dark' ? SIDEBAR_BG.dark : SIDEBAR_BG.light,
+      background: (theme: { palette: { mode: string } }) =>
+        theme.palette.mode === 'dark'
+          ? 'linear-gradient(180deg, #1a0b0d 0%, #13082a 100%)'
+          : 'linear-gradient(180deg, #fef2f2 0%, #f5f3ff 100%)',
       borderRight: '1px solid',
       borderColor: 'divider',
       pt: 3,
