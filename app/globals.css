@@ -40,3 +40,13 @@
     transform: translateY(0);
   }
 }
+
+/* MUI Paper/Card SSR dark-mode fix.
+   Emotion generates different class names per theme, so server-rendered
+   light-mode classes stay on the element after hydration. This CSS-only
+   rule fires before JS and overrides the server-rendered white background. */
+@media (prefers-color-scheme: dark) {
+  .MuiPaper-root {
+    background-color: #1a0b0d !important;
+  }
+}
