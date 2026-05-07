@@ -11,7 +11,7 @@ import HeaderNavToggle from './HeaderNavToggle';
 export default function Header() {
   return (
     <AppBar position="static" sx={{ width: '100%' }}>
-      <Toolbar sx={{ maxWidth: '64rem', width: '100%', mx: 'auto', px: { xs: 2, sm: 3 } }}>
+      <Toolbar sx={{ width: '100%', px: { xs: 2, sm: 3 } }}>
         <HeaderNavToggle />
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
           <Link href="/" className="no-underline" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'inherit' }}>
