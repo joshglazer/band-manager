@@ -15,7 +15,7 @@ import Paper from '@mui/material/Paper';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import PrintIcon from '@mui/icons-material/Print';
+import PrintDropdownButton from '@/components/PrintDropdownButton';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
@@ -238,13 +238,12 @@ export default function SetlistEditor({
               </Button>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 {setlist.id && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<PrintIcon />}
-                    onClick={() => window.open(`/print/setlist/${setlist.id}/chord-charts`, '_blank')}
-                  >
-                    Print Chord Charts
-                  </Button>
+                  <PrintDropdownButton
+                    options={[
+                      { label: 'Print Setlist', url: `/print/setlist/${setlist.id}/songs` },
+                      { label: 'Print Chord Charts', url: `/print/setlist/${setlist.id}/chord-charts` },
+                    ]}
+                  />
                 )}
                 <Button variant="contained" onClick={saveSetlist}>
                   Save Setlist

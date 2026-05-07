@@ -78,6 +78,15 @@ function SetlistActionsMenu({
         </MenuItem>
         <MenuItem
           onClick={() => {
+            window.open(`/print/setlist/${setlistId}/songs`, '_blank');
+            handleClose();
+          }}
+        >
+          <ListItemIcon><PrintIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Print Setlist</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
             window.open(`/print/setlist/${setlistId}/chord-charts`, '_blank');
             handleClose();
           }}
