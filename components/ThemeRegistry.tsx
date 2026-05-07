@@ -150,16 +150,6 @@ function buildTheme(dark: boolean) {
             fontWeight: 600,
             borderRadius: 8,
           },
-          containedPrimary: {
-            background: dark
-              ? 'linear-gradient(135deg, #ef4444 0%, #8b5cf6 100%)'
-              : 'linear-gradient(135deg, #b91c1c 0%, #7c3aed 100%)',
-            '&:hover': {
-              background: dark
-                ? 'linear-gradient(135deg, #f87171 0%, #a78bfa 100%)'
-                : 'linear-gradient(135deg, #dc2626 0%, #8b5cf6 100%)',
-            },
-          },
         },
       },
       MuiTextField: {
