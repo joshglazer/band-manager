@@ -1,5 +1,6 @@
 'use client';
 
+import PracticePrompt from '@/components/PracticePrompt';
 import useBandEvents from '@/hooks/useBandEvents';
 import useSetlists from '@/hooks/useSetlists';
 import { BandEvent } from '@/types/composites';
@@ -191,30 +192,26 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
     [events, today]
   );
 
-  if (eventsLoading) {
-    return (
-      <Box>
-        <Skeleton variant="rounded" width={480} height={180} />
-      </Box>
-    );
-  }
-
-  if (upcomingGigs.length === 0) {
-    return <NoGigCard bandId={bandId} />;
-  }
-
-  const safeIndex = Math.min(gigIndex, upcomingGigs.length - 1);
-  const gig = upcomingGigs[safeIndex];
-
-  return (
+  const gigContent = eventsLoading ? (
+    <Skeleton variant="rounded" width={480} height={180} />
+  ) : upcomingGigs.length === 0 ? (
+    <NoGigCard bandId={bandId} />
+  ) : (
     <GigCard
-      gig={gig}
+      gig={upcomingGigs[Math.min(gigIndex, upcomingGigs.length - 1)]}
       bandId={bandId}
-      setlistId={setlistsByEventId.get(gig.id)}
-      index={safeIndex}
+      setlistId={setlistsByEventId.get(upcomingGigs[Math.min(gigIndex, upcomingGigs.length - 1)].id)}
+      index={Math.min(gigIndex, upcomingGigs.length - 1)}
       total={upcomingGigs.length}
       onPrev={() => setGigIndex((i) => Math.max(0, i - 1))}
       onNext={() => setGigIndex((i) => Math.min(upcomingGigs.length - 1, i + 1))}
     />
+  );
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <PracticePrompt bandId={bandId} />
+      {gigContent}
+    </Box>
   );
 }
