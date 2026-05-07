@@ -1,12 +1,11 @@
 'use client';
 
 import usePracticeProgress from '@/hooks/usePracticeProgress';
-import useSongs, { SongsComposite } from '@/hooks/useSongs';
+import useSongs from '@/hooks/useSongs';
 import { createClient } from '@/utils/supabase/client';
 import CasinoIcon from '@mui/icons-material/Casino';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
