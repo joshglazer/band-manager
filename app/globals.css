@@ -48,5 +48,6 @@
 @media (prefers-color-scheme: dark) {
   .MuiPaper-root {
     background-color: #1a0b0d !important;
+    color: #fef2f2;
   }
 }
