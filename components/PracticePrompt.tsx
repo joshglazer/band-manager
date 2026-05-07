@@ -3,7 +3,7 @@
 import usePracticeProgress from '@/hooks/usePracticeProgress';
 import useSongs from '@/hooks/useSongs';
 import { createClient } from '@/utils/supabase/client';
-import CasinoIcon from '@mui/icons-material/Casino';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
@@ -140,7 +140,7 @@ export default function PracticePrompt({ bandId }: PracticePromptProps) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
           <MusicNoteIcon sx={{ fontSize: 18, color: 'primary.main' }} />
           <Typography variant="subtitle1" fontWeight={600}>
-            Practice This Song
+            Got a few minutes? Work on this song.
           </Typography>
         </Box>
 
@@ -150,12 +150,20 @@ export default function PracticePrompt({ bandId }: PracticePromptProps) {
           </Typography>
         ) : pickedSong ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
               <Typography variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>
                 {pickedSong.name}
               </Typography>
+              <Tooltip title="Pick a different song">
+                <IconButton
+                  size="small"
+                  onClick={() => pickSong(pickedSongId ?? undefined)}
+                >
+                  <RefreshIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
               {pickedSong.artist && (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
                   — {pickedSong.artist}
                 </Typography>
               )}
@@ -188,16 +196,6 @@ export default function PracticePrompt({ bandId }: PracticePromptProps) {
                   Ready
                 </ToggleButton>
               </ToggleButtonGroup>
-
-              <Tooltip title="Pick a different song">
-                <IconButton
-                  size="small"
-                  onClick={() => pickSong(pickedSongId ?? undefined)}
-                  sx={{ ml: 'auto' }}
-                >
-                  <CasinoIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
             </Box>
           </Box>
         ) : null}

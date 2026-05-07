@@ -209,7 +209,7 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
   );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'flex-start' }}>
+    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: { xs: 'flex-start', md: 'stretch' } }}>
       {gigContent}
       <PracticePrompt bandId={bandId} />
     </Box>
