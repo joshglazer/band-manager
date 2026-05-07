@@ -15,6 +15,7 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
+import { useTheme } from '@mui/material/styles';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -33,13 +34,16 @@ interface ConsumerProps {
 type BandLayoutProps = BandRouteProps & ConsumerProps;
 
 const SIDEBAR_WIDTH = 200;
-const SIDEBAR_BG = { light: '#fef2f2', dark: '#1a0b0d' };
 
 export default function BandLayout({ children, params }: BandLayoutProps) {
   const { bandId } = params;
   const { data: band, isLoading } = useBand({ bandId });
   const { mobileOpen, setMobileOpen } = useNav();
   const pathname = usePathname();
+  const { palette } = useTheme();
+  const sidebarGradient = palette.mode === 'dark'
+    ? 'linear-gradient(180deg, #1a0b0d 0%, #1e0c20 100%)'
+    : 'linear-gradient(180deg, #fef2f2 0%, #fcedf8 100%)';
 
   if (isLoading) {
     return <Loading />;
@@ -95,8 +99,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
     );
 
     const sidebarSx = {
-      bgcolor: (theme: { palette: { mode: string } }) =>
-        theme.palette.mode === 'dark' ? SIDEBAR_BG.dark : SIDEBAR_BG.light,
+      background: sidebarGradient,
       borderRight: '1px solid',
       borderColor: 'divider',
       pt: 3,
