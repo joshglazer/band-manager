@@ -5,15 +5,18 @@ import useSetlists from '@/hooks/useSetlists';
 import { BandEvent } from '@/types/composites';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ChecklistIcon from '@mui/icons-material/Checklist';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MicIcon from '@mui/icons-material/Mic';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import NextLink from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { BandRouteProps } from './types';
 
 function todayDateStr(): string {
@@ -39,13 +42,17 @@ function formatDate(dateStr: string, timeStr: string | null): string {
   return datePart + ' · ' + t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
-interface NextGigCardProps {
+interface GigCardProps {
   gig: BandEvent;
   bandId: number;
   setlistId?: number;
+  index: number;
+  total: number;
+  onPrev: () => void;
+  onNext: () => void;
 }
 
-function NextGigCard({ gig, bandId, setlistId }: NextGigCardProps) {
+function GigCard({ gig, bandId, setlistId, index, total, onPrev, onNext }: GigCardProps) {
   const days = daysUntil(gig.date);
 
   let countdownLabel: string;
@@ -61,13 +68,29 @@ function NextGigCard({ gig, bandId, setlistId }: NextGigCardProps) {
     countdownSub = 'days to go';
   }
 
+  const heading = index === 0 ? 'Next Gig' : `Upcoming Gig`;
+
   return (
     <Paper variant="outlined" sx={{ p: 3, maxWidth: 480 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <MicIcon color="primary" />
-        <Typography variant="overline" color="primary" fontWeight={700} lineHeight={1}>
-          Next Gig
+      {/* Header row: label + nav arrows */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <MicIcon color="primary" sx={{ mr: 1 }} />
+        <Typography variant="overline" color="primary" fontWeight={700} lineHeight={1} sx={{ flex: 1 }}>
+          {heading}
         </Typography>
+        {total > 1 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <IconButton size="small" onClick={onPrev} disabled={index === 0} aria-label="Previous gig">
+              <ChevronLeftIcon fontSize="small" />
+            </IconButton>
+            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 32, textAlign: 'center' }}>
+              {index + 1} / {total}
+            </Typography>
+            <IconButton size="small" onClick={onNext} disabled={index === total - 1} aria-label="Next gig">
+              <ChevronRightIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        )}
       </Box>
 
       {/* Countdown */}
@@ -151,6 +174,7 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
   const { bandId } = params;
   const { data: events, isLoading: eventsLoading } = useBandEvents({ bandId });
   const { data: setlists } = useSetlists({ bandId });
+  const [gigIndex, setGigIndex] = useState(0);
 
   const today = useMemo(todayDateStr, []);
 
@@ -162,8 +186,8 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
     return map;
   }, [setlists]);
 
-  const nextGig = useMemo(
-    () => (events ?? []).find((e) => e.type === 'gig' && e.date >= today) ?? null,
+  const upcomingGigs = useMemo(
+    () => (events ?? []).filter((e) => e.type === 'gig' && e.date >= today),
     [events, today]
   );
 
@@ -175,15 +199,22 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
     );
   }
 
-  if (!nextGig) {
+  if (upcomingGigs.length === 0) {
     return <NoGigCard bandId={bandId} />;
   }
 
+  const safeIndex = Math.min(gigIndex, upcomingGigs.length - 1);
+  const gig = upcomingGigs[safeIndex];
+
   return (
-    <NextGigCard
-      gig={nextGig}
+    <GigCard
+      gig={gig}
       bandId={bandId}
-      setlistId={setlistsByEventId.get(nextGig.id)}
+      setlistId={setlistsByEventId.get(gig.id)}
+      index={safeIndex}
+      total={upcomingGigs.length}
+      onPrev={() => setGigIndex((i) => Math.max(0, i - 1))}
+      onNext={() => setGigIndex((i) => Math.min(upcomingGigs.length - 1, i + 1))}
     />
   );
 }
