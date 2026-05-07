@@ -12,6 +12,7 @@ interface BandBreadcrumbsProps {
 }
 
 const SEGMENT_LABELS: Record<string, string> = {
+  events: 'Events',
   members: 'Members',
   songs: 'Songs',
   setlists: 'Setlists',
