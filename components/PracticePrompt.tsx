@@ -1,16 +1,16 @@
 'use client';
 
+import BlockHeader from '@/components/design/BlockHeader';
 import usePracticeProgress from '@/hooks/usePracticeProgress';
 import useSongs from '@/hooks/useSongs';
 import { createClient } from '@/utils/supabase/client';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
@@ -18,18 +18,6 @@ import Typography from '@mui/material/Typography';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type PracticeStatus = 'not_ready' | 'passable' | 'ready';
-
-const STATUS_LABEL: Record<PracticeStatus, string> = {
-  not_ready: 'Not Ready',
-  passable: 'Passable',
-  ready: 'Ready',
-};
-
-const STATUS_COLOR: Record<PracticeStatus, 'error' | 'warning' | 'success'> = {
-  not_ready: 'error',
-  passable: 'warning',
-  ready: 'success',
-};
 
 function pickRandom<T>(arr: T[], exclude?: T): T {
   if (arr.length === 1) return arr[0];
@@ -134,15 +122,28 @@ export default function PracticePrompt({ bandId }: PracticePromptProps) {
 
   if (!isLoading && allSongs.length === 0) return null;
 
+  const refreshAction = (
+    <Tooltip title="Pick a different song">
+      <span>
+        <IconButton
+          size="small"
+          onClick={() => pickSong(pickedSongId ?? undefined)}
+          disabled={isLoading || allSongs.length <= 1}
+        >
+          <RefreshIcon fontSize="small" />
+        </IconButton>
+      </span>
+    </Tooltip>
+  );
+
   return (
     <>
       <Paper variant="outlined" sx={{ p: 2.5, flex: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-          <MusicNoteIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-          <Typography variant="subtitle1" fontWeight={600}>
-            Got a few minutes? Work on this song.
-          </Typography>
-        </Box>
+        <BlockHeader
+          icon={<MusicNoteIcon color="primary" />}
+          title="Got a few minutes? Work on this song."
+          action={refreshAction}
+        />
 
         {isLoading ? (
           <Typography variant="body2" color="text.secondary">
@@ -150,29 +151,15 @@ export default function PracticePrompt({ bandId }: PracticePromptProps) {
           </Typography>
         ) : pickedSong ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
               <Typography variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>
                 {pickedSong.name}
               </Typography>
-              <Tooltip title="Pick a different song">
-                <IconButton
-                  size="small"
-                  onClick={() => pickSong(pickedSongId ?? undefined)}
-                >
-                  <RefreshIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
               {pickedSong.artist && (
-                <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
+                <Typography variant="body2" color="text.secondary">
                   — {pickedSong.artist}
                 </Typography>
               )}
-              <Chip
-                size="small"
-                label={STATUS_LABEL[currentStatus]}
-                color={STATUS_COLOR[currentStatus]}
-                sx={{ ml: 0.5 }}
-              />
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>

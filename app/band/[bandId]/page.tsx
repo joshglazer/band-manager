@@ -1,5 +1,6 @@
 'use client';
 
+import BlockHeader from '@/components/design/BlockHeader';
 import PracticePrompt from '@/components/PracticePrompt';
 import useBandEvents from '@/hooks/useBandEvents';
 import useSetlists from '@/hooks/useSetlists';
@@ -69,30 +70,29 @@ function GigCard({ gig, bandId, setlistId, index, total, onPrev, onNext }: GigCa
     countdownSub = 'days to go';
   }
 
-  const heading = index === 0 ? 'Next Gig' : `Upcoming Gig`;
+  const heading = index === 0 ? 'Next Gig' : 'Upcoming Gig';
+
+  const navAction = total > 1 ? (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <IconButton size="small" onClick={onPrev} disabled={index === 0} aria-label="Previous gig">
+        <ChevronLeftIcon fontSize="small" />
+      </IconButton>
+      <Typography variant="caption" color="text.secondary" sx={{ minWidth: 32, textAlign: 'center' }}>
+        {index + 1} / {total}
+      </Typography>
+      <IconButton size="small" onClick={onNext} disabled={index === total - 1} aria-label="Next gig">
+        <ChevronRightIcon fontSize="small" />
+      </IconButton>
+    </Box>
+  ) : undefined;
 
   return (
     <Paper variant="outlined" sx={{ p: 3, flex: 1 }}>
-      {/* Header row: label + nav arrows */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <MicIcon color="primary" sx={{ mr: 1 }} />
-        <Typography variant="overline" color="primary" fontWeight={700} lineHeight={1} sx={{ flex: 1 }}>
-          {heading}
-        </Typography>
-        {total > 1 && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <IconButton size="small" onClick={onPrev} disabled={index === 0} aria-label="Previous gig">
-              <ChevronLeftIcon fontSize="small" />
-            </IconButton>
-            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 32, textAlign: 'center' }}>
-              {index + 1} / {total}
-            </Typography>
-            <IconButton size="small" onClick={onNext} disabled={index === total - 1} aria-label="Next gig">
-              <ChevronRightIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        )}
-      </Box>
+      <BlockHeader
+        icon={<MicIcon color="primary" />}
+        title={heading}
+        action={navAction}
+      />
 
       {/* Countdown */}
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5, mb: 1 }}>
@@ -149,12 +149,10 @@ function GigCard({ gig, bandId, setlistId, index, total, onPrev, onNext }: GigCa
 function NoGigCard({ bandId }: { bandId: number }) {
   return (
     <Paper variant="outlined" sx={{ p: 3, flex: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-        <CalendarMonthIcon color="disabled" />
-        <Typography variant="overline" color="text.secondary" fontWeight={700} lineHeight={1}>
-          No Upcoming Gigs
-        </Typography>
-      </Box>
+      <BlockHeader
+        icon={<CalendarMonthIcon color="disabled" />}
+        title="No Upcoming Gigs"
+      />
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Nothing scheduled yet. Add a gig to start the countdown.
       </Typography>
