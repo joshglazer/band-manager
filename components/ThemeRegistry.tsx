@@ -56,8 +56,8 @@ function buildTheme(dark: boolean) {
           body: {
             scrollbarColor: dark ? '#3d1015 #0d0507' : '#e4d8ff #fdf8f8',
             backgroundImage: dark
-              ? 'linear-gradient(160deg, #0d0507 0%, #0f0612 50%, #0d0507 100%)'
-              : 'linear-gradient(160deg, #fdf8f8 0%, #fdf7ff 50%, #fdf8f8 100%)',
+              ? 'linear-gradient(160deg, #0d0507 0%, #100514 50%, #0d0507 100%)'
+              : 'linear-gradient(160deg, #fdf8f8 0%, #fdf5fd 50%, #fdf8f8 100%)',
             backgroundAttachment: 'fixed',
             minHeight: '100vh',
           },
@@ -68,8 +68,8 @@ function buildTheme(dark: boolean) {
         styleOverrides: {
           root: {
             background: dark
-              ? 'linear-gradient(90deg, #2a1010 0%, #230e22 100%)'
-              : 'linear-gradient(90deg, #991b1b 0%, #6e1654 100%)',
+              ? 'linear-gradient(90deg, #2e0e0e 0%, #280d28 100%)'
+              : 'linear-gradient(90deg, #c01c1c 0%, #9a1882 100%)',
             borderBottom: dark ? '1px solid rgba(167,139,250,0.12)' : 'none',
           },
         },
@@ -132,12 +132,12 @@ function buildTheme(dark: boolean) {
           },
           containedPrimary: {
             background: dark
-              ? 'linear-gradient(135deg, #ef4444 0%, #c45bad 100%)'
-              : 'linear-gradient(135deg, #b91c1c 0%, #7e1c6a 100%)',
+              ? 'linear-gradient(135deg, #f04444 0%, #c855c0 100%)'
+              : 'linear-gradient(135deg, #c21c1c 0%, #8e1e80 100%)',
             '&:hover': {
               background: dark
-                ? 'linear-gradient(135deg, #f87171 0%, #d470c0 100%)'
-                : 'linear-gradient(135deg, #dc2626 0%, #8f2178 100%)',
+                ? 'linear-gradient(135deg, #f47070 0%, #d870d8 100%)'
+                : 'linear-gradient(135deg, #d42020 0%, #9e2290 100%)',
             },
           },
         },
