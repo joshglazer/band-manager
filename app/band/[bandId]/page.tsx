@@ -72,7 +72,7 @@ function GigCard({ gig, bandId, setlistId, index, total, onPrev, onNext }: GigCa
   const heading = index === 0 ? 'Next Gig' : `Upcoming Gig`;
 
   return (
-    <Paper variant="outlined" sx={{ p: 3, maxWidth: 480 }}>
+    <Paper variant="outlined" sx={{ p: 3, flex: 1 }}>
       {/* Header row: label + nav arrows */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <MicIcon color="primary" sx={{ mr: 1 }} />
@@ -148,7 +148,7 @@ function GigCard({ gig, bandId, setlistId, index, total, onPrev, onNext }: GigCa
 
 function NoGigCard({ bandId }: { bandId: number }) {
   return (
-    <Paper variant="outlined" sx={{ p: 3, maxWidth: 480 }}>
+    <Paper variant="outlined" sx={{ p: 3, flex: 1 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <CalendarMonthIcon color="disabled" />
         <Typography variant="overline" color="text.secondary" fontWeight={700} lineHeight={1}>
@@ -193,7 +193,7 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
   );
 
   const gigContent = eventsLoading ? (
-    <Skeleton variant="rounded" width={480} height={180} />
+    <Skeleton variant="rounded" sx={{ flex: 1 }} height={180} />
   ) : upcomingGigs.length === 0 ? (
     <NoGigCard bandId={bandId} />
   ) : (
@@ -209,9 +209,9 @@ export default function BandDashboardPage({ params }: Readonly<BandRouteProps>):
   );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <PracticePrompt bandId={bandId} />
+    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'flex-start' }}>
       {gigContent}
+      <PracticePrompt bandId={bandId} />
     </Box>
   );
 }
