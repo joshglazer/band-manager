@@ -107,7 +107,7 @@ export default function Bands() {
       </Box>
       {showArchived && (
         <Box sx={{ mt: 4 }}>
-          <Typography variant="h6" fontWeight={600} mb={2} color="text.secondary">
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, ml: 1.5, color: 'text.secondary' }}>
             Archived Bands
           </Typography>
           <BandList includeArchived={true} />
