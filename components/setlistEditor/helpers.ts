@@ -4,7 +4,9 @@ import { Tables } from '@/types/supabase';
 import { BandEvent, SetlistComposite } from '@/types/composites';
 
 export function getDragDropBackgroundColorClassName(snapshot: DroppableStateSnapshot): string {
-  return snapshot.isDraggingOver ? 'bg-slate-300' : 'bg-white';
+  return snapshot.isDraggingOver
+    ? 'bg-slate-300 dark:bg-slate-700'
+    : 'bg-white dark:bg-[#1a0b0d]';
 }
 
 export function getEventDisplayName(event: BandEvent): string {
