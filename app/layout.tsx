@@ -29,10 +29,10 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
         <body>
           <ThemeRegistry>
             <NavProvider>
-              <div className="min-h-screen flex-1 w-full flex flex-col items-center">
+              <div className="min-h-screen flex-1 w-full flex flex-col">
                 <Header />
-                <main className="flex flex-col items-center grow w-full">
-                  <div className="w-full max-w-4xl p-3">{children}</div>
+                <main className="flex flex-col grow w-full">
+                  <div className="w-full max-w-4xl mx-auto p-3">{children}</div>
                 </main>
                 <Footer />
               </div>

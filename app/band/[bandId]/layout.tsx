@@ -103,13 +103,14 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
 
     return (
       // Breaks out of the root layout's max-w-4xl centered container and p-3 padding.
-      // calc(50% - 50vw - 0.75rem) shifts left by: half the centering gap + the padding.
+      // With border-box sizing, 50% of the content width equals exactly the offset needed
+      // to reach the viewport left edge (centering gap + padding are both captured by 50% - 50vw).
       <Box
         sx={{
           display: 'flex',
           alignItems: 'stretch',
           width: '100vw',
-          ml: 'calc(50% - 50vw - 0.75rem)',
+          ml: 'calc(50% - 50vw)',
           mt: '-0.75rem',
           mb: '-0.75rem',
           minHeight: 'calc(100vh - 64px)',

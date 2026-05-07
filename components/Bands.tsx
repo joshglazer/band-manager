@@ -34,7 +34,7 @@ function BandList({ includeArchived }: { includeArchived: boolean }) {
   }
 
   return (
-    <Grid container spacing={2} justifyContent="flex-start" alignItems="stretch">
+    <Grid container justifyContent="flex-start" alignItems="stretch">
       {data.map(({ id, name, song_count, member_count }) => {
         const bandCardDescription = (
           <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
@@ -107,7 +107,7 @@ export default function Bands() {
       </Box>
       {showArchived && (
         <Box sx={{ mt: 4 }}>
-          <Typography variant="h6" fontWeight={600} mb={2} color="text.secondary">
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, ml: 1.5, color: 'text.secondary' }}>
             Archived Bands
           </Typography>
           <BandList includeArchived={true} />
