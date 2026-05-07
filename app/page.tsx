@@ -14,7 +14,7 @@ export default async function IndexPage() {
       {user ? (
         <>
           <PendingInvitations />
-          <Typography variant="h5" fontWeight={700} mt={2} mb={3} ml={1.5}>
+          <Typography variant="h5" sx={{ fontWeight: 700, mt: 3, mb: 2, ml: 1.5 }}>
             Your Bands
           </Typography>
           <Bands />
