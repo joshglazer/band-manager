@@ -228,12 +228,14 @@ export default function SetlistEditor({
           sx={{ width: 300 }}
         />
         {setlist.id && (
-          <PrintDropdownButton
-            options={[
-              { label: 'Print Setlist', url: `/print/setlist/${setlist.id}/songs` },
-              { label: 'Print Chord Charts', url: `/print/setlist/${setlist.id}/chord-charts` },
-            ]}
-          />
+          <Box sx={{ ml: { xs: 0, sm: 'auto' } }}>
+            <PrintDropdownButton
+              options={[
+                { label: 'Print Setlist', url: `/print/setlist/${setlist.id}/songs` },
+                { label: 'Print Chord Charts', url: `/print/setlist/${setlist.id}/chord-charts` },
+              ]}
+            />
+          </Box>
         )}
       </Box>
       <DragDropContext onDragEnd={onDragEnd}>
