@@ -34,7 +34,7 @@ function BandList({ includeArchived }: { includeArchived: boolean }) {
   }
 
   return (
-    <Grid container spacing={2} justifyContent="flex-start" alignItems="stretch">
+    <Grid container justifyContent="flex-start" alignItems="stretch">
       {data.map(({ id, name, song_count, member_count }) => {
         const bandCardDescription = (
           <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
