@@ -94,6 +94,7 @@ function buildTheme(dark: boolean) {
         styleOverrides: {
           root: ({ theme }) => ({
             backgroundImage: 'none',
+            backgroundColor: theme.palette.background.paper,
             border: `1px solid ${theme.palette.divider}`,
           }),
         },
