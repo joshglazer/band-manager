@@ -83,7 +83,7 @@ export default function Card({
   );
 
   let cardElement = (
-    <MUICard sx={{ m: 1.5, height: '100%' }}>
+    <MUICard sx={{ m: 1.5, flex: 1 }}>
       {link ? (
         <CardActionArea component={Link} href={link}>
           {content}
