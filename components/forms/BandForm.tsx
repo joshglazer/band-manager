@@ -4,13 +4,15 @@ import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
+import { mutate } from 'swr';
 import Form, { FormField } from '../design/Form';
 
 interface BandFormProps {
   bandId?: number;
+  onBandCreated?: (bandId: number) => void;
 }
 
-export default function BandForm({ bandId }: Readonly<BandFormProps>) {
+export default function BandForm({ bandId, onBandCreated }: Readonly<BandFormProps>) {
   const [errorMessage, setErrorMessage] = useState<string>();
 
   const supabase = createClient();
@@ -31,14 +33,19 @@ export default function BandForm({ bandId }: Readonly<BandFormProps>) {
 
   async function onSuccess(data: FieldValues) {
     if (!bandId) {
-      const { error } = await supabase.rpc('create_band_with_member', {
+      const { data: newBandId, error } = await supabase.rpc('create_band_with_member', {
         band_name: data.name,
       });
       if (error) {
         setErrorMessage(error.message);
         return;
       }
-      router.push('/');
+      await mutate('my-bands-active');
+      if (onBandCreated && typeof newBandId === 'number') {
+        onBandCreated(newBandId);
+      } else {
+        router.push('/');
+      }
     }
   }
 
