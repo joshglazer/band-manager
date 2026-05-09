@@ -2,6 +2,7 @@
 
 import Loading from '@/components/design/Loading';
 import BandBreadcrumbs from '@/components/layout/BandBreadcrumbs';
+import BandSwitcher from '@/components/layout/BandSwitcher';
 import { useNav } from '@/components/layout/NavContext';
 import useBand from '@/hooks/useBand';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -140,6 +141,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
             '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH, boxSizing: 'border-box', ...sidebarSx },
           }}
         >
+          <BandSwitcher variant="drawer" onNavigate={() => setMobileOpen(false)} />
           {navList(() => setMobileOpen(false))}
         </Drawer>
 
