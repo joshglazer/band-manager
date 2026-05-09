@@ -3,10 +3,15 @@
 import useBands from '@/hooks/useBands';
 import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Select from '@mui/material/Select';
+import { SxProps, Theme } from '@mui/material/styles';
 import { usePathname, useRouter } from 'next/navigation';
 
-export default function BandSwitcher() {
+interface BandSwitcherProps {
+  sx?: SxProps<Theme>;
+}
+
+export default function BandSwitcher({ sx }: BandSwitcherProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const bandMatch = pathname.match(/^\/band\/(\d+)/);
@@ -16,15 +21,11 @@ export default function BandSwitcher() {
 
   if (!currentBandId || !bands || bands.length <= 1) return null;
 
-  const handleChange = (event: SelectChangeEvent) => {
-    router.push(`/band/${event.target.value}`);
-  };
-
   return (
-    <FormControl size="small" sx={{ minWidth: 140, mr: 1 }}>
+    <FormControl size="small" sx={{ minWidth: 140, ...sx }}>
       <Select
         value={currentBandId}
-        onChange={handleChange}
+        onChange={(e) => router.push(`/band/${e.target.value}`)}
         sx={{
           color: 'inherit',
           '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.4)' },
