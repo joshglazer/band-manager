@@ -358,6 +358,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableSortLabel>
                 )}
               </TableCell>
+              <TableCell>Chord Chart</TableCell>
               <TableCell>
                 {setlistFilter ? (
                   'Notes'
@@ -388,10 +389,10 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                       {song.artist}
                     </Typography>
                   )}
+                </TableCell>
+                <TableCell>
                   {song.chord_chart && (
-                    <Box sx={{ mt: 0.5 }}>
-                      <ChordChartViewModal songName={song.name} chordChart={song.chord_chart} />
-                    </Box>
+                    <ChordChartViewModal songName={song.name} chordChart={song.chord_chart} />
                   )}
                 </TableCell>
                 <TableCell sx={{ whiteSpace: 'nowrap' }}>
