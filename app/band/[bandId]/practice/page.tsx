@@ -358,8 +358,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableSortLabel>
                 )}
               </TableCell>
-              <TableCell>Chord Chart</TableCell>
-              <TableCell>
+              <TableCell>View Chords</TableCell>              <TableCell>
                 {setlistFilter ? (
                   'Notes'
                 ) : (
@@ -390,11 +389,6 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                     </Typography>
                   )}
                 </TableCell>
-                <TableCell>
-                  {song.chord_chart && (
-                    <ChordChartViewModal songName={song.name} chordChart={song.chord_chart} />
-                  )}
-                </TableCell>
                 <TableCell sx={{ whiteSpace: 'nowrap' }}>
                   <ToggleButtonGroup
                     value={p.status}
@@ -414,6 +408,11 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                       Ready
                     </ToggleButton>
                   </ToggleButtonGroup>
+                </TableCell>
+                <TableCell>
+                  {song.chord_chart && (
+                    <ChordChartViewModal songName={song.name} chordChart={song.chord_chart} />
+                  )}
                 </TableCell>
                 <TableCell sx={{ minWidth: 260 }}>
                   <TextField
