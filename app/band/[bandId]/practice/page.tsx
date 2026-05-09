@@ -1,6 +1,7 @@
 'use client';
 
 import Loading from '@/components/design/Loading';
+import ChordChartViewModal from '@/components/modals/ChordChartViewModal';
 import usePracticeProgress from '@/hooks/usePracticeProgress';
 import useSetlists from '@/hooks/useSetlists';
 import useSongs from '@/hooks/useSongs';
@@ -386,6 +387,11 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                     <Typography variant="body2" color="text.secondary">
                       {song.artist}
                     </Typography>
+                  )}
+                  {song.chord_chart && (
+                    <Box sx={{ mt: 0.5 }}>
+                      <ChordChartViewModal songName={song.name} chordChart={song.chord_chart} />
+                    </Box>
                   )}
                 </TableCell>
                 <TableCell sx={{ whiteSpace: 'nowrap' }}>

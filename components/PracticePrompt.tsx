@@ -1,6 +1,7 @@
 'use client';
 
 import BlockHeader from '@/components/design/BlockHeader';
+import ChordChartViewModal from '@/components/modals/ChordChartViewModal';
 import usePracticeProgress from '@/hooks/usePracticeProgress';
 import useSongs from '@/hooks/useSongs';
 import { createClient } from '@/utils/supabase/client';
@@ -161,6 +162,10 @@ export default function PracticePrompt({ bandId }: PracticePromptProps) {
                 </Typography>
               )}
             </Box>
+
+            {pickedSong.chord_chart && (
+              <ChordChartViewModal songName={pickedSong.name} chordChart={pickedSong.chord_chart} />
+            )}
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
               <Typography variant="body2" color="text.secondary" sx={{ mr: 0.5 }}>
