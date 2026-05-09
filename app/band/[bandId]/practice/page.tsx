@@ -1,6 +1,7 @@
 'use client';
 
 import Loading from '@/components/design/Loading';
+import ChordChartViewModal from '@/components/modals/ChordChartViewModal';
 import usePracticeProgress from '@/hooks/usePracticeProgress';
 import useSetlists from '@/hooks/useSetlists';
 import useSongs from '@/hooks/useSongs';
@@ -357,7 +358,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableSortLabel>
                 )}
               </TableCell>
-              <TableCell>
+              <TableCell>View Chords</TableCell>              <TableCell>
                 {setlistFilter ? (
                   'Notes'
                 ) : (
@@ -407,6 +408,11 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                       Ready
                     </ToggleButton>
                   </ToggleButtonGroup>
+                </TableCell>
+                <TableCell>
+                  {song.chord_chart && (
+                    <ChordChartViewModal songName={song.name} chordChart={song.chord_chart} />
+                  )}
                 </TableCell>
                 <TableCell sx={{ minWidth: 260 }}>
                   <TextField

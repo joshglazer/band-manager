@@ -1,6 +1,7 @@
 'use client';
 
 import BlockHeader from '@/components/design/BlockHeader';
+import ChordChartViewModal from '@/components/modals/ChordChartViewModal';
 import usePracticeProgress from '@/hooks/usePracticeProgress';
 import useSongs from '@/hooks/useSongs';
 import { createClient } from '@/utils/supabase/client';
@@ -151,14 +152,19 @@ export default function PracticePrompt({ bandId }: PracticePromptProps) {
           </Typography>
         ) : pickedSong ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-              <Typography variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>
-                {pickedSong.name}
-              </Typography>
-              {pickedSong.artist && (
-                <Typography variant="body2" color="text.secondary">
-                  — {pickedSong.artist}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+              <Box>
+                <Typography variant="h6" fontWeight={600} sx={{ lineHeight: 1.2 }}>
+                  {pickedSong.name}
                 </Typography>
+                {pickedSong.artist && (
+                  <Typography variant="body2" color="text.secondary">
+                    {pickedSong.artist}
+                  </Typography>
+                )}
+              </Box>
+              {pickedSong.chord_chart && (
+                <ChordChartViewModal songName={pickedSong.name} chordChart={pickedSong.chord_chart} />
               )}
             </Box>
 
