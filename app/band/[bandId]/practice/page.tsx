@@ -79,7 +79,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
 
   const [progress, setProgress] = useState<Record<number, SongProgress>>({});
   const [sortConfig, setSortConfig] = useState<{ key: SortColumn; direction: SortDir } | null>(
-    null
+    { key: 'name', direction: 'asc' }
   );
   const [statusFilter, setStatusFilter] = useState<PracticeStatus[]>([]);
   const [setlistFilter, setSetlistFilter] = useState<number | ''>(
