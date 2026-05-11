@@ -195,6 +195,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
           dataKey: 'song_link',
           dataFormatter: formatLinkIcon,
           hideHeader: true,
+          sx: { width: '1px', whiteSpace: 'nowrap', padding: '8px 12px', verticalAlign: 'middle' },
         },
         {
           name: 'Name',
