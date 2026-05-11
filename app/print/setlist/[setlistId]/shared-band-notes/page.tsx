@@ -1,7 +1,7 @@
 'use client';
 
 import Loading from '@/components/design/Loading';
-import ChordChartViewer from '@/components/ChordChartViewer';
+import SharedBandNotesViewer from '@/components/SharedBandNotesViewer';
 import { getSetlistDisplayName } from '@/components/setlistEditor/helpers';
 import useSetlistWithSongs from '@/hooks/useSetlistWithSongs';
 import { Tables } from '@/types/supabase';
@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 import PrintIcon from '@mui/icons-material/Print';
 import { useMemo } from 'react';
 
-interface PrintChordChartsPageProps {
+interface PrintSharedBandNotesPageProps {
   params: { setlistId: number };
 }
 
@@ -22,7 +22,7 @@ interface OrderedSong {
   song: Tables<'songs'>;
 }
 
-export default function PrintChordChartsPage({ params }: Readonly<PrintChordChartsPageProps>) {
+export default function PrintSharedBandNotesPage({ params }: Readonly<PrintSharedBandNotesPageProps>) {
   const { setlistId } = params;
   const { data: setlist, isLoading } = useSetlistWithSongs({ setlistId });
 
@@ -48,7 +48,7 @@ export default function PrintChordChartsPage({ params }: Readonly<PrintChordChar
     return <Typography variant="h5">Setlist not found.</Typography>;
   }
 
-  const songsWithCharts = orderedSongs.filter((s) => s.song.chord_chart?.trim());
+  const songsWithNotes = orderedSongs.filter((s) => s.song.shared_band_notes?.trim());
 
   return (
     <>
@@ -63,24 +63,24 @@ export default function PrintChordChartsPage({ params }: Readonly<PrintChordChar
 
       <Box className="no-print" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
         <Typography variant="h5" fontWeight={700}>
-          {getSetlistDisplayName(setlist)} — Chord Charts
+          {getSetlistDisplayName(setlist)} — Shared Band Notes
         </Typography>
         <Button variant="contained" startIcon={<PrintIcon />} onClick={() => window.print()}>
           Print
         </Button>
       </Box>
 
-      {songsWithCharts.length === 0 ? (
-        <Typography color="text.secondary">No songs with chord charts in this setlist.</Typography>
+      {songsWithNotes.length === 0 ? (
+        <Typography color="text.secondary">No songs with shared band notes in this setlist.</Typography>
       ) : (
-        songsWithCharts.map(({ song }, index) => (
+        songsWithNotes.map(({ song }, index) => (
           <Box key={song.id} sx={{ mb: 4, pageBreakInside: 'avoid' }}>
             <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
               {index + 1}. {song.name}
               {song.artist ? ` — ${song.artist}` : ''}
             </Typography>
-            <ChordChartViewer chordChart={song.chord_chart!} />
-            {index < songsWithCharts.length - 1 && <Divider sx={{ mt: 3 }} />}
+            <SharedBandNotesViewer sharedBandNotes={song.shared_band_notes!} />
+            {index < songsWithNotes.length - 1 && <Divider sx={{ mt: 3 }} />}
           </Box>
         ))
       )}

@@ -1,4 +1,4 @@
-import ChordChartViewer from '@/components/ChordChartViewer';
+import SharedBandNotesViewer from '@/components/SharedBandNotesViewer';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -6,12 +6,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { useState } from 'react';
 
-interface ChordChartViewModalProps {
+interface SharedBandNotesViewModalProps {
   songName: string | null;
-  chordChart: string;
+  sharedBandNotes: string;
 }
 
-export default function ChordChartViewModal({ songName, chordChart }: Readonly<ChordChartViewModalProps>) {
+export default function SharedBandNotesViewModal({ songName, sharedBandNotes }: Readonly<SharedBandNotesViewModalProps>) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -22,12 +22,12 @@ export default function ChordChartViewModal({ songName, chordChart }: Readonly<C
         startIcon={<MusicNoteIcon />}
         onClick={() => setOpen(true)}
       >
-        View Chords
+        View Shared Band Notes
       </Button>
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>{songName ?? 'Chord Chart'}</DialogTitle>
+        <DialogTitle>{songName ?? 'Shared Band Notes'}</DialogTitle>
         <DialogContent>
-          <ChordChartViewer chordChart={chordChart} />
+          <SharedBandNotesViewer sharedBandNotes={sharedBandNotes} />
         </DialogContent>
       </Dialog>
     </>

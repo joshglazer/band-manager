@@ -6,32 +6,32 @@ import { useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import Form, { FormField } from '../design/Form';
 
-interface ChordChartFormProps {
+interface SharedBandNotesFormProps {
   song: Tables<'songs'>;
-  onSaved?: (chordChart: string | null) => void;
+  onSaved?: (sharedBandNotes: string | null) => void;
 }
 
 const formFields: FormField[] = [
   {
     fieldType: 'textarea' as FormField['fieldType'],
-    name: 'chord_chart',
-    label: 'Chord Chart',
+    name: 'shared_band_notes',
+    label: 'Shared Band Notes',
     fullWidth: true,
     rows: 15,
     inputProps: { style: { fontFamily: 'monospace', fontSize: '0.95rem', lineHeight: 1.8 } },
   },
 ];
 
-export default function ChordChartForm({ song, onSaved }: Readonly<ChordChartFormProps>) {
+export default function SharedBandNotesForm({ song, onSaved }: Readonly<SharedBandNotesFormProps>) {
   const supabase = createClient();
   const [errorMessage, setErrorMessage] = useState<string>();
 
   async function onSuccess(data: FieldValues) {
     setErrorMessage('');
-    const newValue = data.chord_chart || null;
+    const newValue = data.shared_band_notes || null;
     const { error } = await supabase
       .from('songs')
-      .update({ chord_chart: newValue })
+      .update({ shared_band_notes: newValue })
       .eq('id', song.id);
 
     if (error) {
@@ -45,7 +45,7 @@ export default function ChordChartForm({ song, onSaved }: Readonly<ChordChartFor
     <Form
       onSuccess={onSuccess}
       formFields={formFields}
-      defaultValues={{ chord_chart: song.chord_chart ?? '' }}
+      defaultValues={{ shared_band_notes: song.shared_band_notes ?? '' }}
       errorMessage={errorMessage}
       saveButtonLabel="Save"
     />
