@@ -6,6 +6,7 @@ import Table, { TableProps, TablePropsDataType, TableRow } from '@/components/de
 import EditSongForm from '@/components/forms/EditSongForm';
 import SongCommentForm from '@/components/forms/SongCommentForm';
 import AddSongModal from '@/components/modals/AddSongModal';
+import SpotifyBadge from '@/components/SpotifyBadge';
 import useSongs, { SongsComposite } from '@/hooks/useSongs';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import EditIcon from '@mui/icons-material/Edit';
@@ -127,6 +128,15 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
     });
   }
 
+  function formatName(value: TablePropsDataType, row: TableRow) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <span>{value as string}</span>
+        {row.spotify_url && <SpotifyBadge spotifyUrl={row.spotify_url as string} />}
+      </Box>
+    );
+  }
+
   function formatActions(_value: TablePropsDataType | null, row: TableRow) {
     const song = songs?.find((s) => s.id === row.id);
     if (!song) return '';
@@ -145,6 +155,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
       name: song.name,
       artist: song.artist,
       duration: song.duration,
+      spotify_url: song.spotify_url,
     }));
 
     const q = searchQuery.toLowerCase();
@@ -174,6 +185,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
         {
           name: 'Name',
           dataKey: 'name',
+          dataFormatter: formatName,
           isHeader: true,
           headerDataKey: 'id',
           sortable: true,

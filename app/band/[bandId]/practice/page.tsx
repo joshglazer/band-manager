@@ -1,5 +1,6 @@
 'use client';
 
+import SpotifyBadge from '@/components/SpotifyBadge';
 import Loading from '@/components/design/Loading';
 import ChordChartViewModal from '@/components/modals/ChordChartViewModal';
 import usePracticeProgress from '@/hooks/usePracticeProgress';
@@ -382,7 +383,10 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableCell>
                 )}
                 <TableCell component="th" scope="row">
-                  <Typography fontWeight={600}>{song.name}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography fontWeight={600}>{song.name}</Typography>
+                    {song.spotify_url && <SpotifyBadge spotifyUrl={song.spotify_url} />}
+                  </Box>
                   {song.artist && (
                     <Typography variant="body2" color="text.secondary">
                       {song.artist}

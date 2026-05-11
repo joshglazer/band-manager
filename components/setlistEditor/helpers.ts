@@ -55,6 +55,7 @@ export function adaptSetlist(setlist: SetlistComposite, songs: Tables<'songs'>[]
         name: 'Not Found',
         artist: 'Not Found',
         created_at: 'Not Found',
+        spotify_url: null,
       };
     } else {
       usedSongIds.push(song.id);
