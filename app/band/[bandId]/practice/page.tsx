@@ -1,5 +1,6 @@
 'use client';
 
+import SongLinkIcon from '@/components/SongLinkIcon';
 import SpotifyBadge from '@/components/SpotifyBadge';
 import Loading from '@/components/design/Loading';
 import SharedBandNotesViewModal from '@/components/modals/SharedBandNotesViewModal';
@@ -333,6 +334,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
           <TableHead>
             <TableRow>
               {setlistFilter && <TableCell>#</TableCell>}
+              <TableCell sx={{ width: '1px', padding: '8px 12px' }}><span className="sr-only">Links</span></TableCell>
               <TableCell>
                 {setlistFilter ? (
                   'Song'
@@ -359,7 +361,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableSortLabel>
                 )}
               </TableCell>
-              <TableCell>View Shared Band Notes</TableCell>              <TableCell>
+              <TableCell>
                 {setlistFilter ? (
                   'Notes'
                 ) : (
@@ -382,11 +384,20 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                     {setlistOrderMap.get(song.id)}
                   </TableCell>
                 )}
-                <TableCell component="th" scope="row">
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography fontWeight={600}>{song.name}</Typography>
-                    {song.spotify_url && <SpotifyBadge spotifyUrl={song.spotify_url} />}
+                <TableCell sx={{ width: '1px', whiteSpace: 'nowrap', padding: '8px 12px', verticalAlign: 'middle' }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                    {song.song_link ? (
+                      <SongLinkIcon url={song.song_link} />
+                    ) : song.spotify_url ? (
+                      <SpotifyBadge spotifyUrl={song.spotify_url} />
+                    ) : null}
+                    {song.shared_band_notes && (
+                      <SharedBandNotesViewModal songName={song.name} sharedBandNotes={song.shared_band_notes} iconOnly />
+                    )}
                   </Box>
+                </TableCell>
+                <TableCell component="th" scope="row">
+                  <Typography fontWeight={600}>{song.name}</Typography>
                   {song.artist && (
                     <Typography variant="body2" color="text.secondary">
                       {song.artist}
@@ -412,11 +423,6 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                       Ready
                     </ToggleButton>
                   </ToggleButtonGroup>
-                </TableCell>
-                <TableCell>
-                  {song.shared_band_notes && (
-                    <SharedBandNotesViewModal songName={song.name} sharedBandNotes={song.shared_band_notes} />
-                  )}
                 </TableCell>
                 <TableCell sx={{ minWidth: 260 }}>
                   <TextField

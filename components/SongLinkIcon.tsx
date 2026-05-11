@@ -87,7 +87,7 @@ function detectPlatform(url: string): Platform {
     if (host.endsWith('.bandcamp.com') || host === 'bandcamp.com') return 'bandcamp';
     if (host === 'vimeo.com') return 'vimeo';
     if (host === 'tidal.com' || host === 'listen.tidal.com') return 'tidal';
-  } catch {
+  } catch (_e) {
     // invalid URL
   }
   return 'generic';
