@@ -169,7 +169,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <SpotifyBadge spotifyUrl={song.spotify_url!} />
+            <SpotifyBadge spotifyUrl={song.spotify_url!} size={24} />
             <Typography variant="caption" color="text.secondary">
               Name, artist, and duration are managed by Spotify
             </Typography>
