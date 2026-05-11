@@ -334,7 +334,6 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
           <TableHead>
             <TableRow>
               {setlistFilter && <TableCell>#</TableCell>}
-              <TableCell sx={{ width: '1px', padding: '8px 12px' }}><span className="sr-only">Links</span></TableCell>
               <TableCell>
                 {setlistFilter ? (
                   'Song'
@@ -348,6 +347,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableSortLabel>
                 )}
               </TableCell>
+              <TableCell sx={{ width: '1px', padding: '8px 12px' }}><span className="sr-only">Links</span></TableCell>
               <TableCell>
                 {setlistFilter ? (
                   'Your Status'
@@ -384,8 +384,16 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                     {setlistOrderMap.get(song.id)}
                   </TableCell>
                 )}
+                <TableCell component="th" scope="row">
+                  <Typography fontWeight={600}>{song.name}</Typography>
+                  {song.artist && (
+                    <Typography variant="body2" color="text.secondary">
+                      {song.artist}
+                    </Typography>
+                  )}
+                </TableCell>
                 <TableCell sx={{ width: '1px', whiteSpace: 'nowrap', padding: '8px 12px', verticalAlign: 'middle' }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     {song.song_link ? (
                       <SongLinkIcon url={song.song_link} />
                     ) : song.spotify_url ? (
@@ -395,14 +403,6 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                       <SharedBandNotesViewModal songName={song.name} sharedBandNotes={song.shared_band_notes} iconOnly />
                     )}
                   </Box>
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  <Typography fontWeight={600}>{song.name}</Typography>
-                  {song.artist && (
-                    <Typography variant="body2" color="text.secondary">
-                      {song.artist}
-                    </Typography>
-                  )}
                 </TableCell>
                 <TableCell sx={{ whiteSpace: 'nowrap' }}>
                   <ToggleButtonGroup
