@@ -2,7 +2,7 @@
 
 import SpotifyBadge from '@/components/SpotifyBadge';
 import Loading from '@/components/design/Loading';
-import ChordChartViewModal from '@/components/modals/ChordChartViewModal';
+import SharesBandNotesViewModal from '@/components/modals/SharesBandNotesViewModal';
 import usePracticeProgress from '@/hooks/usePracticeProgress';
 import useSetlists from '@/hooks/useSetlists';
 import useSongs from '@/hooks/useSongs';
@@ -359,7 +359,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableSortLabel>
                 )}
               </TableCell>
-              <TableCell>View Chords</TableCell>              <TableCell>
+              <TableCell>View Shares Band Notes</TableCell>              <TableCell>
                 {setlistFilter ? (
                   'Notes'
                 ) : (
@@ -414,8 +414,8 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </ToggleButtonGroup>
                 </TableCell>
                 <TableCell>
-                  {song.chord_chart && (
-                    <ChordChartViewModal songName={song.name} chordChart={song.chord_chart} />
+                  {song.shares_band_notes && (
+                    <SharesBandNotesViewModal songName={song.name} sharesBandNotes={song.shares_band_notes} />
                   )}
                 </TableCell>
                 <TableCell sx={{ minWidth: 260 }}>

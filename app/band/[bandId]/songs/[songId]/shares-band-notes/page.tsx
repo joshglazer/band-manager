@@ -1,8 +1,8 @@
 'use client';
 
 import Loading from '@/components/design/Loading';
-import ChordChartForm from '@/components/forms/ChordChartForm';
-import ChordChartViewer from '@/components/ChordChartViewer';
+import SharesBandNotesForm from '@/components/forms/SharesBandNotesForm';
+import SharesBandNotesViewer from '@/components/SharesBandNotesViewer';
 import useSong from '@/hooks/useSong';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
@@ -13,28 +13,28 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { useState } from 'react';
 
-interface ChordChartPageProps {
+interface SharesBandNotesPageProps {
   params: {
     bandId: string;
     songId: string;
   };
 }
 
-export default function ChordChartPage({ params }: Readonly<ChordChartPageProps>) {
+export default function SharesBandNotesPage({ params }: Readonly<SharesBandNotesPageProps>) {
   const { bandId, songId } = params;
 
   const { data: song, isLoading } = useSong({ songId: +songId });
   const [isEditing, setIsEditing] = useState(false);
-  const [chordChart, setChordChart] = useState<string | null | undefined>(undefined);
+  const [sharesBandNotes, setSharesBandNotes] = useState<string | null | undefined>(undefined);
 
   if (isLoading) {
     return <Loading />;
   }
 
-  const currentChordChart = chordChart !== undefined ? chordChart : song?.chord_chart ?? null;
+  const currentSharesBandNotes = sharesBandNotes !== undefined ? sharesBandNotes : song?.shares_band_notes ?? null;
 
   function handleSaved(newValue: string | null) {
-    setChordChart(newValue);
+    setSharesBandNotes(newValue);
     setIsEditing(false);
   }
 
@@ -61,14 +61,14 @@ export default function ChordChartPage({ params }: Readonly<ChordChartPageProps>
       <Divider sx={{ my: 3 }} />
 
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h5">Chord Chart</Typography>
+        <Typography variant="h5">Shares Band Notes</Typography>
         {!isEditing && (
           <Button
             variant="outlined"
             startIcon={<EditIcon />}
             onClick={() => setIsEditing(true)}
           >
-            {currentChordChart ? 'Edit' : 'Add'}
+            {currentSharesBandNotes ? 'Edit' : 'Add'}
           </Button>
         )}
         {isEditing && (
@@ -80,12 +80,12 @@ export default function ChordChartPage({ params }: Readonly<ChordChartPageProps>
 
       <Box sx={{ maxWidth: 800 }}>
         {isEditing && song ? (
-          <ChordChartForm
-            song={{ ...song, chord_chart: currentChordChart }}
+          <SharesBandNotesForm
+            song={{ ...song, shares_band_notes: currentSharesBandNotes }}
             onSaved={handleSaved}
           />
         ) : (
-          <ChordChartViewer chordChart={currentChordChart ?? ''} />
+          <SharesBandNotesViewer sharesBandNotes={currentSharesBandNotes ?? ''} />
         )}
       </Box>
     </>

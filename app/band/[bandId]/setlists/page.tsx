@@ -87,12 +87,12 @@ function SetlistActionsMenu({
         </MenuItem>
         <MenuItem
           onClick={() => {
-            window.open(`/print/setlist/${setlistId}/chord-charts`, '_blank');
+            window.open(`/print/setlist/${setlistId}/shares-band-notes`, '_blank');
             handleClose();
           }}
         >
           <ListItemIcon><PrintIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Print Chord Charts</ListItemText>
+          <ListItemText>Print Shares Band Notes</ListItemText>
         </MenuItem>
       </Menu>
     </>

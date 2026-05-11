@@ -1,6 +1,6 @@
 'use client';
 
-import ChordChartViewer from '@/components/ChordChartViewer';
+import SharesBandNotesViewer from '@/components/SharesBandNotesViewer';
 import Loading from '@/components/design/Loading';
 import Table, { TableProps, TablePropsDataType, TableRow } from '@/components/design/Table';
 import EditSongForm from '@/components/forms/EditSongForm';
@@ -40,7 +40,7 @@ function SongActionsMenu({
 
   const menuOpen = Boolean(menuAnchor);
   const commentsCount = song.song_comments[0].count;
-  const hasChordChart = Boolean(song.chord_chart);
+  const hasSharesBandNotes = Boolean(song.shares_band_notes);
 
   const openMenu = (e: React.MouseEvent<HTMLElement>) => setMenuAnchor(e.currentTarget);
   const closeMenu = () => setMenuAnchor(null);
@@ -60,10 +60,10 @@ function SongActionsMenu({
           <ListItemIcon><ChatBubbleOutlineIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Comments ({commentsCount})</ListItemText>
         </MenuItem>
-        {hasChordChart && (
+        {hasSharesBandNotes && (
           <MenuItem onClick={() => openModal('chords')}>
             <ListItemIcon><MusicNoteIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>View Chord Chart</ListItemText>
+            <ListItemText>View Shares Band Notes</ListItemText>
           </MenuItem>
         )}
         <MenuItem onClick={() => openModal('edit')}>
@@ -92,11 +92,11 @@ function SongActionsMenu({
         </DialogContent>
       </Dialog>
 
-      {hasChordChart && (
+      {hasSharesBandNotes && (
         <Dialog open={activeModal === 'chords'} onClose={closeModal} maxWidth="md" fullWidth>
-          <DialogTitle>{song.name ?? 'Chord Chart'}</DialogTitle>
+          <DialogTitle>{song.name ?? 'Shares Band Notes'}</DialogTitle>
           <DialogContent>
-            <ChordChartViewer chordChart={song.chord_chart!} />
+            <SharesBandNotesViewer sharesBandNotes={song.shares_band_notes!} />
           </DialogContent>
         </Dialog>
       )}
