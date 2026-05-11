@@ -25,7 +25,7 @@ interface EditSongFormProps {
 }
 
 type Mode = 'spotify' | 'manual';
-type LinkedAction = null | 're-search' | 'confirm-unlink';
+type LinkedAction = null | 're-search' | 'confirm-unlink' | 'manual-edit';
 
 const chordChartField: FormField = {
   fieldType: 'textarea',
@@ -154,14 +154,26 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
     }
   }
 
-  async function handleUnlink() {
-    setIsSubmitting(true);
+  async function handleManualEditSuccess(data: FieldValues) {
     setErrorMessage('');
+
+    const duration = data.duration ? parseDurationToMs(data.duration) : null;
+    if (data.duration && duration === null) {
+      setErrorMessage('Invalid duration format. Use m:ss (e.g. 3:45).');
+      return;
+    }
+
     const { error } = await supabase
       .from('songs')
-      .update({ spotify_url: null })
+      .update({
+        name: data.name,
+        artist: data.artist || null,
+        duration,
+        chord_chart: data.chord_chart || null,
+        spotify_url: null,
+      })
       .eq('id', song.id);
-    setIsSubmitting(false);
+
     if (error) {
       setErrorMessage(error.message);
     } else {
@@ -171,6 +183,19 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
 
   // Already linked to Spotify
   if (isSpotifyLinked) {
+    // Confirmed unlink: show manual form; spotify_url removed only on save
+    if (linkedAction === 'manual-edit') {
+      return (
+        <Form
+          onSuccess={handleManualEditSuccess}
+          formFields={manualFormFields}
+          defaultValues={defaultValues}
+          errorMessage={errorMessage}
+          saveButtonLabel="Save Changes"
+        />
+      );
+    }
+
     // Unlink confirmation
     if (linkedAction === 'confirm-unlink') {
       return (
@@ -180,23 +205,17 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
             to edit the name, artist, and duration freely, but the song will no longer be linked to
             Spotify.
           </Alert>
-          {errorMessage && (
-            <Alert severity="error" className="mb-4">
-              {errorMessage}
-            </Alert>
-          )}
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button variant="outlined" onClick={() => setLinkedAction(null)}>
               Cancel
             </Button>
-            <LoadingButton
+            <Button
               variant="contained"
               color="warning"
-              loading={isSubmitting}
-              onClick={handleUnlink}
+              onClick={() => setLinkedAction('manual-edit')}
             >
               Confirm — Switch to Manual
-            </LoadingButton>
+            </Button>
           </Box>
         </>
       );
