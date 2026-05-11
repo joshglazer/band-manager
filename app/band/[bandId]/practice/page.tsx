@@ -347,7 +347,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableSortLabel>
                 )}
               </TableCell>
-              <TableCell sx={{ width: '1px', padding: '8px 12px' }}><span className="sr-only">Links</span></TableCell>
+              <TableCell sx={{ width: '1px', padding: '8px 12px' }}>Resources</TableCell>
               <TableCell>
                 {setlistFilter ? (
                   'Your Status'

@@ -191,7 +191,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
       ariaLabel: 'Table of Songs',
       columns: [
         {
-          name: 'Link',
+          name: 'Resources',
           dataKey: 'song_link',
           dataFormatter: formatLinkIcon,
           hideHeader: true,
