@@ -1,7 +1,7 @@
 'use client';
 
 import { SpotifyIcon } from '@/components/SpotifyBadge';
-import { cleanSpotifyTrackName, formatMsToDuration } from '@/utils/songs';
+import { formatMsToDuration } from '@/utils/songs';
 import CircularProgress from '@mui/material/CircularProgress';
 import InputAdornment from '@mui/material/InputAdornment';
 import List from '@mui/material/List';
@@ -131,7 +131,7 @@ export default function SpotifyTrackSearch({ onSelect, initialQuery = '' }: Read
                   />
                 )}
                 <ListItemText
-                  primary={cleanSpotifyTrackName(track.name)}
+                  primary={track.name}
                   secondary={`${artistNames} · ${duration}`}
                 />
               </ListItemButton>
