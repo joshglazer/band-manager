@@ -90,7 +90,6 @@ export default function Form({
             break;
           }
           case 'select': {
-            console.log((fieldProps as SelectElementProps).options);
             field = (
               <SelectElement
                 {...(fieldProps as SelectElementProps)}

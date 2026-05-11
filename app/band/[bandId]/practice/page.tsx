@@ -347,7 +347,6 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableSortLabel>
                 )}
               </TableCell>
-              <TableCell sx={{ width: '1px', padding: '8px 12px' }}>Resources</TableCell>
               <TableCell>
                 {setlistFilter ? (
                   'Your Status'
@@ -361,6 +360,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableSortLabel>
                 )}
               </TableCell>
+              <TableCell sx={{ width: '1px', padding: '8px 12px' }}>Resources</TableCell>
               <TableCell>
                 {setlistFilter ? (
                   'Notes'
@@ -392,18 +392,6 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                     </Typography>
                   )}
                 </TableCell>
-                <TableCell sx={{ width: '1px', whiteSpace: 'nowrap', padding: '8px 12px', verticalAlign: 'middle' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    {song.song_link ? (
-                      <SongLinkIcon url={song.song_link} />
-                    ) : song.spotify_url ? (
-                      <SpotifyBadge spotifyUrl={song.spotify_url} />
-                    ) : null}
-                    {song.shared_band_notes && (
-                      <SharedBandNotesViewModal songName={song.name} sharedBandNotes={song.shared_band_notes} iconOnly />
-                    )}
-                  </Box>
-                </TableCell>
                 <TableCell sx={{ whiteSpace: 'nowrap' }}>
                   <ToggleButtonGroup
                     value={p.status}
@@ -423,6 +411,18 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                       Ready
                     </ToggleButton>
                   </ToggleButtonGroup>
+                </TableCell>
+                <TableCell sx={{ width: '1px', whiteSpace: 'nowrap', padding: '8px 12px', verticalAlign: 'middle' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    {song.song_link ? (
+                      <SongLinkIcon url={song.song_link} />
+                    ) : song.spotify_url ? (
+                      <SpotifyBadge spotifyUrl={song.spotify_url} />
+                    ) : null}
+                    {song.shared_band_notes && (
+                      <SharedBandNotesViewModal songName={song.name} sharedBandNotes={song.shared_band_notes} iconOnly />
+                    )}
+                  </Box>
                 </TableCell>
                 <TableCell sx={{ minWidth: 260 }}>
                   <TextField
