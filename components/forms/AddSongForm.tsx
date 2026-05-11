@@ -56,6 +56,13 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
         fullWidth: true,
       },
       {
+        fieldType: 'text' as FormField['fieldType'],
+        name: 'song_link',
+        label: 'Link (URL)',
+        placeholder: 'e.g. https://soundcloud.com/...',
+        fullWidth: true,
+      },
+      {
         fieldType: 'textarea' as FormField['fieldType'],
         name: 'shared_band_notes',
         label: 'Shared Band Notes',
@@ -104,6 +111,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
       artist: data.artist || null,
       duration,
       shared_band_notes: data.shared_band_notes || null,
+      song_link: data.song_link || null,
       band_id: bandId,
       spotify_url: null,
     });

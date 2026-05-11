@@ -6,6 +6,7 @@ import Table, { TableProps, TablePropsDataType, TableRow } from '@/components/de
 import EditSongForm from '@/components/forms/EditSongForm';
 import SongCommentForm from '@/components/forms/SongCommentForm';
 import AddSongModal from '@/components/modals/AddSongModal';
+import SongLinkIcon from '@/components/SongLinkIcon';
 import SpotifyBadge from '@/components/SpotifyBadge';
 import useSongs, { SongsComposite } from '@/hooks/useSongs';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
@@ -128,13 +129,19 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
     });
   }
 
-  function formatName(value: TablePropsDataType, row: TableRow) {
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <span>{value as string}</span>
-        {row.spotify_url && <SpotifyBadge spotifyUrl={row.spotify_url as string} />}
-      </Box>
-    );
+  function formatName(value: TablePropsDataType) {
+    return <span>{value as string}</span>;
+  }
+
+  function formatLinkIcon(_value: TablePropsDataType | null, row: TableRow) {
+    const songLink = row.song_link as string | null;
+    const spotifyUrl = row.spotify_url as string | null;
+    const url = songLink || spotifyUrl;
+    if (!url) return '';
+    if (!songLink && spotifyUrl) {
+      return <SpotifyBadge spotifyUrl={spotifyUrl} />;
+    }
+    return <SongLinkIcon url={url} />;
   }
 
   function formatActions(_value: TablePropsDataType | null, row: TableRow) {
@@ -155,6 +162,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
       name: song.name,
       artist: song.artist,
       duration: song.duration,
+      song_link: song.song_link,
       spotify_url: song.spotify_url,
     }));
 
@@ -182,6 +190,12 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
     const songsTableData: TableProps = {
       ariaLabel: 'Table of Songs',
       columns: [
+        {
+          name: 'Link',
+          dataKey: 'song_link',
+          dataFormatter: formatLinkIcon,
+          hideHeader: true,
+        },
         {
           name: 'Name',
           dataKey: 'name',
