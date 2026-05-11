@@ -13,10 +13,11 @@ export default function Footer() {
         justifyContent: 'center',
         borderTop: '1px solid',
         borderColor: 'divider',
-        height: 64,
+        minHeight: 64,
+        py: 1,
       }}
     >
-      <div className="w-full flex justify-between items-center px-3">
+      <div className="w-full flex flex-wrap justify-between items-center gap-2 px-3">
         <Typography variant="caption" color="text.secondary">
           A{' '}
           <Link href="https://joshglazer.com" target="_blank" rel="noreferrer" underline="hover" color="inherit" fontWeight={600}>
@@ -24,16 +25,24 @@ export default function Footer() {
           </Link>{' '}
           Project
         </Typography>
-        <Link
-          href="https://github.com/joshglazer/band-manager"
-          target="_blank"
-          rel="noreferrer"
-          underline="hover"
-          color="text.secondary"
-          sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.75rem', fontWeight: 600 }}
-        >
-          <GitHubIcon sx={{ fontSize: 16 }} /> Source Code
-        </Link>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Link href="/tos" underline="hover" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+            Terms of Service
+          </Link>
+          <Link href="/dmca" underline="hover" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+            DMCA
+          </Link>
+          <Link
+            href="https://github.com/joshglazer/band-manager"
+            target="_blank"
+            rel="noreferrer"
+            underline="hover"
+            color="text.secondary"
+            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.75rem', fontWeight: 600 }}
+          >
+            <GitHubIcon sx={{ fontSize: 16 }} /> Source Code
+          </Link>
+        </Box>
       </div>
     </Box>
   );
