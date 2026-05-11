@@ -1,4 +1,13 @@
+'use client';
+
+import SpotifyTrackSearch, { SpotifyTrack } from '@/components/SpotifyTrackSearch';
 import { createClient } from '@/utils/supabase/client';
+import { formatMsToDuration, parseDurationToMs } from '@/utils/songs';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CloseIcon from '@mui/icons-material/Close';
+import Chip from '@mui/material/Chip';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
 import { useMemo, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import Form, { FormField } from '../design/Form';
@@ -8,16 +17,11 @@ interface AddSongFormProps {
   onSuccess?: () => void;
 }
 
-function parseDurationToMs(value: string): number | null {
-  const match = value.trim().match(/^(\d+):([0-5]\d)$/);
-  if (!match) return null;
-  const minutes = parseInt(match[1], 10);
-  const seconds = parseInt(match[2], 10);
-  return (minutes * 60 + seconds) * 1000;
-}
-
 export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormProps>) {
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
+  const [formKey, setFormKey] = useState(0);
+  const [defaultValues, setDefaultValues] = useState<Record<string, string>>({});
   const supabase = createClient();
 
   const formFields: FormField[] = useMemo(
@@ -54,6 +58,23 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
     []
   );
 
+  function handleSpotifySelect(track: SpotifyTrack) {
+    setSelectedTrack(track);
+    setDefaultValues({
+      name: track.name,
+      artist: track.artists.map((a) => a.name).join(', '),
+      duration: formatMsToDuration(track.duration_ms),
+      chord_chart: '',
+    });
+    setFormKey((k) => k + 1);
+  }
+
+  function handleClearSpotify() {
+    setSelectedTrack(null);
+    setDefaultValues({});
+    setFormKey((k) => k + 1);
+  }
+
   async function handleSuccess(data: FieldValues) {
     setErrorMessage('');
 
@@ -69,6 +90,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
       duration,
       chord_chart: data.chord_chart || null,
       band_id: bandId,
+      spotify_url: selectedTrack?.external_urls.spotify ?? null,
     });
 
     if (error) {
@@ -78,5 +100,33 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
     }
   }
 
-  return <Form onSuccess={handleSuccess} formFields={formFields} errorMessage={errorMessage} saveButtonLabel="Add Song" />;
+  return (
+    <>
+      <SpotifyTrackSearch onSelect={handleSpotifySelect} />
+      {selectedTrack && (
+        <Chip
+          icon={<CheckCircleIcon />}
+          label={`${selectedTrack.name} — ${selectedTrack.artists.map((a) => a.name).join(', ')}`}
+          onDelete={handleClearSpotify}
+          deleteIcon={<CloseIcon />}
+          color="success"
+          variant="outlined"
+          className="mb-4"
+        />
+      )}
+      <Divider className="mb-4">
+        <Typography variant="caption" color="text.secondary">
+          {selectedTrack ? 'Edit song details' : 'Or enter details manually'}
+        </Typography>
+      </Divider>
+      <Form
+        key={formKey}
+        onSuccess={handleSuccess}
+        formFields={formFields}
+        defaultValues={defaultValues}
+        errorMessage={errorMessage}
+        saveButtonLabel="Add Song"
+      />
+    </>
+  );
 }
