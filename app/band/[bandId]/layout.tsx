@@ -58,10 +58,10 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
     const navItems = [
       { label: 'Overview', href: basePath, icon: <GridViewIcon fontSize="small" />, exact: true },
       { label: 'Events', href: `${basePath}/events`, icon: <CalendarMonthIcon fontSize="small" /> },
-      { label: 'Members', href: `${basePath}/members`, icon: <GroupIcon fontSize="small" /> },
       { label: 'Songs', href: `${basePath}/songs`, icon: <LibraryMusicIcon fontSize="small" /> },
       { label: 'Setlists', href: `${basePath}/setlists`, icon: <QueueMusicIcon fontSize="small" /> },
       { label: 'Practice', href: `${basePath}/practice`, icon: <ChecklistIcon fontSize="small" /> },
+      { label: 'Members', href: `${basePath}/members`, icon: <GroupIcon fontSize="small" /> },
       { label: 'Settings', href: `${basePath}/settings`, icon: <SettingsIcon fontSize="small" /> },
     ];
 
