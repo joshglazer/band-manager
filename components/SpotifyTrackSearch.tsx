@@ -25,13 +25,14 @@ export interface SpotifyTrack {
 
 interface SpotifyTrackSearchProps {
   onSelect: (track: SpotifyTrack) => void;
+  initialQuery?: string;
 }
 
 const DEBOUNCE_MS = 500;
 const MIN_QUERY_LENGTH = 2;
 
-export default function SpotifyTrackSearch({ onSelect }: Readonly<SpotifyTrackSearchProps>) {
-  const [query, setQuery] = useState('');
+export default function SpotifyTrackSearch({ onSelect, initialQuery = '' }: Readonly<SpotifyTrackSearchProps>) {
+  const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<SpotifyTrack[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
