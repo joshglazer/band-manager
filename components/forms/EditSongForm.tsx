@@ -34,6 +34,7 @@ const sharedBandNotesField: FormField = {
   fullWidth: true,
   rows: 10,
   inputProps: { style: { fontFamily: 'monospace', fontSize: '0.95rem', lineHeight: 1.8 } },
+  helperText: 'Only upload content you have the right to use (your own notes, original transcriptions, or content you are licensed to store).',
 };
 
 export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormProps>) {
