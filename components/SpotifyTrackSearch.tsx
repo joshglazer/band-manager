@@ -1,9 +1,7 @@
 'use client';
 
 import { formatMsToDuration } from '@/utils/songs';
-import SearchIcon from '@mui/icons-material/Search';
 import CircularProgress from '@mui/material/CircularProgress';
-import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -11,7 +9,7 @@ import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export interface SpotifyTrack {
   id: string;
@@ -29,37 +27,47 @@ interface SpotifyTrackSearchProps {
   onSelect: (track: SpotifyTrack) => void;
 }
 
+const DEBOUNCE_MS = 500;
+const MIN_QUERY_LENGTH = 2;
+
 export default function SpotifyTrackSearch({ onSelect }: Readonly<SpotifyTrackSearchProps>) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SpotifyTrack[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [searched, setSearched] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  async function handleSearch() {
-    if (!query.trim()) return;
-    setLoading(true);
-    setError(undefined);
-    setSearched(true);
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`);
-    if (response.ok) {
-      const tracks = await response.json();
-      setResults(tracks);
-    } else if (response.status === 503) {
-      setError('Spotify search is not configured.');
-    } else {
-      setError('Search failed. Please try again.');
+    if (query.trim().length < MIN_QUERY_LENGTH) {
+      setResults([]);
+      setSearched(false);
+      setError(undefined);
+      return;
     }
-    setLoading(false);
-  }
 
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch();
-    }
-  }
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      setError(undefined);
+      setSearched(true);
+
+      const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`);
+      if (response.ok) {
+        setResults(await response.json());
+      } else if (response.status === 503) {
+        setError('Spotify search is not configured.');
+      } else {
+        setError('Search failed. Please try again.');
+      }
+      setLoading(false);
+    }, DEBOUNCE_MS);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query]);
 
   return (
     <div>
@@ -67,21 +75,14 @@ export default function SpotifyTrackSearch({ onSelect }: Readonly<SpotifyTrackSe
         label="Search Spotify"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={handleKeyDown}
         fullWidth
         className="mb-2"
         InputProps={{
-          endAdornment: (
+          endAdornment: loading ? (
             <InputAdornment position="end">
-              {loading ? (
-                <CircularProgress size={20} />
-              ) : (
-                <IconButton onClick={handleSearch} edge="end" aria-label="search spotify">
-                  <SearchIcon />
-                </IconButton>
-              )}
+              <CircularProgress size={20} />
             </InputAdornment>
-          ),
+          ) : null,
         }}
       />
       {error && (
