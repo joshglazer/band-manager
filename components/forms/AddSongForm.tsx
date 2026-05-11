@@ -1,10 +1,10 @@
 'use client';
 
+import { SpotifyIcon } from '@/components/SpotifyBadge';
 import SpotifyTrackSearch, { SpotifyTrack } from '@/components/SpotifyTrackSearch';
 import { createClient } from '@/utils/supabase/client';
-import { formatMsToDuration, parseDurationToMs } from '@/utils/songs';
+import { cleanSpotifyTrackName, formatMsToDuration, parseDurationToMs } from '@/utils/songs';
 import SaveIcon from '@mui/icons-material/Save';
-import SearchIcon from '@mui/icons-material/Search';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -73,7 +73,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
     setErrorMessage('');
 
     const { error } = await supabase.from('songs').insert({
-      name: selectedTrack.name,
+      name: cleanSpotifyTrackName(selectedTrack.name),
       artist: selectedTrack.artists.map((a) => a.name).join(', '),
       duration: selectedTrack.duration_ms,
       chord_chart: chordChart || null,
@@ -124,7 +124,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
   return (
     <>
       <Tabs value={mode} onChange={handleTabChange} className="mb-4">
-        <Tab icon={<SearchIcon fontSize="small" />} iconPosition="start" label="Search Spotify" value="spotify" />
+        <Tab icon={<SpotifyIcon size={16} />} iconPosition="start" label="Search Spotify" value="spotify" />
         <Tab label="Manual Entry" value="manual" />
       </Tabs>
 
@@ -139,7 +139,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
                   Selected song
                 </Typography>
                 <Typography variant="h6" component="p">
-                  {selectedTrack.name}
+                  {cleanSpotifyTrackName(selectedTrack.name)}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {selectedTrack.artists.map((a) => a.name).join(', ')}

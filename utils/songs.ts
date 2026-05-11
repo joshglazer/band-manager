@@ -1,3 +1,8 @@
+// Strips Spotify remaster suffixes, e.g. " - 2022 Remaster", " - 2019 Remastered Version"
+export function cleanSpotifyTrackName(name: string): string {
+  return name.replace(/ - \(?\d{4} Remaster(?:ed)?(?:\s+\w+)*\)?$/i, '').trim();
+}
+
 export function parseDurationToMs(value: string): number | null {
   const match = value.trim().match(/^(\d+):([0-5]\d)$/);
   if (!match) return null;

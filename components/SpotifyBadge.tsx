@@ -1,13 +1,8 @@
 import Tooltip from '@mui/material/Tooltip';
 
-interface SpotifyBadgeProps {
-  spotifyUrl: string;
-  size?: number;
-}
-
 // Official Spotify icon SVG per Spotify brand guidelines:
 // https://developer.spotify.com/documentation/design#using-our-logo
-function SpotifyIcon({ size }: { size: number }) {
+export function SpotifyIcon({ size = 20 }: Readonly<{ size?: number }>) {
   return (
     <svg
       role="img"
@@ -16,6 +11,7 @@ function SpotifyIcon({ size }: { size: number }) {
       width={size}
       height={size}
       aria-label="Spotify"
+      style={{ flexShrink: 0 }}
     >
       <path
         fill="#1DB954"
@@ -23,6 +19,11 @@ function SpotifyIcon({ size }: { size: number }) {
       />
     </svg>
   );
+}
+
+interface SpotifyBadgeProps {
+  spotifyUrl: string;
+  size?: number;
 }
 
 export default function SpotifyBadge({ spotifyUrl, size = 20 }: Readonly<SpotifyBadgeProps>) {

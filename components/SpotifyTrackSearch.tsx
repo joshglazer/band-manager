@@ -1,6 +1,7 @@
 'use client';
 
-import { formatMsToDuration } from '@/utils/songs';
+import { SpotifyIcon } from '@/components/SpotifyBadge';
+import { cleanSpotifyTrackName, formatMsToDuration } from '@/utils/songs';
 import CircularProgress from '@mui/material/CircularProgress';
 import InputAdornment from '@mui/material/InputAdornment';
 import List from '@mui/material/List';
@@ -79,6 +80,11 @@ export default function SpotifyTrackSearch({ onSelect, initialQuery = '' }: Read
         fullWidth
         className="mb-2"
         InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SpotifyIcon size={18} />
+            </InputAdornment>
+          ),
           endAdornment: loading ? (
             <InputAdornment position="end">
               <CircularProgress size={20} />
@@ -125,7 +131,7 @@ export default function SpotifyTrackSearch({ onSelect, initialQuery = '' }: Read
                   />
                 )}
                 <ListItemText
-                  primary={track.name}
+                  primary={cleanSpotifyTrackName(track.name)}
                   secondary={`${artistNames} · ${duration}`}
                 />
               </ListItemButton>

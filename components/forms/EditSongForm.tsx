@@ -1,12 +1,11 @@
 'use client';
 
-import SpotifyBadge from '@/components/SpotifyBadge';
+import SpotifyBadge, { SpotifyIcon } from '@/components/SpotifyBadge';
 import SpotifyTrackSearch, { SpotifyTrack } from '@/components/SpotifyTrackSearch';
 import { Tables } from '@/types/supabase';
 import { createClient } from '@/utils/supabase/client';
-import { formatMsToDuration, parseDurationToMs } from '@/utils/songs';
+import { cleanSpotifyTrackName, formatMsToDuration, parseDurationToMs } from '@/utils/songs';
 import SaveIcon from '@mui/icons-material/Save';
-import SearchIcon from '@mui/icons-material/Search';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -26,6 +25,7 @@ interface EditSongFormProps {
 }
 
 type Mode = 'spotify' | 'manual';
+type LinkedAction = null | 're-search' | 'confirm-unlink';
 
 const chordChartField: FormField = {
   fieldType: 'textarea',
@@ -38,6 +38,7 @@ const chordChartField: FormField = {
 
 export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormProps>) {
   const [mode, setMode] = useState<Mode>('manual');
+  const [linkedAction, setLinkedAction] = useState<LinkedAction>(null);
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
   const [chordChart, setChordChart] = useState(song.chord_chart ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -124,7 +125,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
     const { error } = await supabase
       .from('songs')
       .update({
-        name: selectedTrack.name,
+        name: cleanSpotifyTrackName(selectedTrack.name),
         artist: selectedTrack.artists.map((a) => a.name).join(', '),
         duration: selectedTrack.duration_ms,
         spotify_url: selectedTrack.external_urls.spotify,
@@ -153,8 +154,117 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
     }
   }
 
-  // Already linked to Spotify: show read-only info + chord chart editor
+  async function handleUnlink() {
+    setIsSubmitting(true);
+    setErrorMessage('');
+    const { error } = await supabase
+      .from('songs')
+      .update({ spotify_url: null })
+      .eq('id', song.id);
+    setIsSubmitting(false);
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      onSuccess?.();
+    }
+  }
+
+  // Already linked to Spotify
   if (isSpotifyLinked) {
+    // Unlink confirmation
+    if (linkedAction === 'confirm-unlink') {
+      return (
+        <>
+          <Alert severity="warning" className="mb-4">
+            Switching to manual entry will remove the Spotify link for this song. You will be able
+            to edit the name, artist, and duration freely, but the song will no longer be linked to
+            Spotify.
+          </Alert>
+          {errorMessage && (
+            <Alert severity="error" className="mb-4">
+              {errorMessage}
+            </Alert>
+          )}
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button variant="outlined" onClick={() => setLinkedAction(null)}>
+              Cancel
+            </Button>
+            <LoadingButton
+              variant="contained"
+              color="warning"
+              loading={isSubmitting}
+              onClick={handleUnlink}
+            >
+              Confirm — Switch to Manual
+            </LoadingButton>
+          </Box>
+        </>
+      );
+    }
+
+    // Re-search Spotify
+    if (linkedAction === 're-search') {
+      return (
+        <>
+          {!selectedTrack ? (
+            <>
+              <SpotifyTrackSearch onSelect={setSelectedTrack} initialQuery={spotifyInitialQuery} />
+              <Button variant="outlined" size="small" onClick={() => setLinkedAction(null)}>
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <Box className="mb-4" sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  Selected song
+                </Typography>
+                <Typography variant="h6" component="p">
+                  {cleanSpotifyTrackName(selectedTrack.name)}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {selectedTrack.artists.map((a) => a.name).join(', ')}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {formatMsToDuration(selectedTrack.duration_ms)}
+                </Typography>
+              </Box>
+              <Divider className="mb-4" />
+              <TextField
+                label="Chord Chart"
+                value={chordChart}
+                onChange={(e) => setChordChart(e.target.value)}
+                fullWidth
+                multiline
+                rows={10}
+                className="mb-4"
+                inputProps={{ style: { fontFamily: 'monospace', fontSize: '0.95rem', lineHeight: 1.8 } }}
+              />
+              {errorMessage && (
+                <Alert severity="error" className="mb-4">
+                  {errorMessage}
+                </Alert>
+              )}
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button variant="outlined" onClick={() => setSelectedTrack(null)}>
+                  Search Again
+                </Button>
+                <LoadingButton
+                  variant="contained"
+                  loading={isSubmitting}
+                  startIcon={<SaveIcon />}
+                  onClick={handleSpotifyLink}
+                >
+                  Update Spotify Link
+                </LoadingButton>
+              </Box>
+            </>
+          )}
+        </>
+      );
+    }
+
+    // Default: show linked info + chord chart
     return (
       <>
         <Box
@@ -187,6 +297,15 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
               {formatMsToDuration(song.duration)}
             </Typography>
           )}
+          <Box sx={{ display: 'flex', gap: 1, mt: 1, pt: 1.5, borderTop: '1px solid rgba(29,185,84,0.25)' }}>
+            <Button size="small" variant="outlined" onClick={() => setLinkedAction('re-search')}
+              sx={{ borderColor: '#1DB954', color: '#1DB954', '&:hover': { borderColor: '#17a349', color: '#17a349' } }}>
+              Change Spotify Link
+            </Button>
+            <Button size="small" color="inherit" onClick={() => setLinkedAction('confirm-unlink')}>
+              Switch to Manual
+            </Button>
+          </Box>
         </Box>
         <Divider className="mb-4" />
         <Form
@@ -204,7 +323,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
   return (
     <>
       <Tabs value={mode} onChange={handleTabChange} className="mb-4">
-        <Tab icon={<SearchIcon fontSize="small" />} iconPosition="start" label="Search Spotify" value="spotify" />
+        <Tab icon={<SpotifyIcon size={16} />} iconPosition="start" label="Search Spotify" value="spotify" />
         <Tab label="Manual Entry" value="manual" />
       </Tabs>
 
@@ -219,7 +338,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
                   Selected song
                 </Typography>
                 <Typography variant="h6" component="p">
-                  {selectedTrack.name}
+                  {cleanSpotifyTrackName(selectedTrack.name)}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {selectedTrack.artists.map((a) => a.name).join(', ')}
