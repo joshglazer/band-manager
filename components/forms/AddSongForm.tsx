@@ -124,7 +124,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
   return (
     <>
       <Tabs value={mode} onChange={handleTabChange} className="mb-4">
-        <Tab icon={<SpotifyIcon size={16} />} iconPosition="start" label="Search Spotify" value="spotify" />
+        <Tab icon={<span style={{ marginRight: 6, display: 'inline-flex' }}><SpotifyIcon size={16} /></span>} iconPosition="start" label="Search Spotify" value="spotify" />
         <Tab label="Manual Entry" value="manual" />
       </Tabs>
 
