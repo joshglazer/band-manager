@@ -132,7 +132,7 @@ export default function SpotifyTrackSearch({ onSelect, initialQuery = '' }: Read
                 )}
                 <ListItemText
                   primary={track.name}
-                  secondary={`${artistNames} · ${duration}`}
+                  secondary={`${artistNames} · ${track.album.name} · ${duration}`}
                 />
               </ListItemButton>
             );
