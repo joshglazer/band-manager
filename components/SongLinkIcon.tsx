@@ -1,6 +1,7 @@
 import { SpotifyIcon } from '@/components/SpotifyBadge';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import Tooltip from '@mui/material/Tooltip';
+import type { ReactNode } from 'react';
 
 function YouTubeIcon({ size }: { size: number }) {
   return (
@@ -112,7 +113,7 @@ export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconPr
   const platform = detectPlatform(url);
   const label = platformLabels[platform];
 
-  let icon: React.ReactNode;
+  let icon: ReactNode;
   switch (platform) {
     case 'youtube':
       icon = <YouTubeIcon size={size} />;
