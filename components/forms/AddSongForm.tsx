@@ -28,7 +28,7 @@ type Mode = 'spotify' | 'manual';
 export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormProps>) {
   const [mode, setMode] = useState<Mode>('spotify');
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
-  const [sharesBandNotes, setSharesBandNotes] = useState('');
+  const [sharedBandNotes, setSharedBandNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
   const supabase = createClient();
@@ -57,8 +57,8 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
       },
       {
         fieldType: 'textarea' as FormField['fieldType'],
-        name: 'shares_band_notes',
-        label: 'Shares Band Notes',
+        name: 'shared_band_notes',
+        label: 'Shared Band Notes',
         fullWidth: true,
         rows: 10,
         inputProps: { style: { fontFamily: 'monospace', fontSize: '0.95rem', lineHeight: 1.8 } },
@@ -76,7 +76,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
       name: cleanSpotifyTrackName(selectedTrack.name),
       artist: selectedTrack.artists.map((a) => a.name).join(', '),
       duration: selectedTrack.duration_ms,
-      shares_band_notes: sharesBandNotes || null,
+      shared_band_notes: sharedBandNotes || null,
       band_id: bandId,
       spotify_url: selectedTrack.external_urls.spotify,
     });
@@ -102,7 +102,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
       name: data.name,
       artist: data.artist || null,
       duration,
-      shares_band_notes: data.shares_band_notes || null,
+      shared_band_notes: data.shared_band_notes || null,
       band_id: bandId,
       spotify_url: null,
     });
@@ -117,7 +117,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
   function handleTabChange(_: React.SyntheticEvent, newMode: Mode) {
     setMode(newMode);
     setSelectedTrack(null);
-    setSharesBandNotes('');
+    setSharedBandNotes('');
     setErrorMessage('');
   }
 
@@ -150,9 +150,9 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
               </Box>
               <Divider className="mb-4" />
               <TextField
-                label="Shares Band Notes"
-                value={sharesBandNotes}
-                onChange={(e) => setSharesBandNotes(e.target.value)}
+                label="Shared Band Notes"
+                value={sharedBandNotes}
+                onChange={(e) => setSharedBandNotes(e.target.value)}
                 fullWidth
                 multiline
                 rows={10}

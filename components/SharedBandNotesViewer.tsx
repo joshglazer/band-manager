@@ -4,8 +4,8 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import React from 'react';
 
-interface SharesBandNotesViewerProps {
-  sharesBandNotes: string;
+interface SharedBandNotesViewerProps {
+  sharedBandNotes: string;
 }
 
 const CHORD_RE = /^[A-G][b#]?(maj|min|m|dim|aug|sus[24]?|add)?[0-9]*(\/[A-G][b#]?)?$/;
@@ -49,16 +49,16 @@ function renderChordLine(line: string, key: number): React.ReactNode {
   return <div key={key}>{elements}</div>;
 }
 
-export default function SharesBandNotesViewer({ sharesBandNotes }: Readonly<SharesBandNotesViewerProps>) {
-  if (!sharesBandNotes.trim()) {
+export default function SharedBandNotesViewer({ sharedBandNotes }: Readonly<SharedBandNotesViewerProps>) {
+  if (!sharedBandNotes.trim()) {
     return (
       <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
-        No shares band notes yet.
+        No shared band notes yet.
       </Typography>
     );
   }
 
-  const lines = sharesBandNotes.split('\n');
+  const lines = sharedBandNotes.split('\n');
 
   return (
     <Box

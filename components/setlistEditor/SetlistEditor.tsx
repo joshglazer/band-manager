@@ -232,7 +232,7 @@ export default function SetlistEditor({
             <PrintDropdownButton
               options={[
                 { label: 'Print Setlist', url: `/print/setlist/${setlist.id}/songs` },
-                { label: 'Print Shares Band Notes', url: `/print/setlist/${setlist.id}/shares-band-notes` },
+                { label: 'Print Shared Band Notes', url: `/print/setlist/${setlist.id}/shared-band-notes` },
               ]}
             />
           </Box>

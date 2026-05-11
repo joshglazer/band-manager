@@ -1,4 +1,4 @@
-import SharesBandNotesViewer from '@/components/SharesBandNotesViewer';
+import SharedBandNotesViewer from '@/components/SharedBandNotesViewer';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -6,12 +6,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { useState } from 'react';
 
-interface SharesBandNotesViewModalProps {
+interface SharedBandNotesViewModalProps {
   songName: string | null;
-  sharesBandNotes: string;
+  sharedBandNotes: string;
 }
 
-export default function SharesBandNotesViewModal({ songName, sharesBandNotes }: Readonly<SharesBandNotesViewModalProps>) {
+export default function SharedBandNotesViewModal({ songName, sharedBandNotes }: Readonly<SharedBandNotesViewModalProps>) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -22,12 +22,12 @@ export default function SharesBandNotesViewModal({ songName, sharesBandNotes }: 
         startIcon={<MusicNoteIcon />}
         onClick={() => setOpen(true)}
       >
-        View Shares Band Notes
+        View Shared Band Notes
       </Button>
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>{songName ?? 'Shares Band Notes'}</DialogTitle>
+        <DialogTitle>{songName ?? 'Shared Band Notes'}</DialogTitle>
         <DialogContent>
-          <SharesBandNotesViewer sharesBandNotes={sharesBandNotes} />
+          <SharedBandNotesViewer sharedBandNotes={sharedBandNotes} />
         </DialogContent>
       </Dialog>
     </>

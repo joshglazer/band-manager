@@ -1,7 +1,7 @@
 'use client';
 
 import Loading from '@/components/design/Loading';
-import SharesBandNotesViewer from '@/components/SharesBandNotesViewer';
+import SharedBandNotesViewer from '@/components/SharedBandNotesViewer';
 import { getSetlistDisplayName } from '@/components/setlistEditor/helpers';
 import useSetlistWithSongs from '@/hooks/useSetlistWithSongs';
 import { Tables } from '@/types/supabase';
@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 import PrintIcon from '@mui/icons-material/Print';
 import { useMemo } from 'react';
 
-interface PrintSharesBandNotesPageProps {
+interface PrintSharedBandNotesPageProps {
   params: { setlistId: number };
 }
 
@@ -22,7 +22,7 @@ interface OrderedSong {
   song: Tables<'songs'>;
 }
 
-export default function PrintSharesBandNotesPage({ params }: Readonly<PrintSharesBandNotesPageProps>) {
+export default function PrintSharedBandNotesPage({ params }: Readonly<PrintSharedBandNotesPageProps>) {
   const { setlistId } = params;
   const { data: setlist, isLoading } = useSetlistWithSongs({ setlistId });
 
@@ -48,7 +48,7 @@ export default function PrintSharesBandNotesPage({ params }: Readonly<PrintShare
     return <Typography variant="h5">Setlist not found.</Typography>;
   }
 
-  const songsWithNotes = orderedSongs.filter((s) => s.song.shares_band_notes?.trim());
+  const songsWithNotes = orderedSongs.filter((s) => s.song.shared_band_notes?.trim());
 
   return (
     <>
@@ -63,7 +63,7 @@ export default function PrintSharesBandNotesPage({ params }: Readonly<PrintShare
 
       <Box className="no-print" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
         <Typography variant="h5" fontWeight={700}>
-          {getSetlistDisplayName(setlist)} — Shares Band Notes
+          {getSetlistDisplayName(setlist)} — Shared Band Notes
         </Typography>
         <Button variant="contained" startIcon={<PrintIcon />} onClick={() => window.print()}>
           Print
@@ -71,7 +71,7 @@ export default function PrintSharesBandNotesPage({ params }: Readonly<PrintShare
       </Box>
 
       {songsWithNotes.length === 0 ? (
-        <Typography color="text.secondary">No songs with shares band notes in this setlist.</Typography>
+        <Typography color="text.secondary">No songs with shared band notes in this setlist.</Typography>
       ) : (
         songsWithNotes.map(({ song }, index) => (
           <Box key={song.id} sx={{ mb: 4, pageBreakInside: 'avoid' }}>
@@ -79,7 +79,7 @@ export default function PrintSharesBandNotesPage({ params }: Readonly<PrintShare
               {index + 1}. {song.name}
               {song.artist ? ` — ${song.artist}` : ''}
             </Typography>
-            <SharesBandNotesViewer sharesBandNotes={song.shares_band_notes!} />
+            <SharedBandNotesViewer sharedBandNotes={song.shared_band_notes!} />
             {index < songsWithNotes.length - 1 && <Divider sx={{ mt: 3 }} />}
           </Box>
         ))

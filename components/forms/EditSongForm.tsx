@@ -27,10 +27,10 @@ interface EditSongFormProps {
 type Mode = 'spotify' | 'manual';
 type LinkedAction = null | 're-search' | 'confirm-unlink' | 'manual-edit';
 
-const sharesBandNotesField: FormField = {
+const sharedBandNotesField: FormField = {
   fieldType: 'textarea',
-  name: 'shares_band_notes',
-  label: 'Shares Band Notes',
+  name: 'shared_band_notes',
+  label: 'Shared Band Notes',
   fullWidth: true,
   rows: 10,
   inputProps: { style: { fontFamily: 'monospace', fontSize: '0.95rem', lineHeight: 1.8 } },
@@ -40,7 +40,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
   const [mode, setMode] = useState<Mode>('manual');
   const [linkedAction, setLinkedAction] = useState<LinkedAction>(null);
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
-  const [sharesBandNotes, setSharesBandNotes] = useState(song.shares_band_notes ?? '');
+  const [sharedBandNotes, setSharedBandNotes] = useState(song.shared_band_notes ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
   const supabase = createClient();
@@ -70,7 +70,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         placeholder: 'e.g. 3:45',
         fullWidth: true,
       },
-      sharesBandNotesField,
+      sharedBandNotesField,
     ],
     []
   );
@@ -80,7 +80,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       name: song.name ?? '',
       artist: song.artist ?? '',
       duration: song.duration ? formatMsToDuration(song.duration) : '',
-      shares_band_notes: song.shares_band_notes ?? '',
+      shared_band_notes: song.shared_band_notes ?? '',
     }),
     [song]
   );
@@ -106,7 +106,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         name: data.name,
         artist: data.artist || null,
         duration,
-        shares_band_notes: data.shares_band_notes || null,
+        shared_band_notes: data.shared_band_notes || null,
       })
       .eq('id', song.id);
 
@@ -129,7 +129,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         artist: selectedTrack.artists.map((a) => a.name).join(', '),
         duration: selectedTrack.duration_ms,
         spotify_url: selectedTrack.external_urls.spotify,
-        shares_band_notes: sharesBandNotes || null,
+        shared_band_notes: sharedBandNotes || null,
       })
       .eq('id', song.id);
 
@@ -145,7 +145,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
     setErrorMessage('');
     const { error } = await supabase
       .from('songs')
-      .update({ shares_band_notes: data.shares_band_notes || null })
+      .update({ shared_band_notes: data.shared_band_notes || null })
       .eq('id', song.id);
     if (error) {
       setErrorMessage(error.message);
@@ -169,7 +169,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         name: data.name,
         artist: data.artist || null,
         duration,
-        shares_band_notes: data.shares_band_notes || null,
+        shared_band_notes: data.shared_band_notes || null,
         spotify_url: null,
       })
       .eq('id', song.id);
@@ -250,9 +250,9 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
               </Box>
               <Divider className="mb-4" />
               <TextField
-                label="Shares Band Notes"
-                value={sharesBandNotes}
-                onChange={(e) => setSharesBandNotes(e.target.value)}
+                label="Shared Band Notes"
+                value={sharedBandNotes}
+                onChange={(e) => setSharedBandNotes(e.target.value)}
                 fullWidth
                 multiline
                 rows={10}
@@ -329,8 +329,8 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         <Divider className="mb-4" />
         <Form
           onSuccess={handleSpotifyOnlySuccess}
-          formFields={[sharesBandNotesField]}
-          defaultValues={{ shares_band_notes: song.shares_band_notes ?? '' }}
+          formFields={[sharedBandNotesField]}
+          defaultValues={{ shared_band_notes: song.shared_band_notes ?? '' }}
           errorMessage={errorMessage}
           saveButtonLabel="Save Changes"
         />
@@ -368,9 +368,9 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
               </Box>
               <Divider className="mb-4" />
               <TextField
-                label="Shares Band Notes"
-                value={sharesBandNotes}
-                onChange={(e) => setSharesBandNotes(e.target.value)}
+                label="Shared Band Notes"
+                value={sharedBandNotes}
+                onChange={(e) => setSharedBandNotes(e.target.value)}
                 fullWidth
                 multiline
                 rows={10}
