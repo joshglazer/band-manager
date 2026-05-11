@@ -116,7 +116,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
   const { data: songs, isLoading, mutate } = useSongs({ bandId });
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(
-    null
+    { key: 'name', direction: 'asc' }
   );
 
   function handleSort(key: string) {
