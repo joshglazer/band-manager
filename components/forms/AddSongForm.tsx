@@ -3,10 +3,16 @@
 import SpotifyTrackSearch, { SpotifyTrack } from '@/components/SpotifyTrackSearch';
 import { createClient } from '@/utils/supabase/client';
 import { formatMsToDuration, parseDurationToMs } from '@/utils/songs';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CloseIcon from '@mui/icons-material/Close';
-import Chip from '@mui/material/Chip';
+import SaveIcon from '@mui/icons-material/Save';
+import SearchIcon from '@mui/icons-material/Search';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import LoadingButton from '@mui/lab/LoadingButton';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useMemo, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
@@ -17,14 +23,17 @@ interface AddSongFormProps {
   onSuccess?: () => void;
 }
 
+type Mode = 'spotify' | 'manual';
+
 export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormProps>) {
-  const [errorMessage, setErrorMessage] = useState<string>();
+  const [mode, setMode] = useState<Mode>('spotify');
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
-  const [formKey, setFormKey] = useState(0);
-  const [defaultValues, setDefaultValues] = useState<Record<string, string>>({});
+  const [chordChart, setChordChart] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>();
   const supabase = createClient();
 
-  const formFields: FormField[] = useMemo(
+  const manualFormFields: FormField[] = useMemo(
     () => [
       {
         fieldType: 'text' as FormField['fieldType'],
@@ -58,24 +67,29 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
     []
   );
 
-  function handleSpotifySelect(track: SpotifyTrack) {
-    setSelectedTrack(track);
-    setDefaultValues({
-      name: track.name,
-      artist: track.artists.map((a) => a.name).join(', '),
-      duration: formatMsToDuration(track.duration_ms),
-      chord_chart: '',
+  async function handleSpotifySubmit() {
+    if (!selectedTrack) return;
+    setIsSubmitting(true);
+    setErrorMessage('');
+
+    const { error } = await supabase.from('songs').insert({
+      name: selectedTrack.name,
+      artist: selectedTrack.artists.map((a) => a.name).join(', '),
+      duration: selectedTrack.duration_ms,
+      chord_chart: chordChart || null,
+      band_id: bandId,
+      spotify_url: selectedTrack.external_urls.spotify,
     });
-    setFormKey((k) => k + 1);
+
+    setIsSubmitting(false);
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      onSuccess?.();
+    }
   }
 
-  function handleClearSpotify() {
-    setSelectedTrack(null);
-    setDefaultValues({});
-    setFormKey((k) => k + 1);
-  }
-
-  async function handleSuccess(data: FieldValues) {
+  async function handleManualSuccess(data: FieldValues) {
     setErrorMessage('');
 
     const duration = data.duration ? parseDurationToMs(data.duration) : null;
@@ -90,7 +104,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
       duration,
       chord_chart: data.chord_chart || null,
       band_id: bandId,
-      spotify_url: selectedTrack?.external_urls.spotify ?? null,
+      spotify_url: null,
     });
 
     if (error) {
@@ -100,33 +114,82 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
     }
   }
 
+  function handleTabChange(_: React.SyntheticEvent, newMode: Mode) {
+    setMode(newMode);
+    setSelectedTrack(null);
+    setChordChart('');
+    setErrorMessage('');
+  }
+
   return (
     <>
-      <SpotifyTrackSearch onSelect={handleSpotifySelect} />
-      {selectedTrack && (
-        <Chip
-          icon={<CheckCircleIcon />}
-          label={`${selectedTrack.name} — ${selectedTrack.artists.map((a) => a.name).join(', ')}`}
-          onDelete={handleClearSpotify}
-          deleteIcon={<CloseIcon />}
-          color="success"
-          variant="outlined"
-          className="mb-4"
+      <Tabs value={mode} onChange={handleTabChange} className="mb-4">
+        <Tab icon={<SearchIcon fontSize="small" />} iconPosition="start" label="Search Spotify" value="spotify" />
+        <Tab label="Manual Entry" value="manual" />
+      </Tabs>
+
+      {mode === 'spotify' && (
+        <>
+          {!selectedTrack ? (
+            <SpotifyTrackSearch onSelect={setSelectedTrack} />
+          ) : (
+            <>
+              <Box className="mb-4" sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  Selected song
+                </Typography>
+                <Typography variant="h6" component="p">
+                  {selectedTrack.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {selectedTrack.artists.map((a) => a.name).join(', ')}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {formatMsToDuration(selectedTrack.duration_ms)}
+                </Typography>
+              </Box>
+              <Divider className="mb-4" />
+              <TextField
+                label="Chord Chart"
+                value={chordChart}
+                onChange={(e) => setChordChart(e.target.value)}
+                fullWidth
+                multiline
+                rows={10}
+                className="mb-4"
+                inputProps={{ style: { fontFamily: 'monospace', fontSize: '0.95rem', lineHeight: 1.8 } }}
+              />
+              {errorMessage && (
+                <Alert severity="error" className="mb-4">
+                  {errorMessage}
+                </Alert>
+              )}
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button variant="outlined" onClick={() => setSelectedTrack(null)}>
+                  Search Again
+                </Button>
+                <LoadingButton
+                  variant="contained"
+                  loading={isSubmitting}
+                  startIcon={<SaveIcon />}
+                  onClick={handleSpotifySubmit}
+                >
+                  Add Song
+                </LoadingButton>
+              </Box>
+            </>
+          )}
+        </>
+      )}
+
+      {mode === 'manual' && (
+        <Form
+          onSuccess={handleManualSuccess}
+          formFields={manualFormFields}
+          errorMessage={errorMessage}
+          saveButtonLabel="Add Song"
         />
       )}
-      <Divider className="mb-4">
-        <Typography variant="caption" color="text.secondary">
-          {selectedTrack ? 'Edit song details' : 'Or enter details manually'}
-        </Typography>
-      </Divider>
-      <Form
-        key={formKey}
-        onSuccess={handleSuccess}
-        formFields={formFields}
-        defaultValues={defaultValues}
-        errorMessage={errorMessage}
-        saveButtonLabel="Add Song"
-      />
     </>
   );
 }

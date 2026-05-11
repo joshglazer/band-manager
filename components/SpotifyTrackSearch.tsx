@@ -70,20 +70,18 @@ export default function SpotifyTrackSearch({ onSelect }: Readonly<SpotifyTrackSe
         onKeyDown={handleKeyDown}
         fullWidth
         className="mb-2"
-        slotProps={{
-          input: {
-            endAdornment: (
-              <InputAdornment position="end">
-                {loading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <IconButton onClick={handleSearch} edge="end" aria-label="search spotify">
-                    <SearchIcon />
-                  </IconButton>
-                )}
-              </InputAdornment>
-            ),
-          },
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              {loading ? (
+                <CircularProgress size={20} />
+              ) : (
+                <IconButton onClick={handleSearch} edge="end" aria-label="search spotify">
+                  <SearchIcon />
+                </IconButton>
+              )}
+            </InputAdornment>
+          ),
         }}
       />
       {error && (
