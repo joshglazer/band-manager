@@ -59,7 +59,7 @@ export default function SpotifyConnectBanner() {
             size="small"
             variant="contained"
             onClick={initiateSpotifyLogin}
-            startIcon={<SpotifyIcon size={16} />}
+            startIcon={<SpotifyIcon size={16} color="#fff" />}
             sx={{
               background: '#1DB954',
               color: '#fff',
