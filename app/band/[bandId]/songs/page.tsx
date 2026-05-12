@@ -7,8 +7,7 @@ import EditSongForm from '@/components/forms/EditSongForm';
 import SongCommentForm from '@/components/forms/SongCommentForm';
 import AddSongModal from '@/components/modals/AddSongModal';
 import SongLinkIcon from '@/components/SongLinkIcon';
-import SpotifyConnectBanner from '@/components/SpotifyConnectBanner';
-import SpotifyEmbedPlayer from '@/components/SpotifyEmbedPlayer';
+import SpotifyBadge from '@/components/SpotifyBadge';
 import useSongs, { SongsComposite } from '@/hooks/useSongs';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import EditIcon from '@mui/icons-material/Edit';
@@ -140,7 +139,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
     const url = songLink || spotifyUrl;
     if (!url) return '';
     if (!songLink && spotifyUrl) {
-      return <SpotifyEmbedPlayer spotifyUrl={spotifyUrl} />;
+      return <SpotifyBadge spotifyUrl={spotifyUrl} />;
     }
     return <SongLinkIcon url={url} />;
   }
@@ -239,11 +238,8 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
     pageContent = <>You haven&apos;t added any songs</>;
   }
 
-  const hasSpotifySongs = songs?.some((s) => s.spotify_url);
-
   return (
     <>
-      {hasSpotifySongs && <SpotifyConnectBanner />}
       <Box sx={{ mb: 2 }}>
         <TextField
           label="Search songs"
