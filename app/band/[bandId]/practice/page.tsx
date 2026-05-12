@@ -1,6 +1,7 @@
 'use client';
 
 import SongLinkIcon from '@/components/SongLinkIcon';
+import SpotifyConnectBanner from '@/components/SpotifyConnectBanner';
 import SpotifyEmbedPlayer from '@/components/SpotifyEmbedPlayer';
 import Loading from '@/components/design/Loading';
 import SharedBandNotesViewModal from '@/components/modals/SharedBandNotesViewModal';
@@ -274,8 +275,11 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
   const sortDir = (key: SortColumn) =>
     sortConfig?.key === key ? sortConfig.direction : undefined;
 
+  const hasSpotifySongs = songs.some((s) => s.spotify_url);
+
   return (
     <>
+      {hasSpotifySongs && <SpotifyConnectBanner />}
       <Box
         sx={{
           mb: 2,

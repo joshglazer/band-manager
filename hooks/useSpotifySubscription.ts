@@ -20,33 +20,43 @@ function getCachedAccessToken(): string | null {
   }
 }
 
+// Module-level cache: all hook instances in a session share one /me fetch
+let cachedStatus: SpotifySubscriptionStatus | null = null;
+let pendingFetch: Promise<SpotifySubscriptionStatus> | null = null;
+
+async function resolveStatus(): Promise<SpotifySubscriptionStatus> {
+  if (cachedStatus) return cachedStatus;
+  if (pendingFetch) return pendingFetch;
+
+  pendingFetch = (async (): Promise<SpotifySubscriptionStatus> => {
+    const token = getCachedAccessToken();
+    if (!token) return (cachedStatus = 'unauthenticated');
+
+    try {
+      const res = await fetch('https://api.spotify.com/v1/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return (cachedStatus = 'unauthenticated');
+      const data: { product?: string } = await res.json();
+      if (data.product === 'premium') return (cachedStatus = 'premium');
+      if (data.product) return (cachedStatus = 'free');
+      // Token lacks user-read-private scope
+      return (cachedStatus = 'unauthenticated');
+    } catch {
+      return (cachedStatus = 'unauthenticated');
+    } finally {
+      pendingFetch = null;
+    }
+  })();
+
+  return pendingFetch;
+}
+
 export function useSpotifySubscription(): SpotifySubscriptionStatus {
-  const [status, setStatus] = useState<SpotifySubscriptionStatus>('loading');
+  const [status, setStatus] = useState<SpotifySubscriptionStatus>(cachedStatus ?? 'loading');
 
   useEffect(() => {
-    const token = getCachedAccessToken();
-    if (!token) {
-      setStatus('unauthenticated');
-      return;
-    }
-
-    fetch('https://api.spotify.com/v1/me', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { product?: string } | null) => {
-        if (!data) {
-          setStatus('unauthenticated');
-        } else if (data.product === 'premium') {
-          setStatus('premium');
-        } else if (data.product) {
-          setStatus('free');
-        } else {
-          // Token lacks user-read-private scope — treat as unauthenticated for status purposes
-          setStatus('unauthenticated');
-        }
-      })
-      .catch(() => setStatus('unauthenticated'));
+    resolveStatus().then(setStatus);
   }, []);
 
   return status;
