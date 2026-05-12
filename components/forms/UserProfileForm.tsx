@@ -1,6 +1,7 @@
 'use client';
 
 import useUserProfile from '@/hooks/useUserProfile';
+import SpotifyConnectionManager from '@/components/SpotifyConnectionManager';
 import { createClient } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
@@ -108,6 +109,9 @@ export default function UserProfileForm({ user }: Readonly<UserProfileFormProps>
         formFields={formFields}
         errorMessage={errorMessage}
       />
+      <div className="mt-6">
+        <SpotifyConnectionManager />
+      </div>
       <div className="mt-6">
         <h3 className="text-lg font-medium mb-2">Password</h3>
         <Button variant="outlined" onClick={handleResetPassword}>

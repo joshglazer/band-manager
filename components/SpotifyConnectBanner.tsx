@@ -1,20 +1,24 @@
 'use client';
 
-import { useSpotifySubscription } from '@/hooks/useSpotifySubscription';
 import { SpotifyIcon } from '@/components/SpotifyBadge';
+import {
+  SPOTIFY_BANNER_DISMISSED_KEY,
+  SPOTIFY_TOKEN_CACHE_KEY,
+  useSpotifySubscription,
+} from '@/hooks/useSpotifySubscription';
 import { LocalStorageValues } from '@/utils/spotify/consts';
 import { AuthorizationCodeWithPKCEStrategy, SpotifyApi } from '@spotify/web-api-ts-sdk';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import { useEffect, useState } from 'react';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_API_KEY ?? '';
 const SCOPES = ['user-read-private', 'playlist-read-private'];
-// Token cache key used by the SDK — cleared to force re-auth with updated scopes
-const TOKEN_CACHE_KEY = 'spotify-sdk:AuthorizationCodeWithPKCEStrategy:token';
 
 async function initiateSpotifyLogin() {
-  localStorage.removeItem(TOKEN_CACHE_KEY);
+  localStorage.removeItem(SPOTIFY_TOKEN_CACHE_KEY);
+  localStorage.removeItem(SPOTIFY_BANNER_DISMISSED_KEY);
   localStorage.setItem(LocalStorageValues.CONNECT_REDIRECT, window.location.href);
 
   const redirectUrl = `${window.location.origin}/spotifyConnect`;
@@ -25,12 +29,30 @@ async function initiateSpotifyLogin() {
 
 export default function SpotifyConnectBanner() {
   const status = useSpotifySubscription();
+  const [dismissed, setDismissed] = useState(false);
 
-  if (status !== 'unauthenticated') return null;
+  useEffect(() => {
+    try {
+      setDismissed(localStorage.getItem(SPOTIFY_BANNER_DISMISSED_KEY) === 'true');
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
+
+  if (status !== 'unauthenticated' || dismissed) return null;
+
+  function handleDismiss() {
+    try {
+      localStorage.setItem(SPOTIFY_BANNER_DISMISSED_KEY, 'true');
+    } catch {
+      // localStorage unavailable
+    }
+    setDismissed(true);
+  }
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Alert severity="info">
+      <Alert severity="info" onClose={handleDismiss}>
         Log in with Spotify to play songs directly in the app instead of opening a new tab.
         <Box sx={{ mt: 1 }}>
           <Button
