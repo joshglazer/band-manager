@@ -77,9 +77,9 @@ export default function SpotifyConnectionManager() {
             onClick={initiateSpotifyLogin}
             startIcon={<SpotifyIcon size={16} />}
             sx={{
-              backgroundColor: '#1DB954',
+              background: '#1DB954',
               color: '#fff',
-              '&:hover': { backgroundColor: '#17a349' },
+              '&:hover': { background: '#17a349' },
             }}
           >
             Log in with Spotify
