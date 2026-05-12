@@ -10,9 +10,7 @@ interface SongCommentFormProps {
 }
 
 export default function SongCommentForm({ songId, onSubmit }: Readonly<SongCommentFormProps>) {
-  const { data: commentTypes, isLoading } = useCommentTypes();
-
-  console.log(commentTypes, isLoading);
+  const { data: commentTypes } = useCommentTypes();
 
   const [errorMessage, setErrorMessage] = useState<string>();
 
@@ -47,7 +45,6 @@ export default function SongCommentForm({ songId, onSubmit }: Readonly<SongComme
     } = await supabase.auth.getUser();
 
     if (songId && user) {
-      console.log(data);
       const { error: submitError } = await supabase.from('song_comments').insert({
         song_id: songId,
         user_id: user.id,

@@ -360,7 +360,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableSortLabel>
                 )}
               </TableCell>
-              <TableCell sx={{ width: '1px', padding: '8px 12px' }}>Resources</TableCell>
+              <TableCell>Resources</TableCell>
               <TableCell>
                 {setlistFilter ? (
                   'Notes'
@@ -412,7 +412,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                     </ToggleButton>
                   </ToggleButtonGroup>
                 </TableCell>
-                <TableCell sx={{ width: '1px', whiteSpace: 'nowrap', padding: '8px 12px', verticalAlign: 'middle' }}>
+                <TableCell sx={{ verticalAlign: 'middle' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     {song.song_link ? (
                       <SongLinkIcon url={song.song_link} />
