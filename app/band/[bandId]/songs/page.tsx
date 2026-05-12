@@ -7,7 +7,7 @@ import EditSongForm from '@/components/forms/EditSongForm';
 import SongCommentForm from '@/components/forms/SongCommentForm';
 import AddSongModal from '@/components/modals/AddSongModal';
 import SongLinkIcon from '@/components/SongLinkIcon';
-import SpotifyBadge from '@/components/SpotifyBadge';
+import SpotifyEmbedPlayer from '@/components/SpotifyEmbedPlayer';
 import useSongs, { SongsComposite } from '@/hooks/useSongs';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import EditIcon from '@mui/icons-material/Edit';
@@ -139,7 +139,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
     const url = songLink || spotifyUrl;
     if (!url) return '';
     if (!songLink && spotifyUrl) {
-      return <SpotifyBadge spotifyUrl={spotifyUrl} />;
+      return <SpotifyEmbedPlayer spotifyUrl={spotifyUrl} />;
     }
     return <SongLinkIcon url={url} />;
   }

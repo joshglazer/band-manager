@@ -1,7 +1,7 @@
 'use client';
 
 import SongLinkIcon from '@/components/SongLinkIcon';
-import SpotifyBadge from '@/components/SpotifyBadge';
+import SpotifyEmbedPlayer from '@/components/SpotifyEmbedPlayer';
 import Loading from '@/components/design/Loading';
 import SharedBandNotesViewModal from '@/components/modals/SharedBandNotesViewModal';
 import usePracticeProgress from '@/hooks/usePracticeProgress';
@@ -417,7 +417,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                     {song.song_link ? (
                       <SongLinkIcon url={song.song_link} />
                     ) : song.spotify_url ? (
-                      <SpotifyBadge spotifyUrl={song.spotify_url} />
+                      <SpotifyEmbedPlayer spotifyUrl={song.spotify_url} />
                     ) : null}
                     {song.shared_band_notes && (
                       <SharedBandNotesViewModal songName={song.name} sharedBandNotes={song.shared_band_notes} iconOnly />
