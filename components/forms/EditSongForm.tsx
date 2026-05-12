@@ -37,6 +37,14 @@ const sharedBandNotesField: FormField = {
   helperText: 'Only upload content you have the right to use (your own notes, original transcriptions, or content you are licensed to store).',
 };
 
+const songLinkField: FormField = {
+  fieldType: 'text',
+  name: 'song_link',
+  label: 'Link (URL)',
+  placeholder: 'e.g. https://soundcloud.com/...',
+  fullWidth: true,
+};
+
 export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormProps>) {
   const [mode, setMode] = useState<Mode>('manual');
   const [linkedAction, setLinkedAction] = useState<LinkedAction>(null);
@@ -71,6 +79,13 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         placeholder: 'e.g. 3:45',
         fullWidth: true,
       },
+      {
+        fieldType: 'text' as FormField['fieldType'],
+        name: 'song_link',
+        label: 'Link (URL)',
+        placeholder: 'e.g. https://soundcloud.com/...',
+        fullWidth: true,
+      },
       sharedBandNotesField,
     ],
     []
@@ -81,6 +96,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       name: song.name ?? '',
       artist: song.artist ?? '',
       duration: song.duration ? formatMsToDuration(song.duration) : '',
+      song_link: song.song_link ?? '',
       shared_band_notes: song.shared_band_notes ?? '',
     }),
     [song]
@@ -107,6 +123,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         name: data.name,
         artist: data.artist || null,
         duration,
+        song_link: data.song_link || null,
         shared_band_notes: data.shared_band_notes || null,
       })
       .eq('id', song.id);
@@ -146,7 +163,10 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
     setErrorMessage('');
     const { error } = await supabase
       .from('songs')
-      .update({ shared_band_notes: data.shared_band_notes || null })
+      .update({
+        shared_band_notes: data.shared_band_notes || null,
+        song_link: data.song_link || null,
+      })
       .eq('id', song.id);
     if (error) {
       setErrorMessage(error.message);
@@ -170,6 +190,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         name: data.name,
         artist: data.artist || null,
         duration,
+        song_link: data.song_link || null,
         shared_band_notes: data.shared_band_notes || null,
         spotify_url: null,
       })
@@ -330,8 +351,8 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         <Divider className="mb-4" />
         <Form
           onSuccess={handleSpotifyOnlySuccess}
-          formFields={[sharedBandNotesField]}
-          defaultValues={{ shared_band_notes: song.shared_band_notes ?? '' }}
+          formFields={[songLinkField, sharedBandNotesField]}
+          defaultValues={{ song_link: song.song_link ?? '', shared_band_notes: song.shared_band_notes ?? '' }}
           errorMessage={errorMessage}
           saveButtonLabel="Save Changes"
         />

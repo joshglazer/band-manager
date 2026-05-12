@@ -23,6 +23,7 @@ interface TableProps {
     isHeader?: boolean;
     headerDataKey?: TablePropsDataType;
     className?: string;
+    sx?: object;
     sortable?: boolean;
     sortDirection?: 'asc' | 'desc';
     onSort?: () => void;
@@ -50,10 +51,10 @@ export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>
       <MUITable aria-label="Table of Songs">
         <TableHead>
           <TableRow>
-            {columns.map(({ name, sortable, sortDirection, onSort, stickyRight, hideHeader }) => (
+            {columns.map(({ name, sortable, sortDirection, onSort, stickyRight, hideHeader, sx }) => (
               <TableCell
                 key={name}
-                sx={stickyRight ? { position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 2 } : undefined}
+                sx={stickyRight ? { position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 2, ...sx } : sx}
               >
                 {sortable ? (
                   <TableSortLabel
@@ -77,7 +78,7 @@ export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>
             return (
               <TableRow key={row[headerColumn.headerDataKey ?? '']}>
                 {columns.map(
-                  ({ name, dataKey, dataFormatter, isHeader, headerDataKey, className, stickyRight }) => {
+                  ({ name, dataKey, dataFormatter, isHeader, headerDataKey, className, stickyRight, sx }) => {
                     let component: TableCellProps['component'] = 'td';
                     let scope: TableCellProps['scope'];
                     let value: TablePropsDataType | JSX.Element = row[dataKey];
@@ -97,7 +98,7 @@ export default function Table({ ariaLabel, columns, rows }: Readonly<TableProps>
                         scope={scope}
                         key={name}
                         className={className}
-                        sx={stickyRight ? { position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 1 } : undefined}
+                        sx={stickyRight ? { position: 'sticky', right: 0, backgroundColor: 'background.paper', zIndex: 1, ...sx } : sx}
                       >
                         {value}
                       </TableCell>

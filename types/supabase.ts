@@ -330,6 +330,7 @@ export type Database = {
           duration: number | null
           id: number
           name: string | null
+          song_link: string | null
           spotify_url: string | null
         }
         Insert: {
@@ -340,6 +341,7 @@ export type Database = {
           duration?: number | null
           id?: number
           name?: string | null
+          song_link?: string | null
           spotify_url?: string | null
         }
         Update: {
@@ -350,6 +352,7 @@ export type Database = {
           duration?: number | null
           id?: number
           name?: string | null
+          song_link?: string | null
           spotify_url?: string | null
         }
         Relationships: [

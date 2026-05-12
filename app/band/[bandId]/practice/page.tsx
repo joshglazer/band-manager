@@ -1,5 +1,6 @@
 'use client';
 
+import SongLinkIcon from '@/components/SongLinkIcon';
 import SpotifyBadge from '@/components/SpotifyBadge';
 import Loading from '@/components/design/Loading';
 import SharedBandNotesViewModal from '@/components/modals/SharedBandNotesViewModal';
@@ -359,7 +360,8 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableSortLabel>
                 )}
               </TableCell>
-              <TableCell>View Shared Band Notes</TableCell>              <TableCell>
+              <TableCell>Resources</TableCell>
+              <TableCell>
                 {setlistFilter ? (
                   'Notes'
                 ) : (
@@ -383,10 +385,7 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                   </TableCell>
                 )}
                 <TableCell component="th" scope="row">
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography fontWeight={600}>{song.name}</Typography>
-                    {song.spotify_url && <SpotifyBadge spotifyUrl={song.spotify_url} />}
-                  </Box>
+                  <Typography fontWeight={600}>{song.name}</Typography>
                   {song.artist && (
                     <Typography variant="body2" color="text.secondary">
                       {song.artist}
@@ -413,10 +412,17 @@ export default function BandPracticePage({ params }: Readonly<BandRouteProps>) {
                     </ToggleButton>
                   </ToggleButtonGroup>
                 </TableCell>
-                <TableCell>
-                  {song.shared_band_notes && (
-                    <SharedBandNotesViewModal songName={song.name} sharedBandNotes={song.shared_band_notes} />
-                  )}
+                <TableCell sx={{ verticalAlign: 'middle' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    {song.song_link ? (
+                      <SongLinkIcon url={song.song_link} />
+                    ) : song.spotify_url ? (
+                      <SpotifyBadge spotifyUrl={song.spotify_url} />
+                    ) : null}
+                    {song.shared_band_notes && (
+                      <SharedBandNotesViewModal songName={song.name} sharedBandNotes={song.shared_band_notes} iconOnly />
+                    )}
+                  </Box>
                 </TableCell>
                 <TableCell sx={{ minWidth: 260 }}>
                   <TextField
