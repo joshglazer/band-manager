@@ -16,10 +16,19 @@ import { useEffect, useState } from 'react';
 const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_API_KEY ?? '';
 const SCOPES = ['user-read-private', 'playlist-read-private'];
 
+// Exported so /spotifyAuth can read the destination after the OAuth callback
+export const SPOTIFY_AUTH_DESTINATION_KEY = 'spotify_auth_destination';
+
 async function initiateSpotifyLogin() {
   localStorage.removeItem(SPOTIFY_TOKEN_CACHE_KEY);
   localStorage.removeItem(SPOTIFY_BANNER_DISMISSED_KEY);
-  localStorage.setItem(LocalStorageValues.CONNECT_REDIRECT, window.location.href);
+  // Save where to return after auth completes
+  localStorage.setItem(SPOTIFY_AUTH_DESTINATION_KEY, window.location.href);
+  // /spotifyConnect will redirect to /spotifyAuth, which exchanges the code
+  localStorage.setItem(
+    LocalStorageValues.CONNECT_REDIRECT,
+    `${window.location.origin}/spotifyAuth`
+  );
 
   const redirectUrl = `${window.location.origin}/spotifyConnect`;
   const auth = new AuthorizationCodeWithPKCEStrategy(CLIENT_ID, redirectUrl, SCOPES);
