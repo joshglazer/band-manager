@@ -1,6 +1,7 @@
 'use client';
 
 import { useSpotifySubscription } from '@/hooks/useSpotifySubscription';
+import { SpotifyIcon } from '@/components/SpotifyBadge';
 import { LocalStorageValues } from '@/utils/spotify/consts';
 import { AuthorizationCodeWithPKCEStrategy, SpotifyApi } from '@spotify/web-api-ts-sdk';
 import Alert from '@mui/material/Alert';
@@ -33,10 +34,15 @@ export default function SpotifyConnectBanner() {
         Log in with Spotify to play songs directly in the app instead of opening a new tab.
         <Box sx={{ mt: 1 }}>
           <Button
-            color="inherit"
             size="small"
-            variant="outlined"
+            variant="contained"
             onClick={initiateSpotifyLogin}
+            startIcon={<SpotifyIcon size={16} />}
+            sx={{
+              backgroundColor: '#1DB954',
+              color: '#fff',
+              '&:hover': { backgroundColor: '#17a349' },
+            }}
           >
             Log in with Spotify
           </Button>
