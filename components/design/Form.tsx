@@ -3,7 +3,7 @@
 import SaveIcon from '@mui/icons-material/Save';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Alert from '@mui/material/Alert';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   FieldValues,
   FormContainer,
@@ -32,6 +32,7 @@ interface FormProps {
   saveButtonLabel?: string;
   saveButtonDisplay?: boolean;
   saveButtonIcon?: JSX.Element;
+  extraContent?: React.ReactNode;
 }
 
 export default function Form({
@@ -42,6 +43,7 @@ export default function Form({
   saveButtonLabel = 'Save',
   saveButtonDisplay = true,
   saveButtonIcon = <SaveIcon />,
+  extraContent,
 }: Readonly<FormProps>) {
   const [isFormProcessing, setIsFormProcessing] = useState(false);
 
@@ -108,6 +110,7 @@ export default function Form({
 
         return field;
       })}
+      {extraContent}
       {errorMessage && (
         <Alert severity="error" className="mb-4">
           {errorMessage}

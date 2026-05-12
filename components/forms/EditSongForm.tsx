@@ -1,5 +1,6 @@
 'use client';
 
+import AudioFileInput from '@/components/AudioFileInput';
 import SpotifyBadge, { SpotifyIcon } from '@/components/SpotifyBadge';
 import SpotifyTrackSearch, { SpotifyTrack } from '@/components/SpotifyTrackSearch';
 import { Tables } from '@/types/supabase';
@@ -15,7 +16,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import Form, { FormField } from '../design/Form';
 
@@ -45,6 +46,35 @@ const songLinkField: FormField = {
   fullWidth: true,
 };
 
+async function uploadSongAudio(
+  supabase: ReturnType<typeof createClient>,
+  file: File,
+  bandId: number
+): Promise<string> {
+  const ext = file.name.split('.').pop() ?? 'audio';
+  const path = `${bandId}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from('song-audio').upload(path, file, {
+    contentType: file.type,
+  });
+  if (error) throw new Error(error.message);
+  const { data } = supabase.storage.from('song-audio').getPublicUrl(path);
+  return data.publicUrl;
+}
+
+async function deleteSongAudio(
+  supabase: ReturnType<typeof createClient>,
+  audioUrl: string
+): Promise<void> {
+  try {
+    const url = new URL(audioUrl);
+    const pathParts = url.pathname.split('/song-audio/');
+    if (pathParts.length < 2) return;
+    await supabase.storage.from('song-audio').remove([pathParts[1]]);
+  } catch {
+    // ignore storage delete errors — the DB update is the source of truth
+  }
+}
+
 export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormProps>) {
   const [mode, setMode] = useState<Mode>('manual');
   const [linkedAction, setLinkedAction] = useState<LinkedAction>(null);
@@ -52,6 +82,8 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
   const [sharedBandNotes, setSharedBandNotes] = useState(song.shared_band_notes ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [removeAudio, setRemoveAudio] = useState(false);
+  const audioFileRef = useRef<File | null>(null);
   const supabase = createClient();
   const isSpotifyLinked = Boolean(song.spotify_url);
 
@@ -102,6 +134,19 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
     [song]
   );
 
+  async function resolveAudioUrl(): Promise<{ audio_url?: string | null }> {
+    if (removeAudio) {
+      if (song.audio_url) await deleteSongAudio(supabase, song.audio_url);
+      return { audio_url: null };
+    }
+    if (audioFileRef.current) {
+      if (song.audio_url) await deleteSongAudio(supabase, song.audio_url);
+      const url = await uploadSongAudio(supabase, audioFileRef.current, song.band_id);
+      return { audio_url: url };
+    }
+    return {};
+  }
+
   function handleTabChange(_: React.SyntheticEvent, newMode: Mode) {
     setMode(newMode);
     setSelectedTrack(null);
@@ -117,6 +162,14 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       return;
     }
 
+    let audioUpdate: { audio_url?: string | null } = {};
+    try {
+      audioUpdate = await resolveAudioUrl();
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to upload audio file.');
+      return;
+    }
+
     const { error } = await supabase
       .from('songs')
       .update({
@@ -125,6 +178,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         duration,
         song_link: data.song_link || null,
         shared_band_notes: data.shared_band_notes || null,
+        ...audioUpdate,
       })
       .eq('id', song.id);
 
@@ -184,6 +238,14 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       return;
     }
 
+    let audioUpdate: { audio_url?: string | null } = {};
+    try {
+      audioUpdate = await resolveAudioUrl();
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to upload audio file.');
+      return;
+    }
+
     const { error } = await supabase
       .from('songs')
       .update({
@@ -193,6 +255,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         song_link: data.song_link || null,
         shared_band_notes: data.shared_band_notes || null,
         spotify_url: null,
+        ...audioUpdate,
       })
       .eq('id', song.id);
 
@@ -202,6 +265,20 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       onSuccess?.();
     }
   }
+
+  const audioInputElement = (
+    <AudioFileInput
+      existingUrl={removeAudio ? null : song.audio_url}
+      onFileSelect={(file) => {
+        audioFileRef.current = file;
+        if (file) setRemoveAudio(false);
+      }}
+      onRemoveExisting={() => {
+        setRemoveAudio(true);
+        audioFileRef.current = null;
+      }}
+    />
+  );
 
   // Already linked to Spotify
   if (isSpotifyLinked) {
@@ -214,6 +291,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
           defaultValues={defaultValues}
           errorMessage={errorMessage}
           saveButtonLabel="Save Changes"
+          extraContent={audioInputElement}
         />
       );
     }
@@ -429,6 +507,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
           defaultValues={defaultValues}
           errorMessage={errorMessage}
           saveButtonLabel="Save Changes"
+          extraContent={audioInputElement}
         />
       )}
     </>

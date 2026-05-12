@@ -1,5 +1,6 @@
 'use client';
 
+import AudioFileInput from '@/components/AudioFileInput';
 import { SpotifyIcon } from '@/components/SpotifyBadge';
 import SpotifyTrackSearch, { SpotifyTrack } from '@/components/SpotifyTrackSearch';
 import { createClient } from '@/utils/supabase/client';
@@ -14,7 +15,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import Form, { FormField } from '../design/Form';
 
@@ -25,12 +26,28 @@ interface AddSongFormProps {
 
 type Mode = 'spotify' | 'manual';
 
+async function uploadSongAudio(
+  supabase: ReturnType<typeof createClient>,
+  file: File,
+  bandId: number
+): Promise<string> {
+  const ext = file.name.split('.').pop() ?? 'audio';
+  const path = `${bandId}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from('song-audio').upload(path, file, {
+    contentType: file.type,
+  });
+  if (error) throw new Error(error.message);
+  const { data } = supabase.storage.from('song-audio').getPublicUrl(path);
+  return data.publicUrl;
+}
+
 export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormProps>) {
   const [mode, setMode] = useState<Mode>('spotify');
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
   const [sharedBandNotes, setSharedBandNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
+  const audioFileRef = useRef<File | null>(null);
   const supabase = createClient();
 
   const manualFormFields: FormField[] = useMemo(
@@ -106,12 +123,23 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
       return;
     }
 
+    let audioUrl: string | null = null;
+    if (audioFileRef.current) {
+      try {
+        audioUrl = await uploadSongAudio(supabase, audioFileRef.current, bandId);
+      } catch (err) {
+        setErrorMessage(err instanceof Error ? err.message : 'Failed to upload audio file.');
+        return;
+      }
+    }
+
     const { error } = await supabase.from('songs').insert({
       name: data.name,
       artist: data.artist || null,
       duration,
       shared_band_notes: data.shared_band_notes || null,
       song_link: data.song_link || null,
+      audio_url: audioUrl,
       band_id: bandId,
       spotify_url: null,
     });
@@ -128,6 +156,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
     setSelectedTrack(null);
     setSharedBandNotes('');
     setErrorMessage('');
+    audioFileRef.current = null;
   }
 
   return (
@@ -198,6 +227,11 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
           formFields={manualFormFields}
           errorMessage={errorMessage}
           saveButtonLabel="Add Song"
+          extraContent={
+            <AudioFileInput
+              onFileSelect={(file) => { audioFileRef.current = file; }}
+            />
+          }
         />
       )}
     </>
