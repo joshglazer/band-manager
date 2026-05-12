@@ -29,20 +29,18 @@ export default function SpotifyConnectBanner() {
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Alert
-        severity="info"
-        action={
+      <Alert severity="info">
+        Log in with Spotify to play songs directly in the app instead of opening a new tab.
+        <Box sx={{ mt: 1 }}>
           <Button
             color="inherit"
             size="small"
+            variant="outlined"
             onClick={initiateSpotifyLogin}
-            sx={{ whiteSpace: 'nowrap' }}
           >
             Log in with Spotify
           </Button>
-        }
-      >
-        Log in with Spotify to play songs directly in the app instead of opening a new tab.
+        </Box>
       </Alert>
     </Box>
   );
