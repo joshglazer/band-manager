@@ -6,8 +6,8 @@ import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import { useDrawerBodyPadding } from '@/hooks/useDrawerBodyPadding';
-import { type ReactNode, useState } from 'react';
+import { usePlayerDrawer } from '@/hooks/usePlayerDrawer';
+import { type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 function YouTubeIcon({ size }: { size: number }) {
@@ -119,8 +119,7 @@ interface SongLinkIconProps {
 export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconProps>) {
   const platform = detectPlatform(url);
   const label = platformLabels[platform];
-  const [open, setOpen] = useState(false);
-  const drawerRef = useDrawerBodyPadding();
+  const { open, openDrawer, closeDrawer, drawerRef } = usePlayerDrawer();
 
   let icon: ReactNode;
   switch (platform) {
@@ -157,8 +156,8 @@ export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconPr
           <span
             role="button"
             tabIndex={0}
-            onClick={() => setOpen(true)}
-            onKeyDown={(e) => e.key === 'Enter' && setOpen(true)}
+            onClick={openDrawer}
+            onKeyDown={(e) => e.key === 'Enter' && openDrawer()}
             style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, cursor: 'pointer' }}
             aria-label={label}
           >
@@ -183,7 +182,7 @@ export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconPr
                 <Typography variant="subtitle2" sx={{ color: '#FF5500', fontWeight: 600 }}>
                   SoundCloud
                 </Typography>
-                <IconButton size="small" onClick={() => setOpen(false)} aria-label="Close player">
+                <IconButton size="small" onClick={closeDrawer} aria-label="Close player">
                   <CloseIcon fontSize="small" />
                 </IconButton>
               </Box>
