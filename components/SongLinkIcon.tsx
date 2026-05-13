@@ -1,8 +1,13 @@
 import { SpotifyIcon } from '@/components/SpotifyBadge';
+import CloseIcon from '@mui/icons-material/Close';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import Popover from '@mui/material/Popover';
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
-import { type ReactNode, useRef, useState } from 'react';
+import Typography from '@mui/material/Typography';
+import { type ReactNode, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 function YouTubeIcon({ size }: { size: number }) {
   return (
@@ -113,8 +118,7 @@ interface SongLinkIconProps {
 export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconProps>) {
   const platform = detectPlatform(url);
   const label = platformLabels[platform];
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const anchorRef = useRef<HTMLSpanElement>(null);
+  const [open, setOpen] = useState(false);
 
   let icon: ReactNode;
   switch (platform) {
@@ -149,33 +153,48 @@ export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconPr
       <>
         <Tooltip title={label}>
           <span
-            ref={anchorRef}
             role="button"
             tabIndex={0}
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-            onKeyDown={(e) => e.key === 'Enter' && setAnchorEl(anchorRef.current)}
+            onClick={() => setOpen(true)}
+            onKeyDown={(e) => e.key === 'Enter' && setOpen(true)}
             style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, cursor: 'pointer' }}
             aria-label={label}
           >
             {icon}
           </span>
         </Tooltip>
-        <Popover
-          open={Boolean(anchorEl)}
-          anchorEl={anchorEl}
-          onClose={() => setAnchorEl(null)}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-        >
-          <iframe
-            width="300"
-            height="166"
-            allow="autoplay"
-            src={embedUrl}
-            style={{ border: 'none', display: 'block' }}
-            title="SoundCloud player"
-          />
-        </Popover>
+        {open &&
+          createPortal(
+            <Paper
+              elevation={8}
+              sx={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 1300,
+                borderRadius: '8px 8px 0 0',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 0.5 }}>
+                <Typography variant="subtitle2" sx={{ color: '#FF5500', fontWeight: 600 }}>
+                  SoundCloud
+                </Typography>
+                <IconButton size="small" onClick={() => setOpen(false)} aria-label="Close player">
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Box>
+              <iframe
+                width="100%"
+                height="166"
+                allow="autoplay"
+                src={embedUrl}
+                style={{ border: 'none', display: 'block' }}
+                title="SoundCloud player"
+              />
+            </Paper>,
+            document.body,
+          )}
       </>
     );
   }
