@@ -1,12 +1,9 @@
 import { SpotifyIcon } from '@/components/SpotifyBadge';
-import CloseIcon from '@mui/icons-material/Close';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
+import Popover from '@mui/material/Popover';
 import Tooltip from '@mui/material/Tooltip';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 
 function YouTubeIcon({ size }: { size: number }) {
   return (
@@ -114,35 +111,11 @@ interface SongLinkIconProps {
   size?: number;
 }
 
-function SoundCloudPlayer({ url, open, onClose }: { url: string; open: boolean; onClose: () => void }) {
-  const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23FF5500&auto_play=true&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
-        SoundCloud
-        <IconButton onClick={onClose} size="small" aria-label="Close">
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ pb: 2 }}>
-        <iframe
-          width="100%"
-          height="166"
-          allow="autoplay"
-          src={embedUrl}
-          style={{ border: 'none' }}
-          title="SoundCloud player"
-        />
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconProps>) {
   const platform = detectPlatform(url);
   const label = platformLabels[platform];
-  const [soundcloudOpen, setSoundcloudOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const anchorRef = useRef<HTMLSpanElement>(null);
 
   let icon: ReactNode;
   switch (platform) {
@@ -172,21 +145,38 @@ export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconPr
   }
 
   if (platform === 'soundcloud') {
+    const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23FF5500&auto_play=true&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
     return (
       <>
         <Tooltip title={label}>
           <span
+            ref={anchorRef}
             role="button"
             tabIndex={0}
-            onClick={() => setSoundcloudOpen(true)}
-            onKeyDown={(e) => e.key === 'Enter' && setSoundcloudOpen(true)}
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            onKeyDown={(e) => e.key === 'Enter' && setAnchorEl(anchorRef.current)}
             style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, cursor: 'pointer' }}
             aria-label={label}
           >
             {icon}
           </span>
         </Tooltip>
-        <SoundCloudPlayer url={url} open={soundcloudOpen} onClose={() => setSoundcloudOpen(false)} />
+        <Popover
+          open={Boolean(anchorEl)}
+          anchorEl={anchorEl}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <iframe
+            width="300"
+            height="166"
+            allow="autoplay"
+            src={embedUrl}
+            style={{ border: 'none', display: 'block' }}
+            title="SoundCloud player"
+          />
+        </Popover>
       </>
     );
   }
