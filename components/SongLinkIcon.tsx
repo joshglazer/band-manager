@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import { useDrawerBodyPadding } from '@/hooks/useDrawerBodyPadding';
 import { type ReactNode, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -119,6 +120,7 @@ export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconPr
   const platform = detectPlatform(url);
   const label = platformLabels[platform];
   const [open, setOpen] = useState(false);
+  const drawerRef = useDrawerBodyPadding();
 
   let icon: ReactNode;
   switch (platform) {
@@ -166,6 +168,7 @@ export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconPr
         {open &&
           createPortal(
             <Paper
+              ref={drawerRef}
               elevation={8}
               sx={{
                 position: 'fixed',

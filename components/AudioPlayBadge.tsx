@@ -7,6 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import { useDrawerBodyPadding } from '@/hooks/useDrawerBodyPadding';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -17,6 +18,7 @@ interface AudioPlayBadgeProps {
 
 export default function AudioPlayBadge({ audioUrl, size = 20 }: Readonly<AudioPlayBadgeProps>) {
   const [open, setOpen] = useState(false);
+  const drawerRef = useDrawerBodyPadding();
 
   return (
     <>
@@ -33,6 +35,7 @@ export default function AudioPlayBadge({ audioUrl, size = 20 }: Readonly<AudioPl
       {open &&
         createPortal(
           <Paper
+            ref={drawerRef}
             elevation={8}
             sx={{
               position: 'fixed',
