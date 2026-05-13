@@ -1,7 +1,14 @@
 import { SpotifyIcon } from '@/components/SpotifyBadge';
+import CloseIcon from '@mui/icons-material/Close';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
-import type { ReactNode } from 'react';
+import Typography from '@mui/material/Typography';
+import { usePlayerDrawer } from '@/hooks/usePlayerDrawer';
+import { type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 function YouTubeIcon({ size }: { size: number }) {
   return (
@@ -112,6 +119,7 @@ interface SongLinkIconProps {
 export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconProps>) {
   const platform = detectPlatform(url);
   const label = platformLabels[platform];
+  const { open, openDrawer, closeDrawer, drawerRef } = usePlayerDrawer();
 
   let icon: ReactNode;
   switch (platform) {
@@ -138,6 +146,59 @@ export default function SongLinkIcon({ url, size = 20 }: Readonly<SongLinkIconPr
       break;
     default:
       icon = <PlayCircleOutlineIcon sx={{ fontSize: size, color: 'text.secondary' }} />;
+  }
+
+  if (platform === 'soundcloud') {
+    const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23FF5500&auto_play=true&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
+    return (
+      <>
+        <Tooltip title={label}>
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={openDrawer}
+            onKeyDown={(e) => e.key === 'Enter' && openDrawer()}
+            style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, cursor: 'pointer' }}
+            aria-label={label}
+          >
+            {icon}
+          </span>
+        </Tooltip>
+        {open &&
+          createPortal(
+            <Paper
+              ref={drawerRef}
+              elevation={8}
+              sx={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 1300,
+                borderRadius: '8px 8px 0 0',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 0.5 }}>
+                <Typography variant="subtitle2" sx={{ color: '#FF5500', fontWeight: 600 }}>
+                  SoundCloud
+                </Typography>
+                <IconButton size="small" onClick={closeDrawer} aria-label="Close player">
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Box>
+              <iframe
+                width="100%"
+                height="166"
+                allow="autoplay"
+                src={embedUrl}
+                style={{ border: 'none', display: 'block' }}
+                title="SoundCloud player"
+              />
+            </Paper>,
+            document.body,
+          )}
+      </>
+    );
   }
 
   return (
