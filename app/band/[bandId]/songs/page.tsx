@@ -6,6 +6,7 @@ import Table, { TableProps, TablePropsDataType, TableRow } from '@/components/de
 import EditSongForm from '@/components/forms/EditSongForm';
 import SongCommentForm from '@/components/forms/SongCommentForm';
 import AddSongModal from '@/components/modals/AddSongModal';
+import AudioPlayBadge from '@/components/AudioPlayBadge';
 import SongLinkIcon from '@/components/SongLinkIcon';
 import SpotifyBadge from '@/components/SpotifyBadge';
 import useSongs, { SongsComposite } from '@/hooks/useSongs';
@@ -136,12 +137,11 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
   function formatLinkIcon(_value: TablePropsDataType | null, row: TableRow) {
     const songLink = row.song_link as string | null;
     const spotifyUrl = row.spotify_url as string | null;
-    const url = songLink || spotifyUrl;
-    if (!url) return '';
-    if (!songLink && spotifyUrl) {
-      return <SpotifyBadge spotifyUrl={spotifyUrl} />;
-    }
-    return <SongLinkIcon url={url} />;
+    const audioUrl = row.audio_url as string | null;
+    if (songLink) return <SongLinkIcon url={songLink} />;
+    if (spotifyUrl) return <SpotifyBadge spotifyUrl={spotifyUrl} />;
+    if (audioUrl) return <AudioPlayBadge audioUrl={audioUrl} />;
+    return '';
   }
 
   function formatActions(_value: TablePropsDataType | null, row: TableRow) {
@@ -164,6 +164,7 @@ export default function BandSongsPage({ params }: Readonly<BandRouteProps>) {
       duration: song.duration,
       song_link: song.song_link,
       spotify_url: song.spotify_url,
+      audio_url: song.audio_url,
     }));
 
     const q = searchQuery.toLowerCase();

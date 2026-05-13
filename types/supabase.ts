@@ -324,6 +324,7 @@ export type Database = {
       songs: {
         Row: {
           artist: string | null
+          audio_url: string | null
           band_id: number
           shared_band_notes: string | null
           created_at: string
@@ -335,6 +336,7 @@ export type Database = {
         }
         Insert: {
           artist?: string | null
+          audio_url?: string | null
           band_id: number
           shared_band_notes?: string | null
           created_at?: string
@@ -346,6 +348,7 @@ export type Database = {
         }
         Update: {
           artist?: string | null
+          audio_url?: string | null
           band_id?: number
           shared_band_notes?: string | null
           created_at?: string

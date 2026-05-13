@@ -50,6 +50,7 @@ export function adaptSetlist(setlist: SetlistComposite, songs: Tables<'songs'>[]
       song = {
         band_id,
         shared_band_notes: null,
+        audio_url: null,
         duration: 0,
         id: -1,
         name: 'Not Found',

@@ -1,5 +1,6 @@
 'use client';
 
+import SongReferenceInput, { SongRefType } from '@/components/SongReferenceInput';
 import SpotifyBadge, { SpotifyIcon } from '@/components/SpotifyBadge';
 import SpotifyTrackSearch, { SpotifyTrack } from '@/components/SpotifyTrackSearch';
 import { Tables } from '@/types/supabase';
@@ -15,7 +16,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import Form, { FormField } from '../design/Form';
 
@@ -45,6 +46,39 @@ const songLinkField: FormField = {
   fullWidth: true,
 };
 
+async function uploadSongAudio(
+  supabase: ReturnType<typeof createClient>,
+  file: File,
+  bandId: number
+): Promise<string> {
+  const ext = file.name.split('.').pop() ?? 'audio';
+  const path = `${bandId}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from('song-audio').upload(path, file, {
+    contentType: file.type,
+  });
+  if (error) throw new Error(error.message);
+  const { data } = supabase.storage.from('song-audio').getPublicUrl(path);
+  return data.publicUrl;
+}
+
+async function deleteSongAudio(
+  supabase: ReturnType<typeof createClient>,
+  audioUrl: string
+): Promise<void> {
+  try {
+    const url = new URL(audioUrl);
+    const pathParts = url.pathname.split('/song-audio/');
+    if (pathParts.length < 2) return;
+    await supabase.storage.from('song-audio').remove([pathParts[1]]);
+  } catch {
+    // ignore storage delete errors — the DB update is the source of truth
+  }
+}
+
+function initSongRefType(song: Tables<'songs'>): SongRefType {
+  return song.audio_url ? 'audio' : 'link';
+}
+
 export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormProps>) {
   const [mode, setMode] = useState<Mode>('manual');
   const [linkedAction, setLinkedAction] = useState<LinkedAction>(null);
@@ -52,6 +86,10 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
   const [sharedBandNotes, setSharedBandNotes] = useState(song.shared_band_notes ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [songRefType, setSongRefType] = useState<SongRefType>(initSongRefType(song));
+  const [linkUrl, setLinkUrl] = useState(song.song_link ?? '');
+  const [removeAudio, setRemoveAudio] = useState(false);
+  const audioFileRef = useRef<File | null>(null);
   const supabase = createClient();
   const isSpotifyLinked = Boolean(song.spotify_url);
 
@@ -79,13 +117,6 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         placeholder: 'e.g. 3:45',
         fullWidth: true,
       },
-      {
-        fieldType: 'text' as FormField['fieldType'],
-        name: 'song_link',
-        label: 'Link (URL)',
-        placeholder: 'e.g. https://soundcloud.com/...',
-        fullWidth: true,
-      },
       sharedBandNotesField,
     ],
     []
@@ -96,11 +127,40 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       name: song.name ?? '',
       artist: song.artist ?? '',
       duration: song.duration ? formatMsToDuration(song.duration) : '',
-      song_link: song.song_link ?? '',
       shared_band_notes: song.shared_band_notes ?? '',
     }),
     [song]
   );
+
+  function handleRefTypeChange(newType: SongRefType) {
+    setSongRefType(newType);
+    if (newType === 'link') {
+      audioFileRef.current = null;
+      if (song.audio_url) setRemoveAudio(true);
+    } else {
+      setLinkUrl('');
+      setRemoveAudio(false);
+    }
+  }
+
+  async function resolveRefFields(): Promise<{ song_link: string | null; audio_url: string | null } | null> {
+    if (songRefType === 'link') {
+      if (song.audio_url) await deleteSongAudio(supabase, song.audio_url);
+      return { song_link: linkUrl || null, audio_url: null };
+    }
+    // audio type
+    if (removeAudio) {
+      if (song.audio_url) await deleteSongAudio(supabase, song.audio_url);
+      return { song_link: null, audio_url: null };
+    }
+    if (audioFileRef.current) {
+      if (song.audio_url) await deleteSongAudio(supabase, song.audio_url);
+      const url = await uploadSongAudio(supabase, audioFileRef.current, song.band_id);
+      return { song_link: null, audio_url: url };
+    }
+    // no change to audio
+    return { song_link: null, audio_url: song.audio_url };
+  }
 
   function handleTabChange(_: React.SyntheticEvent, newMode: Mode) {
     setMode(newMode);
@@ -117,14 +177,22 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       return;
     }
 
+    let refFields: { song_link: string | null; audio_url: string | null } | null = null;
+    try {
+      refFields = await resolveRefFields();
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to upload audio file.');
+      return;
+    }
+
     const { error } = await supabase
       .from('songs')
       .update({
         name: data.name,
         artist: data.artist || null,
         duration,
-        song_link: data.song_link || null,
         shared_band_notes: data.shared_band_notes || null,
+        ...refFields,
       })
       .eq('id', song.id);
 
@@ -184,15 +252,23 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       return;
     }
 
+    let refFields: { song_link: string | null; audio_url: string | null } | null = null;
+    try {
+      refFields = await resolveRefFields();
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to upload audio file.');
+      return;
+    }
+
     const { error } = await supabase
       .from('songs')
       .update({
         name: data.name,
         artist: data.artist || null,
         duration,
-        song_link: data.song_link || null,
         shared_band_notes: data.shared_band_notes || null,
         spotify_url: null,
+        ...refFields,
       })
       .eq('id', song.id);
 
@@ -203,9 +279,26 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
     }
   }
 
+  const songReferenceInput = (
+    <SongReferenceInput
+      type={songRefType}
+      linkUrl={linkUrl}
+      existingAudioUrl={removeAudio ? null : song.audio_url}
+      onTypeChange={handleRefTypeChange}
+      onLinkChange={setLinkUrl}
+      onAudioFileSelect={(file) => {
+        audioFileRef.current = file;
+        if (file) setRemoveAudio(false);
+      }}
+      onRemoveExistingAudio={() => {
+        setRemoveAudio(true);
+        audioFileRef.current = null;
+      }}
+    />
+  );
+
   // Already linked to Spotify
   if (isSpotifyLinked) {
-    // Confirmed unlink: show manual form; spotify_url removed only on save
     if (linkedAction === 'manual-edit') {
       return (
         <Form
@@ -214,11 +307,11 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
           defaultValues={defaultValues}
           errorMessage={errorMessage}
           saveButtonLabel="Save Changes"
+          extraContent={songReferenceInput}
         />
       );
     }
 
-    // Unlink confirmation
     if (linkedAction === 'confirm-unlink') {
       return (
         <>
@@ -243,7 +336,6 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       );
     }
 
-    // Re-search Spotify
     if (linkedAction === 're-search') {
       return (
         <>
@@ -305,7 +397,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       );
     }
 
-    // Default: show linked info + chord chart
+    // Default: show linked info + link field + notes
     return (
       <>
         <Box
@@ -429,6 +521,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
           defaultValues={defaultValues}
           errorMessage={errorMessage}
           saveButtonLabel="Save Changes"
+          extraContent={songReferenceInput}
         />
       )}
     </>
