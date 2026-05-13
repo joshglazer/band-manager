@@ -1,6 +1,6 @@
 'use client';
 
-import AudioFileInput from '@/components/AudioFileInput';
+import SongReferenceInput, { SongRefType } from '@/components/SongReferenceInput';
 import { SpotifyIcon } from '@/components/SpotifyBadge';
 import SpotifyTrackSearch, { SpotifyTrack } from '@/components/SpotifyTrackSearch';
 import { createClient } from '@/utils/supabase/client';
@@ -47,6 +47,8 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
   const [sharedBandNotes, setSharedBandNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [songRefType, setSongRefType] = useState<SongRefType>('link');
+  const [linkUrl, setLinkUrl] = useState('');
   const audioFileRef = useRef<File | null>(null);
   const supabase = createClient();
 
@@ -70,13 +72,6 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
         name: 'duration',
         label: 'Duration (m:ss)',
         placeholder: 'e.g. 3:45',
-        fullWidth: true,
-      },
-      {
-        fieldType: 'text' as FormField['fieldType'],
-        name: 'song_link',
-        label: 'Link (URL)',
-        placeholder: 'e.g. https://soundcloud.com/...',
         fullWidth: true,
       },
       {
@@ -124,7 +119,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
     }
 
     let audioUrl: string | null = null;
-    if (audioFileRef.current) {
+    if (songRefType === 'audio' && audioFileRef.current) {
       try {
         audioUrl = await uploadSongAudio(supabase, audioFileRef.current, bandId);
       } catch (err) {
@@ -138,7 +133,7 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
       artist: data.artist || null,
       duration,
       shared_band_notes: data.shared_band_notes || null,
-      song_link: data.song_link || null,
+      song_link: songRefType === 'link' ? (linkUrl || null) : null,
       audio_url: audioUrl,
       band_id: bandId,
       spotify_url: null,
@@ -156,7 +151,18 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
     setSelectedTrack(null);
     setSharedBandNotes('');
     setErrorMessage('');
+    setSongRefType('link');
+    setLinkUrl('');
     audioFileRef.current = null;
+  }
+
+  function handleRefTypeChange(newType: SongRefType) {
+    setSongRefType(newType);
+    if (newType === 'link') {
+      audioFileRef.current = null;
+    } else {
+      setLinkUrl('');
+    }
   }
 
   return (
@@ -228,8 +234,13 @@ export default function AddSongForm({ bandId, onSuccess }: Readonly<AddSongFormP
           errorMessage={errorMessage}
           saveButtonLabel="Add Song"
           extraContent={
-            <AudioFileInput
-              onFileSelect={(file) => { audioFileRef.current = file; }}
+            <SongReferenceInput
+              type={songRefType}
+              linkUrl={linkUrl}
+              onTypeChange={handleRefTypeChange}
+              onLinkChange={setLinkUrl}
+              onAudioFileSelect={(file) => { audioFileRef.current = file; }}
+              onRemoveExistingAudio={() => { audioFileRef.current = null; }}
             />
           }
         />

@@ -1,6 +1,6 @@
 'use client';
 
-import AudioFileInput from '@/components/AudioFileInput';
+import SongReferenceInput, { SongRefType } from '@/components/SongReferenceInput';
 import SpotifyBadge, { SpotifyIcon } from '@/components/SpotifyBadge';
 import SpotifyTrackSearch, { SpotifyTrack } from '@/components/SpotifyTrackSearch';
 import { Tables } from '@/types/supabase';
@@ -75,6 +75,10 @@ async function deleteSongAudio(
   }
 }
 
+function initSongRefType(song: Tables<'songs'>): SongRefType {
+  return song.audio_url ? 'audio' : 'link';
+}
+
 export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormProps>) {
   const [mode, setMode] = useState<Mode>('manual');
   const [linkedAction, setLinkedAction] = useState<LinkedAction>(null);
@@ -82,6 +86,8 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
   const [sharedBandNotes, setSharedBandNotes] = useState(song.shared_band_notes ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [songRefType, setSongRefType] = useState<SongRefType>(initSongRefType(song));
+  const [linkUrl, setLinkUrl] = useState(song.song_link ?? '');
   const [removeAudio, setRemoveAudio] = useState(false);
   const audioFileRef = useRef<File | null>(null);
   const supabase = createClient();
@@ -111,13 +117,6 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         placeholder: 'e.g. 3:45',
         fullWidth: true,
       },
-      {
-        fieldType: 'text' as FormField['fieldType'],
-        name: 'song_link',
-        label: 'Link (URL)',
-        placeholder: 'e.g. https://soundcloud.com/...',
-        fullWidth: true,
-      },
       sharedBandNotesField,
     ],
     []
@@ -128,23 +127,39 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       name: song.name ?? '',
       artist: song.artist ?? '',
       duration: song.duration ? formatMsToDuration(song.duration) : '',
-      song_link: song.song_link ?? '',
       shared_band_notes: song.shared_band_notes ?? '',
     }),
     [song]
   );
 
-  async function resolveAudioUrl(): Promise<{ audio_url?: string | null }> {
+  function handleRefTypeChange(newType: SongRefType) {
+    setSongRefType(newType);
+    if (newType === 'link') {
+      audioFileRef.current = null;
+      if (song.audio_url) setRemoveAudio(true);
+    } else {
+      setLinkUrl('');
+      setRemoveAudio(false);
+    }
+  }
+
+  async function resolveRefFields(): Promise<{ song_link: string | null; audio_url: string | null } | null> {
+    if (songRefType === 'link') {
+      if (song.audio_url) await deleteSongAudio(supabase, song.audio_url);
+      return { song_link: linkUrl || null, audio_url: null };
+    }
+    // audio type
     if (removeAudio) {
       if (song.audio_url) await deleteSongAudio(supabase, song.audio_url);
-      return { audio_url: null };
+      return { song_link: null, audio_url: null };
     }
     if (audioFileRef.current) {
       if (song.audio_url) await deleteSongAudio(supabase, song.audio_url);
       const url = await uploadSongAudio(supabase, audioFileRef.current, song.band_id);
-      return { audio_url: url };
+      return { song_link: null, audio_url: url };
     }
-    return {};
+    // no change to audio
+    return { song_link: null, audio_url: song.audio_url };
   }
 
   function handleTabChange(_: React.SyntheticEvent, newMode: Mode) {
@@ -162,9 +177,9 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       return;
     }
 
-    let audioUpdate: { audio_url?: string | null } = {};
+    let refFields: { song_link: string | null; audio_url: string | null } | null = null;
     try {
-      audioUpdate = await resolveAudioUrl();
+      refFields = await resolveRefFields();
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'Failed to upload audio file.');
       return;
@@ -176,9 +191,8 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         name: data.name,
         artist: data.artist || null,
         duration,
-        song_link: data.song_link || null,
         shared_band_notes: data.shared_band_notes || null,
-        ...audioUpdate,
+        ...refFields,
       })
       .eq('id', song.id);
 
@@ -238,9 +252,9 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       return;
     }
 
-    let audioUpdate: { audio_url?: string | null } = {};
+    let refFields: { song_link: string | null; audio_url: string | null } | null = null;
     try {
-      audioUpdate = await resolveAudioUrl();
+      refFields = await resolveRefFields();
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'Failed to upload audio file.');
       return;
@@ -252,10 +266,9 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
         name: data.name,
         artist: data.artist || null,
         duration,
-        song_link: data.song_link || null,
         shared_band_notes: data.shared_band_notes || null,
         spotify_url: null,
-        ...audioUpdate,
+        ...refFields,
       })
       .eq('id', song.id);
 
@@ -266,14 +279,18 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
     }
   }
 
-  const audioInputElement = (
-    <AudioFileInput
-      existingUrl={removeAudio ? null : song.audio_url}
-      onFileSelect={(file) => {
+  const songReferenceInput = (
+    <SongReferenceInput
+      type={songRefType}
+      linkUrl={linkUrl}
+      existingAudioUrl={removeAudio ? null : song.audio_url}
+      onTypeChange={handleRefTypeChange}
+      onLinkChange={setLinkUrl}
+      onAudioFileSelect={(file) => {
         audioFileRef.current = file;
         if (file) setRemoveAudio(false);
       }}
-      onRemoveExisting={() => {
+      onRemoveExistingAudio={() => {
         setRemoveAudio(true);
         audioFileRef.current = null;
       }}
@@ -282,7 +299,6 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
 
   // Already linked to Spotify
   if (isSpotifyLinked) {
-    // Confirmed unlink: show manual form; spotify_url removed only on save
     if (linkedAction === 'manual-edit') {
       return (
         <Form
@@ -291,12 +307,11 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
           defaultValues={defaultValues}
           errorMessage={errorMessage}
           saveButtonLabel="Save Changes"
-          extraContent={audioInputElement}
+          extraContent={songReferenceInput}
         />
       );
     }
 
-    // Unlink confirmation
     if (linkedAction === 'confirm-unlink') {
       return (
         <>
@@ -321,7 +336,6 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       );
     }
 
-    // Re-search Spotify
     if (linkedAction === 're-search') {
       return (
         <>
@@ -383,7 +397,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
       );
     }
 
-    // Default: show linked info + chord chart
+    // Default: show linked info + link field + notes
     return (
       <>
         <Box
@@ -507,7 +521,7 @@ export default function EditSongForm({ song, onSuccess }: Readonly<EditSongFormP
           defaultValues={defaultValues}
           errorMessage={errorMessage}
           saveButtonLabel="Save Changes"
-          extraContent={audioInputElement}
+          extraContent={songReferenceInput}
         />
       )}
     </>
