@@ -1,6 +1,5 @@
 import { SpotifyIcon } from '@/components/SpotifyBadge';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import IconButton from '@mui/material/IconButton';
 import Popover from '@mui/material/Popover';
 import Tooltip from '@mui/material/Tooltip';
 import { type ReactNode, useRef, useState } from 'react';
