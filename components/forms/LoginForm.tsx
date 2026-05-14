@@ -1,9 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import LoginIcon from '@mui/icons-material/Login';
-import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import { cookies } from 'next/headers';
-import NextLink from 'next/link';
 import { redirect } from 'next/navigation';
 import { useMemo } from 'react';
 import { FieldValues } from 'react-hook-form';
@@ -61,19 +58,6 @@ export default function LoginForm({ errorMessage }: Readonly<LoginFormProps>) {
       errorMessage={errorMessage}
       saveButtonLabel="Login"
       saveButtonIcon={<LoginIcon />}
-      extraContent={
-        <Box sx={{ textAlign: 'right', mb: 1 }}>
-          <Link
-            component={NextLink}
-            href="/forgot-password"
-            underline="hover"
-            variant="body2"
-            color="text.secondary"
-          >
-            Forgot your password?
-          </Link>
-        </Box>
-      }
     />
   );
 }

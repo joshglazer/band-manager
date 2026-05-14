@@ -13,6 +13,9 @@ interface AuthCardProps {
   footerText: string;
   footerLinkText: string;
   footerLinkHref: string;
+  secondaryFooterText?: string;
+  secondaryFooterLinkText?: string;
+  secondaryFooterLinkHref?: string;
   children: ReactNode;
 }
 
@@ -22,6 +25,9 @@ export default function AuthCard({
   footerText,
   footerLinkText,
   footerLinkHref,
+  secondaryFooterText,
+  secondaryFooterLinkText,
+  secondaryFooterLinkHref,
   children,
 }: AuthCardProps) {
   return (
@@ -40,6 +46,14 @@ export default function AuthCard({
             {footerLinkText}
           </Link>
         </Typography>
+        {secondaryFooterLinkText && secondaryFooterLinkHref && (
+          <Typography variant="body2" color="text.secondary" mt={1}>
+            {secondaryFooterText}{' '}
+            <Link component={NextLink} href={secondaryFooterLinkHref} underline="hover" color="primary">
+              {secondaryFooterLinkText}
+            </Link>
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );
