@@ -17,8 +17,7 @@ export default function LoginPage({ searchParams }: Readonly<LoginPageProps>) {
         footerText="Don't have an account?"
         footerLinkText="Sign up"
         footerLinkHref="/signup"
-        secondaryFooterText="Forgot your password?"
-        secondaryFooterLinkText="Reset it"
+        secondaryFooterLinkText="Forgot Password?"
         secondaryFooterLinkHref="/forgot-password"
       >
         <LoginForm errorMessage={searchParams.message} />

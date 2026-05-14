@@ -40,20 +40,20 @@ export default function AuthCard({
           {subtitle}
         </Typography>
         {children}
-        <Typography variant="body2" color="text.secondary" mt={3}>
-          {footerText}{' '}
-          <Link component={NextLink} href={footerLinkHref} underline="hover" color="primary">
-            {footerLinkText}
-          </Link>
-        </Typography>
         {secondaryFooterLinkText && secondaryFooterLinkHref && (
-          <Typography variant="body2" color="text.secondary" mt={1}>
-            {secondaryFooterText}{' '}
+          <Typography variant="body2" color="text.secondary" mt={3}>
+            {secondaryFooterText && <>{secondaryFooterText}{' '}</>}
             <Link component={NextLink} href={secondaryFooterLinkHref} underline="hover" color="primary">
               {secondaryFooterLinkText}
             </Link>
           </Typography>
         )}
+        <Typography variant="body2" color="text.secondary" mt={1}>
+          {footerText}{' '}
+          <Link component={NextLink} href={footerLinkHref} underline="hover" color="primary">
+            {footerLinkText}
+          </Link>
+        </Typography>
       </CardContent>
     </Card>
   );
