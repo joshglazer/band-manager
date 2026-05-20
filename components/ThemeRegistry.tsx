@@ -6,18 +6,18 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { ReactNode, useMemo } from 'react';
 
-// Deep crimson meets electric violet — rock energy + stage lights
-// Dark: near-black with red undertone, accented by deep indigo
-// Light: warm white with rich crimson + violet accents
+// Deep ocean blue meets electric violet — cool energy + stage lights
+// Dark: near-black with blue undertone, accented by deep indigo
+// Light: cool white with rich cobalt + violet accents
 function buildTheme(dark: boolean) {
   return createTheme({
     palette: {
       mode: dark ? 'dark' : 'light',
       primary: {
-        main: dark ? '#f87171' : '#b91c1c',
-        light: dark ? '#fca5a5' : '#dc2626',
-        dark: dark ? '#ef4444' : '#991b1b',
-        contrastText: dark ? '#0d0305' : '#ffffff',
+        main: dark ? '#60a5fa' : '#1d4ed8',
+        light: dark ? '#93c5fd' : '#2563eb',
+        dark: dark ? '#3b82f6' : '#1e40af',
+        contrastText: dark ? '#030d1a' : '#ffffff',
       },
       secondary: {
         main: dark ? '#a78bfa' : '#7c3aed',
@@ -26,14 +26,14 @@ function buildTheme(dark: boolean) {
         contrastText: '#ffffff',
       },
       background: {
-        default: dark ? '#0d0507' : '#fdf8f8',
-        paper: dark ? '#1a0b0d' : '#ffffff',
+        default: dark ? '#05080d' : '#f8faff',
+        paper: dark ? '#0b0d1a' : '#ffffff',
       },
       text: {
-        primary: dark ? '#fef2f2' : '#1a0505',
-        secondary: dark ? '#fca5a5' : '#7f1d1d',
+        primary: dark ? '#eff6ff' : '#05101a',
+        secondary: dark ? '#93c5fd' : '#1e3a5f',
       },
-      divider: dark ? 'rgba(248,113,113,0.12)' : 'rgba(185,28,28,0.12)',
+      divider: dark ? 'rgba(96,165,250,0.12)' : 'rgba(29,78,216,0.12)',
       error: { main: dark ? '#fb923c' : '#ea580c' },
       success: { main: dark ? '#86efac' : '#15803d' },
       warning: { main: dark ? '#fde68a' : '#d97706' },
@@ -54,10 +54,10 @@ function buildTheme(dark: boolean) {
       MuiCssBaseline: {
         styleOverrides: {
           body: {
-            scrollbarColor: dark ? '#3d1015 #0d0507' : '#e4d8ff #fdf8f8',
+            scrollbarColor: dark ? '#0d1540 #05080d' : '#d8e8ff #f8faff',
             backgroundImage: dark
-              ? 'linear-gradient(160deg, #0d0507 0%, #100514 50%, #0d0507 100%)'
-              : 'linear-gradient(160deg, #fdf8f8 0%, #fdf5fd 50%, #fdf8f8 100%)',
+              ? 'linear-gradient(160deg, #05080d 0%, #05100e 50%, #05080d 100%)'
+              : 'linear-gradient(160deg, #f8faff 0%, #f5f8fd 50%, #f8faff 100%)',
             backgroundAttachment: 'fixed',
             minHeight: '100vh',
           },
@@ -68,8 +68,8 @@ function buildTheme(dark: boolean) {
         styleOverrides: {
           root: {
             background: dark
-              ? 'linear-gradient(90deg, #2e0e0e 0%, #280d28 100%)'
-              : 'linear-gradient(90deg, #c01c1c 0%, #9a1882 100%)',
+              ? 'linear-gradient(90deg, #0e1a2e 0%, #0d1e28 100%)'
+              : 'linear-gradient(90deg, #1d4ed8 0%, #0369a1 100%)',
             borderBottom: dark ? '1px solid rgba(167,139,250,0.12)' : 'none',
           },
         },
@@ -107,8 +107,8 @@ function buildTheme(dark: boolean) {
               fontSize: '0.75rem',
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
-              backgroundColor: dark ? 'rgba(13,5,7,0.7)' : 'rgba(253,248,248,0.8)',
-              color: dark ? '#fca5a5' : '#7f1d1d',
+              backgroundColor: dark ? 'rgba(5,8,13,0.7)' : 'rgba(248,250,255,0.8)',
+              color: dark ? '#93c5fd' : '#1e3a5f',
             },
           },
         },
@@ -133,12 +133,12 @@ function buildTheme(dark: boolean) {
           },
           containedPrimary: {
             background: dark
-              ? 'linear-gradient(135deg, #f04444 0%, #c855c0 100%)'
-              : 'linear-gradient(135deg, #c21c1c 0%, #8e1e80 100%)',
+              ? 'linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%)'
+              : 'linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%)',
             '&:hover': {
               background: dark
-                ? 'linear-gradient(135deg, #f47070 0%, #d870d8 100%)'
-                : 'linear-gradient(135deg, #d42020 0%, #9e2290 100%)',
+                ? 'linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%)'
+                : 'linear-gradient(135deg, #2563eb 0%, #0369a1 100%)',
             },
           },
         },
@@ -181,7 +181,7 @@ function buildTheme(dark: boolean) {
       MuiAvatar: {
         styleOverrides: {
           root: {
-            backgroundColor: dark ? '#ef4444' : '#b91c1c',
+            backgroundColor: dark ? '#3b82f6' : '#1d4ed8',
             color: '#ffffff',
             fontWeight: 700,
           },

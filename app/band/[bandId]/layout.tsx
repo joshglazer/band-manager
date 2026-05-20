@@ -43,8 +43,8 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
   const pathname = usePathname();
   const { palette } = useTheme();
   const sidebarGradient = palette.mode === 'dark'
-    ? 'linear-gradient(180deg, #1a0b0d 0%, #1e0c20 100%)'
-    : 'linear-gradient(180deg, #fef2f2 0%, #fcedf8 100%)';
+    ? 'linear-gradient(180deg, #0b0d1a 0%, #0c101e 100%)'
+    : 'linear-gradient(180deg, #eff6ff 0%, #edf3fc 100%)';
 
   if (isLoading) {
     return <Loading />;

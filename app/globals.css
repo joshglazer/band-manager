@@ -4,18 +4,18 @@
 
 @layer base {
   :root {
-    --background: 0 60% 98%;
-    --foreground: 0 85% 6%;
-    --btn-background: 0 30% 91%;
-    --btn-background-hover: 0 30% 86%;
+    --background: 220 60% 98%;
+    --foreground: 220 85% 6%;
+    --btn-background: 220 30% 91%;
+    --btn-background-hover: 220 30% 86%;
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --background: 345 50% 4%;
-      --foreground: 0 85% 97%;
-      --btn-background: 345 30% 12%;
-      --btn-background-hover: 345 30% 17%;
+      --background: 220 50% 4%;
+      --foreground: 220 85% 97%;
+      --btn-background: 220 30% 12%;
+      --btn-background-hover: 220 30% 17%;
     }
   }
 }
@@ -47,7 +47,7 @@
    rule fires before JS and overrides the server-rendered white background. */
 @media (prefers-color-scheme: dark) {
   .MuiPaper-root {
-    background-color: #1a0b0d !important;
-    color: #fef2f2;
+    background-color: #0b0d1a !important;
+    color: #eff6ff;
   }
 }
