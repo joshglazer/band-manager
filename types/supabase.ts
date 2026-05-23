@@ -15,7 +15,6 @@ export type Database = {
           band_id: number
           name: string
           proposals_per_member: number
-          votes_per_member: number
           songs_to_add: number
           status: 'proposing' | 'voting' | 'completed'
           created_by: string
@@ -26,7 +25,6 @@ export type Database = {
           band_id: number
           name: string
           proposals_per_member?: number
-          votes_per_member?: number
           songs_to_add?: number
           status?: 'proposing' | 'voting' | 'completed'
           created_by: string
@@ -37,7 +35,6 @@ export type Database = {
           band_id?: number
           name?: string
           proposals_per_member?: number
-          votes_per_member?: number
           songs_to_add?: number
           status?: 'proposing' | 'voting' | 'completed'
           created_by?: string
@@ -83,6 +80,7 @@ export type Database = {
           id: number
           vote_session_id: number
           proposal_id: number
+          proposer_id: string
           user_id: string
           rank: number
           created_at: string
@@ -91,6 +89,7 @@ export type Database = {
           id?: number
           vote_session_id: number
           proposal_id: number
+          proposer_id: string
           user_id: string
           rank: number
           created_at?: string
@@ -99,6 +98,7 @@ export type Database = {
           id?: number
           vote_session_id?: number
           proposal_id?: number
+          proposer_id?: string
           user_id?: string
           rank?: number
           created_at?: string

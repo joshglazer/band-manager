@@ -77,7 +77,7 @@ export default function VotesPage({ params }: Readonly<BandRouteProps>) {
                   {session.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {session.proposals_per_member} proposals · {session.votes_per_member} votes ·{' '}
+                  {session.proposals_per_member} proposals per member ·{' '}
                   {session.songs_to_add} songs to add
                 </Typography>
               </Box>

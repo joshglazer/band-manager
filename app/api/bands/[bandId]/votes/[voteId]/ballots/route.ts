@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 interface BallotEntry {
   proposal_id: number;
+  proposer_id: string;
   rank: number;
 }
 
@@ -29,7 +30,7 @@ export async function POST(
 
   const { data: session, error: sessionError } = await supabase
     .from('vote_sessions')
-    .select('status, votes_per_member, band_id')
+    .select('status, band_id')
     .eq('id', voteId)
     .eq('band_id', bandId)
     .single();
@@ -42,17 +43,24 @@ export async function POST(
     return NextResponse.json({ error: 'Voting is not open for this session' }, { status: 400 });
   }
 
-  if (ballot.length > session.votes_per_member) {
-    return NextResponse.json(
-      { error: `Cannot cast more than ${session.votes_per_member} votes` },
-      { status: 400 }
-    );
+  // Validate: within each proposer's group, ranks must be consecutive from 1..N
+  const byProposer = new Map<string, BallotEntry[]>();
+  for (const entry of ballot) {
+    const group = byProposer.get(entry.proposer_id) ?? [];
+    group.push(entry);
+    byProposer.set(entry.proposer_id, group);
   }
 
-  const ranks = ballot.map((b) => b.rank);
-  const uniqueRanks = new Set(ranks);
-  if (uniqueRanks.size !== ranks.length) {
-    return NextResponse.json({ error: 'Duplicate ranks in ballot' }, { status: 400 });
+  for (const [proposerId, entries] of Array.from(byProposer.entries())) {
+    const ranks = entries.map((e) => e.rank).sort((a, b) => a - b);
+    for (let i = 0; i < ranks.length; i++) {
+      if (ranks[i] !== i + 1) {
+        return NextResponse.json(
+          { error: `Invalid ranks for proposer ${proposerId}: must be consecutive from 1` },
+          { status: 400 }
+        );
+      }
+    }
   }
 
   const { error: deleteError } = await supabase
@@ -68,6 +76,7 @@ export async function POST(
   const rows = ballot.map((b) => ({
     vote_session_id: voteId,
     proposal_id: b.proposal_id,
+    proposer_id: b.proposer_id,
     user_id: user.id,
     rank: b.rank,
   }));

@@ -17,7 +17,6 @@ export default function NewVoteSessionPage({ params }: Readonly<BandRouteProps>)
 
   const [name, setName] = useState('');
   const [proposalsPerMember, setProposalsPerMember] = useState(3);
-  const [votesPerMember, setVotesPerMember] = useState(5);
   const [songsToAdd, setSongsToAdd] = useState(3);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +34,6 @@ export default function NewVoteSessionPage({ params }: Readonly<BandRouteProps>)
       body: JSON.stringify({
         name: name.trim(),
         proposals_per_member: proposalsPerMember,
-        votes_per_member: votesPerMember,
         songs_to_add: songsToAdd,
       }),
     });
@@ -57,7 +55,7 @@ export default function NewVoteSessionPage({ params }: Readonly<BandRouteProps>)
         Set Up a New Vote Session
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Configure the parameters, then members will propose songs before voting begins.
+        Members propose songs, then everyone ranks each person&apos;s proposals against each other.
       </Typography>
 
       <Paper sx={{ p: 3 }} component="form" onSubmit={handleSubmit}>
@@ -78,20 +76,7 @@ export default function NewVoteSessionPage({ params }: Readonly<BandRouteProps>)
             value={proposalsPerMember}
             onChange={(e) => setProposalsPerMember(Math.max(1, parseInt(e.target.value) || 1))}
             inputProps={{ min: 1, max: 20 }}
-            helperText="How many songs each person can propose"
-            fullWidth
-            InputProps={{
-              endAdornment: <InputAdornment position="end">songs</InputAdornment>,
-            }}
-          />
-
-          <TextField
-            label="Votes per member"
-            type="number"
-            value={votesPerMember}
-            onChange={(e) => setVotesPerMember(Math.max(1, parseInt(e.target.value) || 1))}
-            inputProps={{ min: 1, max: 50 }}
-            helperText="How many songs each person can rank in their ballot"
+            helperText="How many songs each person can nominate"
             fullWidth
             InputProps={{
               endAdornment: <InputAdornment position="end">songs</InputAdornment>,
@@ -104,7 +89,7 @@ export default function NewVoteSessionPage({ params }: Readonly<BandRouteProps>)
             value={songsToAdd}
             onChange={(e) => setSongsToAdd(Math.max(1, parseInt(e.target.value) || 1))}
             inputProps={{ min: 1, max: 50 }}
-            helperText="How many top-ranked songs will be added to the setlist"
+            helperText="Target number of songs to add from the results"
             fullWidth
             InputProps={{
               endAdornment: <InputAdornment position="end">songs</InputAdornment>,

@@ -7,7 +7,7 @@ export async function POST(
   { params }: { params: { bandId: string } }
 ) {
   const bandId = parseInt(params.bandId, 10);
-  const { name, proposals_per_member, votes_per_member, songs_to_add } = await request.json();
+  const { name, proposals_per_member, songs_to_add } = await request.json();
 
   if (!name || !bandId) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -27,7 +27,6 @@ export async function POST(
       band_id: bandId,
       name,
       proposals_per_member: proposals_per_member ?? 3,
-      votes_per_member: votes_per_member ?? 5,
       songs_to_add: songs_to_add ?? 3,
       created_by: user.id,
     })

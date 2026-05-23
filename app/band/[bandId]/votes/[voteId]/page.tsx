@@ -7,9 +7,7 @@ import useUserProfiles from '@/hooks/useUserProfiles';
 import { VoteProposalWithBallots } from '@/types/composites';
 import { Tables } from '@/types/supabase';
 import { createClient } from '@/utils/supabase/client';
-import AddIcon from '@mui/icons-material/Add';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import Alert from '@mui/material/Alert';
@@ -110,9 +108,7 @@ function ProposingPhase({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'advance' }),
     });
-    if (res.ok) {
-      onUpdate();
-    }
+    if (res.ok) onUpdate();
     setAdvancing(false);
   }
 
@@ -125,6 +121,7 @@ function ProposingPhase({
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {members.map((m) => {
+            const memberProposals = proposals.filter((p) => p.user_id === m.user_id);
             const proposed = proposedUserIds.has(m.user_id);
             return (
               <Box key={m.user_id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -136,8 +133,7 @@ function ProposingPhase({
                 <Typography variant="body2">{memberName(m.user_id, profiles)}</Typography>
                 {proposed && (
                   <Typography variant="caption" color="text.secondary">
-                    ({proposals.filter((p) => p.user_id === m.user_id).length} song
-                    {proposals.filter((p) => p.user_id === m.user_id).length !== 1 ? 's' : ''})
+                    ({memberProposals.length} song{memberProposals.length !== 1 ? 's' : ''})
                   </Typography>
                 )}
               </Box>
@@ -152,7 +148,7 @@ function ProposingPhase({
           {hasProposed ? 'Update your proposals' : 'Submit your proposals'}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Propose up to {session.proposals_per_member} song
+          Nominate up to {session.proposals_per_member} song
           {session.proposals_per_member !== 1 ? 's' : ''} you&apos;d like the band to learn.
         </Typography>
 
@@ -186,22 +182,18 @@ function ProposingPhase({
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={submitting || !songs.some((s) => s.song_name.trim())}
-          >
-            {submitting ? 'Saving…' : hasProposed ? 'Update proposals' : 'Submit proposals'}
-          </Button>
-        </Box>
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={submitting || !songs.some((s) => s.song_name.trim())}
+        >
+          {submitting ? 'Saving…' : hasProposed ? 'Update proposals' : 'Submit proposals'}
+        </Button>
       </Paper>
 
-      {/* Advance to voting */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Button
           variant="outlined"
-          color="primary"
           onClick={handleAdvance}
           disabled={advancing || proposals.length === 0}
         >
@@ -214,6 +206,12 @@ function ProposingPhase({
 
 // ─── Voting phase ────────────────────────────────────────────────────────────
 
+interface RankedGroup {
+  proposerId: string;
+  /** proposal ids in rank order (index 0 = rank 1) */
+  orderedIds: number[];
+}
+
 interface VotingPhaseProps {
   bandId: number;
   voteId: number;
@@ -225,15 +223,9 @@ interface VotingPhaseProps {
   onUpdate: () => void;
 }
 
-interface BallotEntry {
-  proposal_id: number;
-  rank: number;
-}
-
 function VotingPhase({
   bandId,
   voteId,
-  session,
   proposals,
   members,
   profiles,
@@ -245,59 +237,66 @@ function VotingPhase({
   const myBallots = allBallots.filter((b) => b.user_id === currentUserId);
   const hasVoted = myBallots.length > 0;
 
-  const initialBallot: BallotEntry[] = hasVoted
-    ? myBallots
-        .sort((a, b) => a.rank - b.rank)
-        .map((b) => ({ proposal_id: b.proposal_id, rank: b.rank }))
-    : [];
+  // Group proposals by proposer
+  const proposerGroups = useMemo(() => {
+    const grouped = new Map<string, VoteProposalWithBallots[]>();
+    for (const p of proposals) {
+      const list = grouped.get(p.user_id) ?? [];
+      list.push(p);
+      grouped.set(p.user_id, list);
+    }
+    return grouped;
+  }, [proposals]);
 
-  const [ballot, setBallot] = useState<BallotEntry[]>(initialBallot);
+  // Build initial ranked state per group
+  const initialGroups = useMemo((): RankedGroup[] => {
+    return Array.from(proposerGroups.entries()).map(([proposerId, groupProposals]) => {
+      if (hasVoted) {
+        // Restore from existing ballots
+        const sorted = groupProposals
+          .map((p) => {
+            const ballot = myBallots.find((b) => b.proposal_id === p.id);
+            return { id: p.id, rank: ballot?.rank ?? 999 };
+          })
+          .sort((a, b) => a.rank - b.rank);
+        return { proposerId, orderedIds: sorted.map((s) => s.id) };
+      }
+      return { proposerId, orderedIds: groupProposals.map((p) => p.id) };
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [groups, setGroups] = useState<RankedGroup[]>(initialGroups);
   const [submitting, setSubmitting] = useState(false);
   const [advancing, setAdvancing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const rankedProposalIds = new Set(ballot.map((b) => b.proposal_id));
-  const maxRank = session.votes_per_member;
-
-  function addToBallot(proposalId: number) {
-    if (ballot.length >= maxRank) return;
-    const nextRank = ballot.length + 1;
-    setBallot((prev) => [...prev, { proposal_id: proposalId, rank: nextRank }]);
-  }
-
-  function removeFromBallot(proposalId: number) {
-    setBallot((prev) => {
-      const filtered = prev.filter((b) => b.proposal_id !== proposalId);
-      return filtered.map((b, i) => ({ ...b, rank: i + 1 }));
-    });
-  }
-
-  function moveUp(proposalId: number) {
-    setBallot((prev) => {
-      const idx = prev.findIndex((b) => b.proposal_id === proposalId);
-      if (idx <= 0) return prev;
-      const next = [...prev];
-      [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-      return next.map((b, i) => ({ ...b, rank: i + 1 }));
-    });
-  }
-
-  function moveDown(proposalId: number) {
-    setBallot((prev) => {
-      const idx = prev.findIndex((b) => b.proposal_id === proposalId);
-      if (idx < 0 || idx >= prev.length - 1) return prev;
-      const next = [...prev];
-      [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
-      return next.map((b, i) => ({ ...b, rank: i + 1 }));
-    });
+  function moveInGroup(proposerId: string, proposalId: number, direction: -1 | 1) {
+    setGroups((prev) =>
+      prev.map((g) => {
+        if (g.proposerId !== proposerId) return g;
+        const idx = g.orderedIds.indexOf(proposalId);
+        const newIdx = idx + direction;
+        if (newIdx < 0 || newIdx >= g.orderedIds.length) return g;
+        const next = [...g.orderedIds];
+        [next[idx], next[newIdx]] = [next[newIdx], next[idx]];
+        return { ...g, orderedIds: next };
+      })
+    );
   }
 
   async function handleSubmitBallot(e: React.FormEvent) {
     e.preventDefault();
-    if (!ballot.length) return;
-
     setSubmitting(true);
     setError(null);
+
+    const ballot = groups.flatMap((g) =>
+      g.orderedIds.map((proposalId, i) => ({
+        proposal_id: proposalId,
+        proposer_id: g.proposerId,
+        rank: i + 1,
+      }))
+    );
 
     const res = await fetch(`/api/bands/${bandId}/votes/${voteId}/ballots`, {
       method: 'POST',
@@ -327,7 +326,7 @@ function VotingPhase({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Voting status */}
+      {/* Who has voted */}
       <Paper sx={{ p: 2.5 }}>
         <Typography variant="subtitle2" color="text.secondary" gutterBottom>
           Voting Status
@@ -349,153 +348,98 @@ function VotingPhase({
         </Box>
       </Paper>
 
-      {/* Ballot builder */}
+      {/* Ballot — one section per proposer */}
       <Paper sx={{ p: 2.5 }} component="form" onSubmit={handleSubmitBallot}>
         <Typography variant="subtitle1" fontWeight={600} gutterBottom>
           {hasVoted ? 'Update your ballot' : 'Cast your ballot'}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Rank up to {maxRank} song{maxRank !== 1 ? 's' : ''} in order of preference (1st = top
-          choice). Click a song to add it; use ↑↓ to reorder.
+          For each member&apos;s nominations, drag or use ↑↓ to rank their songs from most to least
+          preferred. Rank 1 = your top choice within that person&apos;s list.
         </Typography>
 
-        {/* Current ranked ballot */}
-        {ballot.length > 0 && (
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-              Your ranked ballot ({ballot.length}/{maxRank})
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {ballot.map((entry, i) => {
-                const proposal = proposals.find((p) => p.id === entry.proposal_id);
-                if (!proposal) return null;
-                return (
-                  <Paper
-                    key={entry.proposal_id}
-                    variant="outlined"
-                    sx={{ p: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
-                  >
-                    <Typography
-                      variant="body2"
-                      fontWeight={700}
-                      color="primary"
-                      sx={{ minWidth: 28 }}
-                    >
-                      #{i + 1}
-                    </Typography>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body2" fontWeight={500}>
-                        {proposal.song_name}
-                      </Typography>
-                      {proposal.artist && (
-                        <Typography variant="caption" color="text.secondary">
-                          {proposal.artist}
-                        </Typography>
-                      )}
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <Tooltip title="Move up">
-                        <span>
-                          <IconButton size="small" onClick={() => moveUp(entry.proposal_id)} disabled={i === 0}>
-                            ↑
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                      <Tooltip title="Move down">
-                        <span>
-                          <IconButton
-                            size="small"
-                            onClick={() => moveDown(entry.proposal_id)}
-                            disabled={i === ballot.length - 1}
-                          >
-                            ↓
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                      <Tooltip title="Remove">
-                        <IconButton size="small" onClick={() => removeFromBallot(entry.proposal_id)}>
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </Paper>
-                );
-              })}
-            </Box>
-          </Box>
-        )}
-
-        {/* All proposals to pick from */}
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-          All proposed songs
-        </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-          {proposals.map((proposal) => {
-            const inBallot = rankedProposalIds.has(proposal.id);
-            const ballotFull = ballot.length >= maxRank;
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {groups.map((group) => {
+            const groupProposals = proposerGroups.get(group.proposerId) ?? [];
+            const name = memberName(group.proposerId, profiles);
             return (
-              <Paper
-                key={proposal.id}
-                variant="outlined"
-                sx={{
-                  p: 1.5,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  opacity: inBallot ? 0.5 : 1,
-                  bgcolor: inBallot ? 'action.selected' : undefined,
-                }}
-              >
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" fontWeight={500}>
-                    {proposal.song_name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {proposal.artist && `${proposal.artist} · `}
-                    proposed by {memberName(proposal.user_id, profiles)}
-                  </Typography>
-                </Box>
-                {inBallot ? (
-                  <Chip
-                    label={`#${ballot.find((b) => b.proposal_id === proposal.id)?.rank}`}
-                    size="small"
-                    color="primary"
-                  />
-                ) : (
-                  <Tooltip title={ballotFull ? `Ballot full (${maxRank} max)` : 'Add to ballot'}>
-                    <span>
-                      <Button
-                        size="small"
+              <Box key={group.proposerId}>
+                <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                  {name}&apos;s nominations
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {group.orderedIds.map((proposalId, i) => {
+                    const proposal = groupProposals.find((p) => p.id === proposalId);
+                    if (!proposal) return null;
+                    return (
+                      <Paper
+                        key={proposalId}
                         variant="outlined"
-                        startIcon={<AddIcon />}
-                        onClick={() => addToBallot(proposal.id)}
-                        disabled={ballotFull}
+                        sx={{ p: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
                       >
-                        Add
-                      </Button>
-                    </span>
-                  </Tooltip>
-                )}
-              </Paper>
+                        <Typography
+                          variant="body2"
+                          fontWeight={700}
+                          color="primary"
+                          sx={{ minWidth: 28 }}
+                        >
+                          #{i + 1}
+                        </Typography>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" fontWeight={500}>
+                            {proposal.song_name}
+                          </Typography>
+                          {proposal.artist && (
+                            <Typography variant="caption" color="text.secondary">
+                              {proposal.artist}
+                            </Typography>
+                          )}
+                        </Box>
+                        <Box sx={{ display: 'flex' }}>
+                          <Tooltip title="Move up (more preferred)">
+                            <span>
+                              <IconButton
+                                size="small"
+                                onClick={() => moveInGroup(group.proposerId, proposalId, -1)}
+                                disabled={i === 0}
+                              >
+                                ↑
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip title="Move down (less preferred)">
+                            <span>
+                              <IconButton
+                                size="small"
+                                onClick={() => moveInGroup(group.proposerId, proposalId, 1)}
+                                disabled={i === group.orderedIds.length - 1}
+                              >
+                                ↓
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        </Box>
+                      </Paper>
+                    );
+                  })}
+                </Box>
+              </Box>
             );
           })}
         </Box>
 
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && <Alert severity="error" sx={{ mt: 2, mb: 1 }}>{error}</Alert>}
 
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={submitting || ballot.length === 0}
-        >
-          {submitting ? 'Saving…' : hasVoted ? 'Update ballot' : 'Submit ballot'}
-        </Button>
+        <Box sx={{ mt: 3 }}>
+          <Button type="submit" variant="contained" disabled={submitting || groups.length === 0}>
+            {submitting ? 'Saving…' : hasVoted ? 'Update ballot' : 'Submit ballot'}
+          </Button>
+        </Box>
       </Paper>
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Button
           variant="outlined"
-          color="primary"
           onClick={handleAdvance}
           disabled={advancing || allBallots.length === 0}
         >
@@ -515,158 +459,173 @@ interface ResultsPhaseProps {
   profiles: Tables<'user_profiles'>[] | null | undefined;
 }
 
-function bordaScores(
-  proposals: VoteProposalWithBallots[],
-  votesPerMember: number
-): { proposal: VoteProposalWithBallots; score: number }[] {
-  const allBallots = proposals.flatMap((p) => p.vote_ballots);
-  return proposals
+interface RankedProposal {
+  proposal: VoteProposalWithBallots;
+  avgRank: number;
+  voteCount: number;
+}
+
+function rankProposalsForProposer(
+  proposerProposals: VoteProposalWithBallots[]
+): RankedProposal[] {
+  return proposerProposals
     .map((proposal) => {
-      const score = allBallots
-        .filter((b) => b.proposal_id === proposal.id)
-        .reduce((sum, b) => sum + (votesPerMember - b.rank + 1), 0);
-      return { proposal, score };
+      const ballots = proposal.vote_ballots;
+      const voteCount = ballots.length;
+      const avgRank =
+        voteCount > 0
+          ? ballots.reduce((sum, b) => sum + b.rank, 0) / voteCount
+          : Infinity;
+      return { proposal, avgRank, voteCount };
     })
-    .sort((a, b) => b.score - a.score);
+    .sort((a, b) => a.avgRank - b.avgRank);
 }
 
-function topSongPerMember(
-  members: Tables<'band_members'>[],
-  proposals: VoteProposalWithBallots[]
-): { userId: string; topProposal: VoteProposalWithBallots | null }[] {
-  const allBallots = proposals.flatMap((p) => p.vote_ballots);
-  return members.map((m) => {
-    const memberBallots = allBallots
-      .filter((b) => b.user_id === m.user_id)
-      .sort((a, b) => a.rank - b.rank);
-    const top = memberBallots[0];
-    const topProposal = top ? (proposals.find((p) => p.id === top.proposal_id) ?? null) : null;
-    return { userId: m.user_id, topProposal };
-  });
-}
-
-function ResultsPhase({ session, proposals, members, profiles }: ResultsPhaseProps) {
-  const ranked = useMemo(
-    () => bordaScores(proposals, session.votes_per_member),
-    [proposals, session.votes_per_member]
-  );
-
-  const perMember = useMemo(
-    () => topSongPerMember(members, proposals),
-    [members, proposals]
-  );
+function ResultsPhase({ proposals, members, profiles }: ResultsPhaseProps) {
+  // Group by proposer
+  const proposerGroups = useMemo(() => {
+    const grouped = new Map<string, VoteProposalWithBallots[]>();
+    for (const p of proposals) {
+      const list = grouped.get(p.user_id) ?? [];
+      list.push(p);
+      grouped.set(p.user_id, list);
+    }
+    return grouped;
+  }, [proposals]);
 
   const totalVoters = new Set(
     proposals.flatMap((p) => p.vote_ballots.map((b) => b.user_id))
   ).size;
 
+  // Build ordered results per proposer
+  const proposerResults = useMemo(() => {
+    return members
+      .filter((m) => proposerGroups.has(m.user_id))
+      .map((m) => ({
+        userId: m.user_id,
+        ranked: rankProposalsForProposer(proposerGroups.get(m.user_id) ?? []),
+      }));
+  }, [members, proposerGroups]);
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Overall ranking */}
-      <Paper sx={{ p: 2.5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <EmojiEventsIcon color="warning" />
-          <Typography variant="subtitle1" fontWeight={700}>
-            Top {session.songs_to_add} Song{session.songs_to_add !== 1 ? 's' : ''} to Add
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            ({totalVoters} voter{totalVoters !== 1 ? 's' : ''} · Borda count)
-          </Typography>
-        </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <EmojiEventsIcon color="warning" />
+        <Typography variant="h6" fontWeight={700}>
+          Results
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          ({totalVoters} voter{totalVoters !== 1 ? 's' : ''} · average rank per group, lower = more preferred)
+        </Typography>
+      </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-          {ranked.slice(0, session.songs_to_add).map((item, i) => (
-            <Paper
-              key={item.proposal.id}
-              variant="outlined"
-              sx={{
-                p: 1.5,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                bgcolor: i === 0 ? 'warning.50' : undefined,
-              }}
-            >
-              <Typography variant="h6" color={i === 0 ? 'warning.main' : 'text.secondary'} sx={{ minWidth: 32 }}>
-                {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
-              </Typography>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="body1" fontWeight={600}>
-                  {item.proposal.song_name}
+      {/* Winner summary */}
+      <Paper sx={{ p: 2.5 }}>
+        <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+          Top pick per member
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          The song from each member&apos;s nominations that the band ranked highest on average.
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {proposerResults.map(({ userId, ranked }) => {
+            const winner = ranked[0];
+            return (
+              <Box key={userId} sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 0.5 }}>
+                <Typography variant="body2" fontWeight={600} sx={{ minWidth: 140 }}>
+                  {memberName(userId, profiles)}
                 </Typography>
-                {item.proposal.artist && (
-                  <Typography variant="body2" color="text.secondary">
-                    {item.proposal.artist}
+                {winner ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2">
+                      {winner.proposal.song_name}
+                      {winner.proposal.artist && (
+                        <Typography component="span" variant="body2" color="text.secondary">
+                          {' '}· {winner.proposal.artist}
+                        </Typography>
+                      )}
+                    </Typography>
+                    {winner.voteCount > 0 && (
+                      <Chip
+                        label={`avg rank ${winner.avgRank.toFixed(1)}`}
+                        size="small"
+                        color="success"
+                        variant="outlined"
+                      />
+                    )}
+                  </Box>
+                ) : (
+                  <Typography variant="body2" color="text.secondary" fontStyle="italic">
+                    No proposals
                   </Typography>
                 )}
               </Box>
-              <Chip label={`${item.score} pts`} size="small" variant="outlined" />
-            </Paper>
-          ))}
+            );
+          })}
         </Box>
-
-        {ranked.length > session.songs_to_add && (
-          <>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-              Remaining songs
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-              {ranked.slice(session.songs_to_add).map((item, i) => (
-                <Box
-                  key={item.proposal.id}
-                  sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}
-                >
-                  <Typography variant="body2" color="text.secondary" sx={{ minWidth: 32 }}>
-                    #{i + session.songs_to_add + 1}
-                  </Typography>
-                  <Typography variant="body2" sx={{ flex: 1 }}>
-                    {item.proposal.song_name}
-                    {item.proposal.artist && (
-                      <Typography component="span" variant="body2" color="text.secondary">
-                        {' '}· {item.proposal.artist}
-                      </Typography>
-                    )}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {item.score} pts
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          </>
-        )}
       </Paper>
 
-      {/* Top song per member */}
-      <Paper sx={{ p: 2.5 }}>
-        <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-          Each Member&apos;s Top Pick
-        </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {perMember.map(({ userId, topProposal }) => (
-            <Box key={userId} sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 0.5 }}>
-              <Typography variant="body2" fontWeight={500} sx={{ minWidth: 140 }}>
-                {memberName(userId, profiles)}
-              </Typography>
-              {topProposal ? (
-                <Typography variant="body2">
-                  {topProposal.song_name}
-                  {topProposal.artist && (
-                    <Typography component="span" variant="body2" color="text.secondary">
-                      {' '}· {topProposal.artist}
+      {/* Full breakdown per proposer */}
+      {proposerResults.map(({ userId, ranked }) => (
+        <Paper key={userId} sx={{ p: 2.5 }}>
+          <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+            {memberName(userId, profiles)}&apos;s nominations — full ranking
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {ranked.map((item, i) => (
+              <Paper
+                key={item.proposal.id}
+                variant="outlined"
+                sx={{
+                  p: 1.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  bgcolor: i === 0 ? 'success.50' : undefined,
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  fontWeight={700}
+                  color={i === 0 ? 'success.main' : 'text.secondary'}
+                  sx={{ minWidth: 28 }}
+                >
+                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+                </Typography>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" fontWeight={i === 0 ? 600 : 400}>
+                    {item.proposal.song_name}
+                  </Typography>
+                  {item.proposal.artist && (
+                    <Typography variant="caption" color="text.secondary">
+                      {item.proposal.artist}
                     </Typography>
                   )}
-                </Typography>
-              ) : (
-                <Typography variant="body2" color="text.secondary" fontStyle="italic">
-                  Did not vote
-                </Typography>
-              )}
-            </Box>
-          ))}
-        </Box>
-      </Paper>
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                  {item.voteCount > 0 ? (
+                    <>
+                      <Typography variant="caption" color="text.secondary">
+                        avg rank {item.avgRank.toFixed(1)}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {item.voteCount} vote{item.voteCount !== 1 ? 's' : ''}
+                      </Typography>
+                    </>
+                  ) : (
+                    <Typography variant="caption" color="text.secondary">
+                      No votes
+                    </Typography>
+                  )}
+                </Box>
+              </Paper>
+            ))}
+          </Box>
+          {ranked.length > 1 && (
+            <Divider sx={{ mt: 2, mb: 1 }} />
+          )}
+        </Paper>
+      ))}
     </Box>
   );
 }
@@ -716,23 +675,33 @@ export default function VoteSessionPage({ params }: PageProps) {
 
   const proposals = session.vote_proposals ?? [];
 
-  const statusColor = STATUS_COLORS[session.status];
-  const statusLabel = STATUS_LABELS[session.status];
-
   return (
     <>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 3, gap: 2, flexWrap: 'wrap' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          mb: 3,
+          gap: 2,
+          flexWrap: 'wrap',
+        }}
+      >
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
             <Typography variant="h6" fontWeight={700}>
               {session.name}
             </Typography>
-            <Chip label={statusLabel} color={statusColor} size="small" />
+            <Chip
+              label={STATUS_LABELS[session.status]}
+              color={STATUS_COLORS[session.status]}
+              size="small"
+            />
           </Box>
           <Typography variant="body2" color="text.secondary">
-            {session.proposals_per_member} proposals per member · {session.votes_per_member} votes
-            per member · {session.songs_to_add} songs to add
+            {session.proposals_per_member} nominations per member · {session.songs_to_add} songs to
+            add
           </Typography>
         </Box>
         <Button component={Link} href={`/band/${bandId}/votes`} variant="text" size="small">
