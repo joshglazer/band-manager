@@ -9,6 +9,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import GridViewIcon from '@mui/icons-material/GridView';
 import GroupIcon from '@mui/icons-material/Group';
+import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -61,6 +62,7 @@ export default function BandLayout({ children, params }: BandLayoutProps) {
       { label: 'Songs', href: `${basePath}/songs`, icon: <LibraryMusicIcon fontSize="small" /> },
       { label: 'Setlists', href: `${basePath}/setlists`, icon: <QueueMusicIcon fontSize="small" /> },
       { label: 'Practice', href: `${basePath}/practice`, icon: <ChecklistIcon fontSize="small" /> },
+      { label: 'Votes', href: `${basePath}/votes`, icon: <HowToVoteIcon fontSize="small" /> },
       { label: 'Members', href: `${basePath}/members`, icon: <GroupIcon fontSize="small" /> },
       { label: 'Settings', href: `${basePath}/settings`, icon: <SettingsIcon fontSize="small" /> },
     ];

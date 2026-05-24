@@ -9,6 +9,102 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      vote_sessions: {
+        Row: {
+          id: number
+          band_id: number
+          name: string
+          proposals_per_member: number
+          songs_to_add: number
+          status: 'proposing' | 'voting' | 'completed'
+          created_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          band_id: number
+          name: string
+          proposals_per_member?: number
+          songs_to_add?: number
+          status?: 'proposing' | 'voting' | 'completed'
+          created_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          band_id?: number
+          name?: string
+          proposals_per_member?: number
+          songs_to_add?: number
+          status?: 'proposing' | 'voting' | 'completed'
+          created_by?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      vote_proposals: {
+        Row: {
+          id: number
+          vote_session_id: number
+          band_id: number
+          user_id: string
+          song_name: string
+          artist: string | null
+          spotify_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          vote_session_id: number
+          band_id: number
+          user_id: string
+          song_name: string
+          artist?: string | null
+          spotify_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          vote_session_id?: number
+          band_id?: number
+          user_id?: string
+          song_name?: string
+          artist?: string | null
+          spotify_url?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      vote_ballots: {
+        Row: {
+          id: number
+          vote_session_id: number
+          proposal_id: number
+          proposer_id: string
+          user_id: string
+          rank: number
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          vote_session_id: number
+          proposal_id: number
+          proposer_id: string
+          user_id: string
+          rank: number
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          vote_session_id?: number
+          proposal_id?: number
+          proposer_id?: string
+          user_id?: string
+          rank?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
       practice_progress: {
         Row: {
           band_id: number
