@@ -42,14 +42,31 @@ function SetlistActionsMenu({
   setlistId: number;
   bandId: number;
   onDuplicate: (id: number) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: number) => Promise<void>;
 }) {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const open = Boolean(anchorEl);
 
   const handleOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
+
+  const handleDeleteClick = () => {
+    handleClose();
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await onDelete(setlistId);
+    } finally {
+      setDeleting(false);
+      setConfirmOpen(false);
+    }
+  };
 
   return (
     <>
@@ -102,17 +119,32 @@ function SetlistActionsMenu({
           <ListItemIcon><PrintIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Print Shared Band Notes</ListItemText>
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            onDelete(setlistId);
-            handleClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
+        <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
           <ListItemIcon><DeleteOutlineIcon fontSize="small" color="error" /></ListItemIcon>
           <ListItemText>Delete</ListItemText>
         </MenuItem>
       </Menu>
+      <Dialog open={confirmOpen} onClose={() => !deleting && setConfirmOpen(false)}>
+        <DialogTitle>Delete Setlist</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this setlist? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color="error"
+            variant="contained"
+            disabled={deleting}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
@@ -121,8 +153,6 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
   const { bandId } = params;
 
   const [nameFilter, setNameFilter] = useState('');
-  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
   const supabase = createClient();
   const { data: setlists, isLoading: isLoadingSetlists, mutate: mutateSetlists } = useSetlists({ bandId });
@@ -174,12 +204,9 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
 
   const deleteSetlist = useCallback(
     async (setlistId: number) => {
-      setDeleting(true);
       await supabase.from('setlist_songs').delete().eq('setlist_id', setlistId);
       await supabase.from('setlists').delete().eq('id', setlistId);
       await mutateSetlists();
-      setDeleting(false);
-      setConfirmDeleteId(null);
     },
     [supabase, mutateSetlists]
   );
@@ -191,11 +218,11 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
           setlistId={setlistId as number}
           bandId={bandId}
           onDuplicate={duplicateSetlist}
-          onDelete={setConfirmDeleteId}
+          onDelete={deleteSetlist}
         />
       );
     },
-    [bandId, duplicateSetlist]
+    [bandId, duplicateSetlist, deleteSetlist]
   );
 
   const isLoading = useMemo(() => {
@@ -291,27 +318,6 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
           Create a Setlist
         </Button>
       </Box>
-      <Dialog open={confirmDeleteId !== null} onClose={() => setConfirmDeleteId(null)}>
-        <DialogTitle>Delete Setlist</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete this setlist? This action cannot be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmDeleteId(null)} disabled={deleting}>
-            Cancel
-          </Button>
-          <Button
-            onClick={() => confirmDeleteId !== null && deleteSetlist(confirmDeleteId)}
-            color="error"
-            variant="contained"
-            disabled={deleting}
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 }
