@@ -37,12 +37,12 @@ function SetlistActionsMenu({
   setlistId,
   bandId,
   onDuplicate,
-  onDelete,
+  onRefresh,
 }: {
   setlistId: number;
   bandId: number;
   onDuplicate: (id: number) => void;
-  onDelete: (id: number) => Promise<void>;
+  onRefresh: () => void;
 }) {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -60,12 +60,11 @@ function SetlistActionsMenu({
 
   const handleConfirmDelete = async () => {
     setDeleting(true);
-    try {
-      await onDelete(setlistId);
-    } finally {
-      setDeleting(false);
-      setConfirmOpen(false);
-    }
+    const supabase = createClient();
+    await supabase.from('setlists').delete().eq('id', setlistId);
+    onRefresh();
+    setDeleting(false);
+    setConfirmOpen(false);
   };
 
   return (
@@ -202,15 +201,6 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
     [setlists, supabase, mutateSetlists]
   );
 
-  const deleteSetlist = useCallback(
-    async (setlistId: number) => {
-      await supabase.from('setlist_songs').delete().eq('setlist_id', setlistId);
-      await supabase.from('setlists').delete().eq('id', setlistId);
-      await mutateSetlists();
-    },
-    [supabase, mutateSetlists]
-  );
-
   const formatEditButton = useCallback(
     (setlistId: TablePropsDataType) => {
       return (
@@ -218,11 +208,11 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
           setlistId={setlistId as number}
           bandId={bandId}
           onDuplicate={duplicateSetlist}
-          onDelete={deleteSetlist}
+          onRefresh={mutateSetlists}
         />
       );
     },
-    [bandId, duplicateSetlist, deleteSetlist]
+    [bandId, duplicateSetlist, mutateSetlists]
   );
 
   const isLoading = useMemo(() => {
