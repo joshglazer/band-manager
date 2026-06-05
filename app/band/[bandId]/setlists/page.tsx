@@ -10,10 +10,16 @@ import { createClient } from '@/utils/supabase/client';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditIcon from '@mui/icons-material/Edit';
 import PrintIcon from '@mui/icons-material/Print';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -31,17 +37,35 @@ function SetlistActionsMenu({
   setlistId,
   bandId,
   onDuplicate,
+  onRefresh,
 }: {
   setlistId: number;
   bandId: number;
   onDuplicate: (id: number) => void;
+  onRefresh: () => void;
 }) {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const open = Boolean(anchorEl);
 
   const handleOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
+
+  const handleDeleteClick = () => {
+    handleClose();
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setDeleting(true);
+    const supabase = createClient();
+    await supabase.from('setlists').delete().eq('id', setlistId);
+    onRefresh();
+    setDeleting(false);
+    setConfirmOpen(false);
+  };
 
   return (
     <>
@@ -94,7 +118,32 @@ function SetlistActionsMenu({
           <ListItemIcon><PrintIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Print Shared Band Notes</ListItemText>
         </MenuItem>
+        <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
+          <ListItemIcon><DeleteOutlineIcon fontSize="small" color="error" /></ListItemIcon>
+          <ListItemText>Delete</ListItemText>
+        </MenuItem>
       </Menu>
+      <Dialog open={confirmOpen} onClose={() => !deleting && setConfirmOpen(false)}>
+        <DialogTitle>Delete Setlist</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this setlist? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color="error"
+            variant="contained"
+            disabled={deleting}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
@@ -159,10 +208,11 @@ export default function BandSetlistsPage({ params }: Readonly<BandRouteProps>) {
           setlistId={setlistId as number}
           bandId={bandId}
           onDuplicate={duplicateSetlist}
+          onRefresh={mutateSetlists}
         />
       );
     },
-    [bandId, duplicateSetlist]
+    [bandId, duplicateSetlist, mutateSetlists]
   );
 
   const isLoading = useMemo(() => {
